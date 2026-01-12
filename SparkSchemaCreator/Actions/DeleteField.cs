@@ -29,11 +29,6 @@ namespace SparkSchemaCreator.Actions
             parent.Fields.Remove(deletedField);
         }
 
-        public void Redo()
-        {
-            parent.Fields.Remove(deletedField);
-        }
-
         public void Undo()
         {
             parent.InsertField(fieldIndex, deletedField);

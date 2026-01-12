@@ -30,11 +30,6 @@ namespace SparkSchemaCreator.Actions
             _model.SetRoot(_newRoot);
         }
 
-        public void Redo()
-        {
-            _model.SetRoot(_newRoot);
-        }
-
         public void Undo()
         {
             _model.SetRoot(_oldRoot);

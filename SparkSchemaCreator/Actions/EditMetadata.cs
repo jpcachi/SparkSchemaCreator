@@ -19,11 +19,6 @@ namespace SparkSchemaCreator.Actions
             editedField.Metadata = _newMetadata;
         }
 
-        public void Redo()
-        {
-            editedField.Metadata = _newMetadata;
-        }
-
         public void Undo()
         {
             editedField.Metadata = _oldMetadata;

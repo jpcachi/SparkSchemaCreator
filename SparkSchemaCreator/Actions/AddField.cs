@@ -16,11 +16,6 @@ namespace SparkSchemaCreator.Actions
             parent.AddField(addedField);
         }
 
-        public void Redo()
-        {
-            Do();
-        }
-
         public void Undo()
         {
             parent.Fields.Remove(addedField);

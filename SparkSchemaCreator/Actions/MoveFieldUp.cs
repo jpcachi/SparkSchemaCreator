@@ -19,11 +19,6 @@ namespace SparkSchemaCreator.Actions
             parent.Fields.Insert(_index - 1, fieldToMove);
         }
 
-        public void Redo()
-        {
-            Do();
-        }
-
         public void Undo()
         {
             parent.Fields.RemoveAt(_index - 1);

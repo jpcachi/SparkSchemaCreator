@@ -286,7 +286,7 @@ namespace SparkSchemaCreator
             if (redo.Count > 0)
             {
                 IAction action = redo.Pop();
-                action.Redo();
+                action.Do();
                 RebuildTreesAfterAction(action);
                 undo.Push(action);
             }

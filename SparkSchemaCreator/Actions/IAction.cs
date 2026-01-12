@@ -8,7 +8,6 @@ namespace SparkSchemaCreator.Actions
     internal interface IAction
     {
         void Do();
-        void Redo();
         void Undo();
 
         object? AffectedNode { get; }

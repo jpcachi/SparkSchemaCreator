@@ -30,11 +30,6 @@ namespace SparkSchemaCreator.Actions
             _field.UpdateFrom(_newValue);
         }
 
-        public void Redo()
-        {
-            _field.UpdateFrom(_newValue);
-        }
-
         public void Undo()
         {
             _field.UpdateFrom(_oldValue);

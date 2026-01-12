@@ -48,11 +48,6 @@ namespace SparkSchemaCreator.Actions
             SetParentValue(_newValue);
         }
 
-        public void Redo()
-        {
-            SetParentValue(_newValue);
-        }
-
         public void Undo()
         {
             SetParentValue(_oldValue);
