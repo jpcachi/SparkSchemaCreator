@@ -412,7 +412,6 @@ namespace SparkSchemaCreator.Views
             fastColoredTextBoxLeft.DisabledColor = Color.FromArgb(100, 180, 180, 180);
             fastColoredTextBoxLeft.Dock = DockStyle.Fill;
             fastColoredTextBoxLeft.FoldingIndicatorColor = Color.LightSkyBlue;
-            fastColoredTextBoxLeft.Font = new Font("Courier New", 9.75F);
             fastColoredTextBoxLeft.Language = SparkSchemaCreator.Controls.FastColoredTextBox.Language.JSON;
             fastColoredTextBoxLeft.LeftBracket = '[';
             fastColoredTextBoxLeft.LeftBracket2 = '{';
@@ -422,7 +421,7 @@ namespace SparkSchemaCreator.Views
             fastColoredTextBoxLeft.RightBracket = ']';
             fastColoredTextBoxLeft.RightBracket2 = '}';
             fastColoredTextBoxLeft.SelectionColor = Color.FromArgb(60, 30, 144, 255);
-            //fastColoredTextBoxLeft.ServiceColors = (SparkSchemaCreator.Controls.FastColoredTextBox.ServiceColors)resources.GetObject("fastColoredTextBoxLeft.ServiceColors");
+            fastColoredTextBoxLeft.ServiceColors = (Controls.FastColoredTextBox.ServiceColors)resources.GetObject("fastColoredTextBoxLeft.ServiceColors");
             fastColoredTextBoxLeft.ShowLineNumbers = false;
             fastColoredTextBoxLeft.Size = new Size(298, 184);
             fastColoredTextBoxLeft.TabIndex = 0;
@@ -451,6 +450,7 @@ namespace SparkSchemaCreator.Views
             fastColoredTextBoxRight.DisabledColor = Color.FromArgb(100, 180, 180, 180);
             fastColoredTextBoxRight.Dock = DockStyle.Fill;
             fastColoredTextBoxRight.FoldingIndicatorColor = Color.LightSkyBlue;
+            fastColoredTextBoxRight.Font = new Font("Courier New", 9.75F);
             fastColoredTextBoxRight.Language = SparkSchemaCreator.Controls.FastColoredTextBox.Language.JSON;
             fastColoredTextBoxRight.LeftBracket = '[';
             fastColoredTextBoxRight.LeftBracket2 = '{';
@@ -460,7 +460,7 @@ namespace SparkSchemaCreator.Views
             fastColoredTextBoxRight.RightBracket = ']';
             fastColoredTextBoxRight.RightBracket2 = '}';
             fastColoredTextBoxRight.SelectionColor = Color.FromArgb(60, 30, 144, 255);
-            //fastColoredTextBoxRight.ServiceColors = (SparkSchemaCreator.Controls.FastColoredTextBox.ServiceColors)resources.GetObject("fastColoredTextBoxRight.ServiceColors");
+            fastColoredTextBoxRight.ServiceColors = (Controls.FastColoredTextBox.ServiceColors)resources.GetObject("fastColoredTextBoxRight.ServiceColors");
             fastColoredTextBoxRight.ShowLineNumbers = false;
             fastColoredTextBoxRight.Size = new Size(298, 183);
             fastColoredTextBoxRight.TabIndex = 0;
@@ -553,7 +553,7 @@ namespace SparkSchemaCreator.Views
             // 
             label5.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
             label5.AutoSize = true;
-            label5.ForeColor = Color.FromArgb(0, 26, 87);
+            label5.ForeColor = Color.Navy;
             label5.Location = new Point(178, 239);
             label5.Name = "label5";
             label5.Size = new Size(114, 15);

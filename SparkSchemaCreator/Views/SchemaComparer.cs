@@ -1,13 +1,9 @@
 ﻿using SparkSchemaCreator.Controls.FastColoredTextBox;
 using SparkSchemaCreator.Comparer;
 using SparkSchemaCreator.Controls;
-using SparkSchemaCreator.Properties;
 using SparkSchemaCreator.Types;
 using SparkSchemaCreator.Utils;
 using Newtonsoft.Json.Linq;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Xml.Linq;
 
 namespace SparkSchemaCreator.Views
 {
