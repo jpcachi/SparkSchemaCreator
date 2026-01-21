@@ -13,10 +13,10 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
     /// </summary>
     public class FileTextSource : TextSource, IDisposable
     {
-        List<int> sourceFileLinePositions = new List<int>();
+        List<int> sourceFileLinePositions = [];
         FileStream? fs;
         Encoding? fileEncoding;
-        System.Windows.Forms.Timer timer = new System.Windows.Forms.Timer();
+        readonly System.Windows.Forms.Timer timer = new();
 
         /// <summary>
         /// Occurs when need to display line in the textbox
@@ -32,13 +32,13 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
             : base(currentTB)
         {
             timer.Interval = 10000;
-            timer.Tick += new EventHandler(timer_Tick);
+            timer.Tick += new EventHandler(Timer_Tick);
             timer.Enabled = true;
 
             SaveEOL = Environment.NewLine;
         }
 
-        void timer_Tick(object? sender, EventArgs e)
+        void Timer_Tick(object? sender, EventArgs e)
         {
             timer.Enabled = false;
             try
@@ -73,8 +73,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         {
             Clear();
 
-            if (fs != null)
-                fs.Dispose();
+            fs?.Dispose();
 
             SaveEOL = Environment.NewLine;
 
@@ -83,42 +82,16 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
             var length = fs.Length;
             //read signature
             enc = DefineEncoding(enc, fs);
-            int shift = DefineShift(enc);
+            DefineShift(enc);
             //first line
             sourceFileLinePositions.Add((int)fs.Position);
             base.lines.Add(null);
             //other lines
             sourceFileLinePositions.Capacity = (int)(length/7 + 1000);
 
-            //int prev = 0;
-            //while(fs.Position < length)
-            //{
-            //    var b = fs.ReadByte();
-
-            //    if (b == 10)// \n
-            //    {
-            //        sourceFileLinePositions.Add((int)(fs.Position) + shift);
-            //        base.lines.Add(null);
-            //    }else
-            //    if (prev == 13)// \r (Mac format)
-            //    {
-            //        sourceFileLinePositions.Add((int)(fs.Position - 1) + shift);
-            //        base.lines.Add(null);
-            //        SaveEOL = "\r";
-            //    }
-
-            //    prev = b;
-            //}
-
-            //if (prev == 13)
-            //{
-            //    sourceFileLinePositions.Add((int)(fs.Position) + shift);
-            //    base.lines.Add(null);
-            //}
-
             int prev = 0;
             int prevPos = 0;
-            BinaryReader br = new BinaryReader(fs, enc);
+            BinaryReader br = new(fs, enc);
             while (fs.Position < length)
             {
                 prevPos = (int)fs.Position;
@@ -177,7 +150,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
                 OnRecalcWordWrap(new TextChangedEventArgs(0, linesCount - 1));
         }
 
-        private int DefineShift(Encoding enc)
+        private static int DefineShift(Encoding enc)
         {
             if (enc.IsSingleByte)
                 return 0;
@@ -268,9 +241,9 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
             if (fs == null)
                 return;
 
-            StreamReader sr = new StreamReader(fs, fileEncoding);
-            using (FileStream tempFs = new FileStream(tempFileName, FileMode.Create))
-            using (StreamWriter sw = new StreamWriter(tempFs, enc))
+            StreamReader sr = new(fs, fileEncoding);
+            using (FileStream tempFs = new(tempFileName, FileMode.Create))
+            using (StreamWriter sw = new(tempFs, enc))
             {
                 sw.Flush();
 
@@ -344,8 +317,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         public override void ClearIsChanged()
         {
             foreach (var line in lines)
-                if(line!=null)
-                    line.IsChanged = false;
+                line?.IsChanged = false;
         }
 
         public override Line this[int i]
@@ -369,11 +341,10 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
                 return;
 
             fs.Seek(sourceFileLinePositions[i], SeekOrigin.Begin);
-            StreamReader sr = new StreamReader(fs, fileEncoding);
+            StreamReader sr = new(fs, fileEncoding);
 
             var s = sr.ReadLine();
-            if (s == null)
-                s = "";
+            s ??= "";
 
             //call event handler
             if(LineNeeded!=null)
@@ -430,10 +401,9 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
 
         public override void Dispose()
         {
-            if (fs != null)
-                fs.Dispose();
-
+            fs?.Dispose();
             timer.Dispose();
+            GC.SuppressFinalize(this);
         }
 
         internal void UnloadLine(int iLine)
@@ -443,44 +413,29 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         }
     }
 
-    public class LineNeededEventArgs : EventArgs
+    public class LineNeededEventArgs(string? sourceLineText, int displayedLineIndex) : EventArgs
     {
-        public string? SourceLineText { get; private set; }
-        public int DisplayedLineIndex { get; private set; }
+        public string? SourceLineText { get; private set; } = sourceLineText;
+        public int DisplayedLineIndex { get; private set; } = displayedLineIndex;
         /// <summary>
         /// This text will be displayed in textbox
         /// </summary>
-        public string? DisplayedLineText { get; set; }
-
-        public LineNeededEventArgs(string? sourceLineText, int displayedLineIndex)
-        {
-            this.SourceLineText = sourceLineText;
-            this.DisplayedLineIndex = displayedLineIndex;
-            this.DisplayedLineText = sourceLineText;
-        }
+        public string? DisplayedLineText { get; set; } = sourceLineText;
     }
 
-    public class LinePushedEventArgs : EventArgs
+    public class LinePushedEventArgs(string? sourceLineText, int displayedLineIndex, string? displayedLineText) : EventArgs
     {
-        public string? SourceLineText { get; private set; }
-        public int DisplayedLineIndex { get; private set; }
+        public string? SourceLineText { get; private set; } = sourceLineText;
+        public int DisplayedLineIndex { get; private set; } = displayedLineIndex;
         /// <summary>
         /// This property contains only changed text.
         /// If text of line is not changed, this property contains null.
         /// </summary>
-        public string? DisplayedLineText { get; private set; }
+        public string? DisplayedLineText { get; private set; } = displayedLineText;
         /// <summary>
         /// This text will be saved in the file
         /// </summary>
-        public string? SavedText { get; set; }
-
-        public LinePushedEventArgs(string? sourceLineText, int displayedLineIndex, string? displayedLineText)
-        {
-            this.SourceLineText = sourceLineText;
-            this.DisplayedLineIndex = displayedLineIndex;
-            this.DisplayedLineText = displayedLineText;
-            this.SavedText = displayedLineText;
-        }
+        public string? SavedText { get; set; } = displayedLineText;
     }
 
     class CharReader : TextReader

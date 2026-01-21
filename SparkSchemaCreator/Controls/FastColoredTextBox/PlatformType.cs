@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 
 namespace SparkSchemaCreator.Controls.FastColoredTextBox
 {
-    public static class PlatformType
+    public static partial class PlatformType
     {
         const ushort PROCESSOR_ARCHITECTURE_INTEL = 0;
         const ushort PROCESSOR_ARCHITECTURE_IA64 = 6;
@@ -28,11 +28,11 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
             public ushort wProcessorRevision;
         };
 
-        [DllImport("kernel32.dll")]
-        static extern void GetNativeSystemInfo(ref SYSTEM_INFO lpSystemInfo);
+        [LibraryImport("kernel32.dll")]
+        static partial void GetNativeSystemInfo(ref SYSTEM_INFO lpSystemInfo);
 
-        [DllImport("kernel32.dll")]
-        static extern void GetSystemInfo(ref SYSTEM_INFO lpSystemInfo);
+        [LibraryImport("kernel32.dll")]
+        static partial void GetSystemInfo(ref SYSTEM_INFO lpSystemInfo);
 
         public static Platform GetOperationSystemPlatform()
         {
@@ -50,18 +50,12 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
                 GetSystemInfo(ref sysInfo);
             }
 
-            switch (sysInfo.wProcessorArchitecture)
+            return sysInfo.wProcessorArchitecture switch
             {
-                case PROCESSOR_ARCHITECTURE_IA64:
-                case PROCESSOR_ARCHITECTURE_AMD64:
-                    return Platform.X64;
-
-                case PROCESSOR_ARCHITECTURE_INTEL:
-                    return Platform.X86;
-
-                default:
-                    return Platform.Unknown;
-            }
+                PROCESSOR_ARCHITECTURE_IA64 or PROCESSOR_ARCHITECTURE_AMD64 => Platform.X64,
+                PROCESSOR_ARCHITECTURE_INTEL => Platform.X86,
+                _ => Platform.Unknown,
+            };
         }
     }
 

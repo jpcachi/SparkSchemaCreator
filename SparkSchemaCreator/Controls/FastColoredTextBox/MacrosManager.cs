@@ -13,7 +13,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
     /// </summary>
     public class MacrosManager
     {
-        private readonly List<object> macro = new List<object>();
+        private readonly List<object> macro = [];
 
         internal MacrosManager(FastColoredTextBox ctrl)
         {
@@ -54,13 +54,12 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
             UnderlayingControl.BeginAutoUndo();
             foreach (var item in macro)
             {
-                if (item is Keys)
+                if (item is Keys keys)
                 {
-                    UnderlayingControl.ProcessKey((Keys)item);
+                    UnderlayingControl.ProcessKey(keys);
                 }
-                if (item is KeyValuePair<char, Keys>)
+                if (item is KeyValuePair<char, Keys> p)
                 {
-                    var p = (KeyValuePair<char, Keys>)item;
                     UnderlayingControl.ProcessKey(p.Key, p.Value);
                 }
                 
@@ -123,17 +122,16 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
                 Thread.CurrentThread.CurrentUICulture = CultureInfo.InvariantCulture;
                 var kc = new KeysConverter();
 
-                StringBuilder sb = new StringBuilder();
+                StringBuilder sb = new();
                 sb.AppendLine("<macros>");
                 foreach (var item in macro)
                 {
-                    if (item is Keys)
+                    if (item is Keys keys)
                     {
-                        sb.AppendFormat("<item key='{0}' />\r\n", kc.ConvertToString((Keys)item));
+                        sb.AppendFormat("<item key='{0}' />\r\n", kc.ConvertToString(keys));
                     }
-                    else if (item is KeyValuePair<char, Keys>)
+                    else if (item is KeyValuePair<char, Keys> p)
                     {
-                        var p = (KeyValuePair<char, Keys>)item;
                         sb.AppendFormat("<item char='{0}' key='{1}' />\r\n", (int)p.Key, kc.ConvertToString(p.Value));
                     }
                 }
@@ -168,12 +166,12 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
                     if (ca != null)
                     {
                         if(ka!=null)
-                            AddCharToMacros((char)int.Parse(ca.Value), (Keys)kc.ConvertFromString(ka.Value));
+                            AddCharToMacros((char)int.Parse(ca.Value), (Keys)kc.ConvertFromString(ka.Value)!);
                         else
                             AddCharToMacros((char)int.Parse(ca.Value), Keys.None);
                     }else
                     if(ka!=null)
-                            AddKeyToMacros((Keys)kc.ConvertFromString(ka.Value));
+                            AddKeyToMacros((Keys)kc.ConvertFromString(ka.Value)!);
                 }
 
                 Thread.CurrentThread.CurrentUICulture = cult;

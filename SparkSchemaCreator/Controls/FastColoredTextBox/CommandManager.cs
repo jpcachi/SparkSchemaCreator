@@ -3,23 +3,16 @@ using System;
 
 namespace SparkSchemaCreator.Controls.FastColoredTextBox
 {
-    public class CommandManager
+    public class CommandManager(TextSource ts)
     {
-        public static int MaxHistoryLength = 200;
+        private static readonly int MaxHistoryLength = 200;
 
-        LimitedStack<UndoableCommand> history;
-        Stack<UndoableCommand> redoStack = new Stack<UndoableCommand>();
-        public TextSource TextSource{ get; private set; }
-        public bool UndoRedoStackIsEnabled { get; set; }
+        readonly LimitedStack<UndoableCommand> history = new(MaxHistoryLength);
+        readonly Stack<UndoableCommand> redoStack = new();
+        public TextSource TextSource { get; private set; } = ts;
+        public bool UndoRedoStackIsEnabled { get; set; } = true;
 
         public event EventHandler RedoCompleted = delegate { };
-
-        public CommandManager(TextSource ts)
-        {
-            history = new LimitedStack<UndoableCommand>(MaxHistoryLength);
-            TextSource = ts;
-            UndoRedoStackIsEnabled = true;
-        }
 
         public virtual void ExecuteCommand(Command cmd)
         {
@@ -28,16 +21,16 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
 
             //multirange ?
             if (cmd.ts.CurrentTB.Selection.ColumnSelectionMode)
-            if (cmd is UndoableCommand)
+            if (cmd is UndoableCommand command)
                 //make wrapper
-                cmd = new MultiRangeCommand((UndoableCommand)cmd);
+                cmd = new MultiRangeCommand(command);
 
 
-            if (cmd is UndoableCommand)
+            if (cmd is UndoableCommand command2)
             {
                 //if range is ColumnRange, then create wrapper
-                (cmd as UndoableCommand).autoUndo = autoUndoCommands > 0;
-                history.Push(cmd as UndoableCommand);
+                command2.autoUndo = autoUndoCommands > 0;
+                history.Push(command2);
             }
 
             try
@@ -64,24 +57,28 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
             if (history.Count > 0)
             {
                 var cmd = history.Pop();
-                //
-                BeginDisableCommands();//prevent text changing into handlers
-                try
+
+                if (cmd != null)
                 {
-                    cmd.Undo();
+                    //
+                    BeginDisableCommands();//prevent text changing into handlers
+                    try
+                    {
+                        cmd.Undo();
+                    }
+                    finally
+                    {
+                        EndDisableCommands();
+                    }
+                    //
+                    redoStack.Push(cmd);
                 }
-                finally
-                {
-                    EndDisableCommands();
-                }
-                //
-                redoStack.Push(cmd);
             }
 
             //undo next autoUndo command
             if (history.Count > 0)
             {
-                if (history.Peek().autoUndo)
+                if (history.Peek()?.autoUndo ?? false)
                     Undo();
             }
 
@@ -107,7 +104,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
             autoUndoCommands--;
             if (autoUndoCommands == 0)
                 if (history.Count > 0)
-                    history.Peek().autoUndo = false;
+                    history.Peek()?.autoUndo = false;
         }
 
         public void BeginAutoUndoCommands()
@@ -170,22 +167,17 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         }
     }
 
-    public abstract class Command
+    public abstract class Command(TextSource ts)
     {
-        public TextSource ts;
+        public TextSource ts = ts;
+
         public abstract void Execute();
     }
 
-    internal class RangeInfo
+    internal class RangeInfo(Range r)
     {
-        public Place Start { get; set; }
-        public Place End { get; set; }
-
-        public RangeInfo(Range r)
-        {
-            Start = r.Start;
-            End = r.End;
-        }
+        public Place Start { get; set; } = r.Start;
+        public Place End { get; set; } = r.End;
 
         internal int FromX
         {
@@ -198,17 +190,11 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         }
     }
 
-    public abstract class UndoableCommand : Command
+    public abstract class UndoableCommand(TextSource ts) : Command(ts)
     {
-        internal RangeInfo sel;
-        internal RangeInfo lastSel;
+        internal RangeInfo sel = new(ts.CurrentTB.Selection);
+        internal RangeInfo? lastSel;
         internal bool autoUndo;
-
-        public UndoableCommand(TextSource ts)
-        {
-            this.ts = ts;
-            sel = new RangeInfo(ts.CurrentTB.Selection);
-        }
 
         public virtual void Undo()
         {
@@ -223,7 +209,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
 
         protected virtual void OnTextChanged(bool invert)
         {
-            bool b = sel.Start.iLine < lastSel.Start.iLine;
+            bool b = sel.Start.iLine < lastSel!.Start.iLine;
             if (invert)
             {
                 if (b)

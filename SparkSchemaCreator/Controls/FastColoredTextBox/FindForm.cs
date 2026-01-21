@@ -9,7 +9,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
     {
         bool firstSearch = true;
         Place startPlace;
-        FastColoredTextBox tb;
+        readonly FastColoredTextBox tb;
 
         public FindForm(FastColoredTextBox tb)
         {
@@ -17,12 +17,12 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
             this.tb = tb;
         }
 
-        private void btClose_Click(object sender, EventArgs e)
+        private void BtClose_Click(object sender, EventArgs e)
         {
             Close();
         }
 
-        private void btFindNext_Click(object sender, EventArgs e)
+        private void BtFindNext_Click(object sender, EventArgs e)
         {
             FindNext(tbFind.Text);
         }
@@ -74,7 +74,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
             }
         }
 
-        private void tbFind_KeyPress(object sender, KeyPressEventArgs e)
+        private void TbFind_KeyPress(object sender, KeyPressEventArgs e)
         {
             if (e.KeyChar == '\r')
             {
@@ -121,7 +121,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
             firstSearch = true;
         }
 
-        private void cbMatchCase_CheckedChanged(object sender, EventArgs e)
+        private void CbMatchCase_CheckedChanged(object sender, EventArgs e)
         {
             ResetSerach();
         }

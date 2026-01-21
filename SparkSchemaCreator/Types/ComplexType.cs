@@ -42,8 +42,6 @@ namespace SparkSchemaCreator.Types
             return null;  
         }
 
-        //public abstract void UpdateFrom(ComplexType complexType);
-
         public override string GetJsonPath()
         {
             if (FieldOfWhichItIsType != null)

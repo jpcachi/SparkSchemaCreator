@@ -8,7 +8,7 @@ using System.Xml;
 
 namespace SparkSchemaCreator.Controls.FastColoredTextBox
 {
-    public class SyntaxHighlighter : IDisposable
+    public partial class SyntaxHighlighter(FastColoredTextBox currentTb) : IDisposable
     {
         //styles
         protected static readonly Platform platformType = PlatformType.GetOperationSystemPlatform();
@@ -29,131 +29,130 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         public readonly Style BlackItalicStyle = new TextStyle(Brushes.Black, null, FontStyle.Italic);
         public readonly Style RedBkgdYellowStyle = new TextStyle(Brushes.Red, Brushes.Yellow, FontStyle.Regular);
         public readonly Style RedBoldStyle = new TextStyle(Brushes.Red, null, FontStyle.Bold);
-        public readonly TextStyle GreenStyleItalic = new TextStyle(Brushes.Green, null, FontStyle.Italic);
-        public readonly TextStyle LightBlueStyle = new TextStyle(Brushes.RoyalBlue, null, FontStyle.Regular);
+        public readonly TextStyle GreenStyleItalic = new(Brushes.Green, null, FontStyle.Italic);
+        public readonly TextStyle LightBlueStyle = new(Brushes.RoyalBlue, null, FontStyle.Regular);
 
         public readonly Style JsonStringStyle  = new TextStyle(new SolidBrush(Color.FromArgb(10, 50, 103)), null, FontStyle.Regular);
         public readonly Style JsonNumberStyle  = new TextStyle(new SolidBrush(Color.FromArgb(6, 83, 170)), null, FontStyle.Regular);
         public readonly Style JsonKeywordStyle = new TextStyle(new SolidBrush(Color.FromArgb(14, 98, 47)), null, FontStyle.Regular);
         //
-        protected readonly Dictionary<string, SyntaxDescriptor> descByXMLfileNames =
-            new Dictionary<string, SyntaxDescriptor>();
+        protected readonly Dictionary<string, SyntaxDescriptor> descByXMLfileNames = [];
 
-        protected readonly List<Style> resilientStyles = new List<Style>(5);
+        protected readonly List<Style> resilientStyles = new(5);
 
-        protected Regex BatchFileStringRegex1;
+        protected Regex? BatchFileStringRegex1;
 
-        protected Regex BatchFileVariableRegex1,
+        protected Regex? BatchFileVariableRegex1,
             BatchFileVariableRegex2;
 
-        protected Regex BatchFileAttrRegex;
+        protected Regex? BatchFileAttrRegex;
 
-        protected Regex BatchFileClassNameRegex;
+        protected Regex? BatchFileClassNameRegex;
 
-        protected Regex BatchFileSymbolRegex1,
+        protected Regex? BatchFileSymbolRegex1,
             BatchFileSymbolRegex2,
             BatchFileSymbolRegex3;
 
-        protected Regex BatchFileKeywordRegex1,
+        protected Regex? BatchFileKeywordRegex1,
             BatchFileKeywordRegex2,
             BatchFileKeywordRegex3;
 
-        protected Regex BatchFileOutKeyRegex;
+        protected Regex? BatchFileOutKeyRegex;
 
-        protected Regex BatchFileCommentRegex1,
+        protected Regex? BatchFileCommentRegex1,
             BatchFileCommentRegex2;
 
-        protected Regex CSharpAttributeRegex,
+        protected Regex? CSharpAttributeRegex,
                       CSharpClassNameRegex;
 
-        protected Regex CSharpCommentRegex1,
+        protected Regex? CSharpCommentRegex1,
                       CSharpCommentRegex2,
                       CSharpCommentRegex3;
 
-        protected Regex CSharpKeywordRegex;
-        protected Regex CSharpNumberRegex;
-        protected Regex CSharpStringRegex;
+        protected Regex? CSharpKeywordRegex;
+        protected Regex? CSharpNumberRegex;
+        protected Regex? CSharpStringRegex;
 
-        protected Regex HTMLAttrRegex,
+        protected Regex? HTMLAttrRegex,
                       HTMLAttrValRegex,
                       HTMLCommentRegex1,
                       HTMLCommentRegex2;
 
-        protected Regex HTMLEndTagRegex;
+        protected Regex? HTMLEndTagRegex;
 
-        protected Regex HTMLEntityRegex,
+        protected Regex? HTMLEntityRegex,
                       HTMLTagContentRegex;
 
-        protected Regex HTMLTagNameRegex;
-        protected Regex HTMLTagRegex;
+        protected Regex? HTMLTagNameRegex;
+        protected Regex? HTMLTagRegex;
 
-        protected Regex XMLAttrRegex,
+        protected Regex? XMLAttrRegex,
                       XMLAttrValRegex,
                       XMLCommentRegex1,
                       XMLCommentRegex2;
 
-        protected Regex XMLEndTagRegex;
+        protected Regex? XMLEndTagRegex;
 
-        protected Regex XMLEntityRegex,
+        protected Regex? XMLEntityRegex,
                       XMLTagContentRegex;
 
-        protected Regex XMLTagNameRegex;
-        protected Regex XMLTagRegex;
-        protected Regex XMLCDataRegex;
-        protected Regex XMLFoldingRegex;
+        protected Regex? XMLTagNameRegex;
+        protected Regex? XMLTagRegex;
+        protected Regex? XMLCDataRegex;
+        protected Regex? XMLFoldingRegex;
 
-        protected Regex JScriptCommentRegex1,
+        protected Regex? JScriptCommentRegex1,
                       JScriptCommentRegex2,
                       JScriptCommentRegex3;
 
-        protected Regex JScriptKeywordRegex;
-        protected Regex JScriptNumberRegex;
-        protected Regex JScriptStringRegex;
+        protected Regex? JScriptKeywordRegex;
+        protected Regex? JScriptNumberRegex;
+        protected Regex? JScriptStringRegex;
 
-        protected Regex JSONKeywordRegex;
-        protected Regex JSONNumberRegex;
-        protected Regex JSONStringRegex;
+        protected Regex? JSONKeywordRegex;
+        protected Regex? JSONNumberRegex;
+        protected Regex? JSONStringRegex;
 
-        protected Regex LuaCommentRegex1,
+        protected Regex? LuaCommentRegex1,
                       LuaCommentRegex2,
                       LuaCommentRegex3;
 
-        protected Regex LuaKeywordRegex;
-        protected Regex LuaNumberRegex;
-        protected Regex LuaStringRegex;
-        protected Regex LuaFunctionsRegex;
+        protected Regex? LuaKeywordRegex;
+        protected Regex? LuaNumberRegex;
+        protected Regex? LuaStringRegex;
+        protected Regex? LuaFunctionsRegex;
 
-        protected Regex PHPCommentRegex1,
+        protected Regex? PHPCommentRegex1,
                       PHPCommentRegex2,
                       PHPCommentRegex3;
 
-        protected Regex PHPKeywordRegex1,
+        protected Regex? PHPKeywordRegex1,
                       PHPKeywordRegex2,
                       PHPKeywordRegex3;
 
-        protected Regex PHPNumberRegex;
-        protected Regex PHPStringRegex;
-        protected Regex PHPVarRegex;
-
-        protected Regex SQLCommentRegex1,
+        protected Regex? PHPNumberRegex;
+        protected Regex? PHPStringRegex;
+        protected Regex? PHPVarRegex;
+                       
+        protected Regex? SQLCommentRegex1,
                       SQLCommentRegex2,
                       SQLCommentRegex3, 
                       SQLCommentRegex4;
 
-        protected Regex SQLFunctionsRegex;
-        protected Regex SQLKeywordsRegex;
-        protected Regex SQLNumberRegex;
-        protected Regex SQLStatementsRegex;
-        protected Regex SQLStringRegex;
-        protected Regex SQLTypesRegex;
-        protected Regex SQLVarRegex;
-        protected Regex VBClassNameRegex;
-        protected Regex VBCommentRegex;
-        protected Regex VBKeywordRegex;
-        protected Regex VBNumberRegex;
-        protected Regex VBStringRegex;
+        protected Regex? SQLFunctionsRegex;
+        protected Regex? SQLKeywordsRegex;
+        protected Regex? SQLNumberRegex;
+        protected Regex? SQLStatementsRegex;
+        protected Regex? SQLStringRegex;
+        protected Regex? SQLTypesRegex;
+        protected Regex? SQLVarRegex;
+        protected Regex? VBClassNameRegex;
+        protected Regex? VBCommentRegex;
+        protected Regex? VBKeywordRegex;
+        protected Regex? VBNumberRegex;
+        protected Regex? VBStringRegex;
 
-        protected Regex AssemblyStringRegex,
+        protected Regex? AssemblyStringRegex,
             AssemblyCommentRegex,
             AssemblyNumberRegex,
             AssemblyAttributeRegex,
@@ -161,7 +160,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
             AssemblyInstructionsRegex,
             AssemblyRegisterRegex;
 
-        protected FastColoredTextBox currentTb;
+        protected FastColoredTextBox currentTb = currentTb;
 
         public static RegexOptions RegexCompiledOption
         {
@@ -174,16 +173,14 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
             }
         }
 
-        public SyntaxHighlighter(FastColoredTextBox currentTb) {
-            this.currentTb = currentTb;
-        }
-
         #region IDisposable Members
 
         public void Dispose()
         {
             foreach (SyntaxDescriptor desc in descByXMLfileNames.Values)
                 desc.Dispose();
+
+            GC.SuppressFinalize(this);
         }
 
         #endregion
@@ -238,8 +235,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         /// </summary>
         public virtual void HighlightSyntax(string XMLdescriptionFile, Range range)
         {
-            SyntaxDescriptor desc = null;
-            if (!descByXMLfileNames.TryGetValue(XMLdescriptionFile, out desc))
+            if (!descByXMLfileNames.TryGetValue(XMLdescriptionFile, out SyntaxDescriptor? desc))
             {
                 var doc = new XmlDocument();
                 string file = XMLdescriptionFile;
@@ -254,9 +250,11 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
             HighlightSyntax(desc, range);
         }
 
-        public virtual void AutoIndentNeeded(object sender, AutoIndentEventArgs args)
+        public virtual void AutoIndentNeeded(object? sender, AutoIndentEventArgs args)
         {
-            var tb = (sender as FastColoredTextBox);
+            if (sender is not FastColoredTextBox tb)
+                return;
+
             Language language = tb.Language;
             switch (language)
             {
@@ -298,24 +296,24 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
             FastColoredTextBox tb = sender as FastColoredTextBox;
             tb.CalcAutoIndentShiftByCodeFolding(sender, args);*/
             //block {}
-            if (Regex.IsMatch(args.LineText, @"^[^""']*\{.*\}[^""']*$"))
+            if (PhpBlockRegex().IsMatch(args.LineText))
                 return;
             //start of block {}
-            if (Regex.IsMatch(args.LineText, @"^[^""']*\{"))
+            if (PhpStartOfBlockRegex().IsMatch(args.LineText))
             {
                 args.ShiftNextLines = args.TabLength;
                 return;
             }
             //end of block {}
-            if (Regex.IsMatch(args.LineText, @"}[^""']*$"))
+            if (PhpEndOfBlockRegex().IsMatch(args.LineText))
             {
                 args.Shift = -args.TabLength;
                 args.ShiftNextLines = -args.TabLength;
                 return;
             }
             //is unclosed operator in previous line ?
-            if (Regex.IsMatch(args.PrevLineText, @"^\s*(if|for|foreach|while|[\}\s]*else)\b[^{]*$"))
-                if (!Regex.IsMatch(args.PrevLineText, @"(;\s*$)|(;\s*//)")) //operator is unclosed
+            if (PhpCheckIfOperatorIsUnclosedRegex().IsMatch(args.PrevLineText))
+                if (!PhpOperatorIsUnclosedRegex().IsMatch(args.PrevLineText)) //operator is unclosed
                 {
                     args.Shift = args.TabLength;
                     return;
@@ -324,58 +322,62 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
 
         protected void SQLAutoIndentNeeded(object sender, AutoIndentEventArgs args)
         {
-            var tb = sender as FastColoredTextBox;
+            if (sender is not FastColoredTextBox tb)
+                return;
+
             tb.CalcAutoIndentShiftByCodeFolding(sender, args);
         }
 
         protected void HTMLAutoIndentNeeded(object sender, AutoIndentEventArgs args)
         {
-            var tb = sender as FastColoredTextBox;
+            if (sender is not FastColoredTextBox tb)
+                return;
+
             tb.CalcAutoIndentShiftByCodeFolding(sender, args);
         }
 
         protected void XMLAutoIndentNeeded(object sender, AutoIndentEventArgs args)
         {
-            var tb = sender as FastColoredTextBox;
+            if (sender is not FastColoredTextBox tb)
+                return;
+
             tb.CalcAutoIndentShiftByCodeFolding(sender, args);
         }
 
         protected void VBAutoIndentNeeded(object sender, AutoIndentEventArgs args)
         {
             //end of block
-            if (Regex.IsMatch(args.LineText, @"^\s*(End|EndIf|Next|Loop)\b", RegexOptions.IgnoreCase))
+            if (VbEndOfBlockRegex().IsMatch(args.LineText))
             {
                 args.Shift = -args.TabLength;
                 args.ShiftNextLines = -args.TabLength;
                 return;
             }
             //start of declaration
-            if (Regex.IsMatch(args.LineText,
-                              @"\b(Class|Property|Enum|Structure|Sub|Function|Namespace|Interface|Get)\b|(Set\s*\()",
-                              RegexOptions.IgnoreCase))
+            if (VbStartOfDeclarationRegex().IsMatch(args.LineText))
             {
                 args.ShiftNextLines = args.TabLength;
                 return;
             }
             // then ...
-            if (Regex.IsMatch(args.LineText, @"\b(Then)\s*\S+", RegexOptions.IgnoreCase))
+            if (VbThenRegex().IsMatch(args.LineText))
                 return;
             //start of operator block
-            if (Regex.IsMatch(args.LineText, @"^\s*(If|While|For|Do|Try|With|Using|Select)\b", RegexOptions.IgnoreCase))
+            if (VbStartOfOperatorBlockRegex().IsMatch(args.LineText))
             {
                 args.ShiftNextLines = args.TabLength;
                 return;
             }
 
             //Statements else, elseif, case etc
-            if (Regex.IsMatch(args.LineText, @"^\s*(Else|ElseIf|Case|Catch|Finally)\b", RegexOptions.IgnoreCase))
+            if (VbStatementsRegex().IsMatch(args.LineText))
             {
                 args.Shift = -args.TabLength;
                 return;
             }
 
             //Char _
-            if (args.PrevLineText.TrimEnd().EndsWith("_"))
+            if (args.PrevLineText.TrimEnd().EndsWith('_'))
             {
                 args.Shift = args.TabLength;
                 return;
@@ -385,37 +387,37 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         protected void CSharpAutoIndentNeeded(object sender, AutoIndentEventArgs args)
         {
             //block {}
-            if (Regex.IsMatch(args.LineText, @"^[^""']*\{.*\}[^""']*$"))
+            if (CsharpBlockRegex().IsMatch(args.LineText))
                 return;
             //start of block {}
-            if (Regex.IsMatch(args.LineText, @"^[^""']*\{"))
+            if (CsharpStartOfBlockRegex().IsMatch(args.LineText))
             {
                 args.ShiftNextLines = args.TabLength;
                 return;
             }
             //end of block {}
-            if (Regex.IsMatch(args.LineText, @"}[^""']*$"))
+            if (CsharpEndOfBlockRegex().IsMatch(args.LineText))
             {
                 args.Shift = -args.TabLength;
                 args.ShiftNextLines = -args.TabLength;
                 return;
             }
             //label
-            if (Regex.IsMatch(args.LineText, @"^\s*\w+\s*:\s*($|//)") &&
-                !Regex.IsMatch(args.LineText, @"^\s*default\s*:"))
+            if (CsharpLabelRegex().IsMatch(args.LineText) &&
+                !CsharpLabelDefaultRegex().IsMatch(args.LineText))
             {
                 args.Shift = -args.TabLength;
                 return;
             }
             //some statements: case, default
-            if (Regex.IsMatch(args.LineText, @"^\s*(case|default)\b.*:\s*($|//)"))
+            if (CsharpCaseDefaultRegex().IsMatch(args.LineText))
             {
                 args.Shift = -args.TabLength / 2;
                 return;
             }
             //is unclosed operator in previous line ?
-            if (Regex.IsMatch(args.PrevLineText, @"^\s*(if|for|foreach|while|[\}\s]*else)\b[^{]*$"))
-                if (!Regex.IsMatch(args.PrevLineText, @"(;\s*$)|(;\s*//)")) //operator is unclosed
+            if (CsharpStatementRegex().IsMatch(args.PrevLineText))
+                if (!CsharpOperatorUnclosedRegex().IsMatch(args.PrevLineText)) //operator is unclosed
                 {
                     args.Shift = args.TabLength;
                     return;
@@ -425,7 +427,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         private void AssemblyAutoIndentNeeded(object sender, AutoIndentEventArgs args)
         {
             //label
-            if (Regex.IsMatch(args.LineText, @"^\s*\w+\s*:\s*($|//)") && !Regex.IsMatch(args.LineText, @"^\s*default\s*:"))
+            if (AssemblyLabelRegex().IsMatch(args.LineText) && !AssemblyLabelDefaultRegex().IsMatch(args.LineText))
             {
                 args.Shift = -args.TabLength;
                 return;
@@ -465,50 +467,58 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         public static SyntaxDescriptor ParseXmlDescription(XmlDocument doc)
         {
             var desc = new SyntaxDescriptor();
-            XmlNode brackets = doc.SelectSingleNode("doc/brackets");
+            XmlNode? brackets = doc.SelectSingleNode("doc/brackets");
             if (brackets != null)
             {
-                if (brackets.Attributes["left"] == null || brackets.Attributes["right"] == null ||
-                    brackets.Attributes["left"].Value == "" || brackets.Attributes["right"].Value == "")
+                if (brackets.Attributes?["left"] == null || brackets.Attributes?["right"] == null ||
+                    brackets.Attributes?["left"]?.Value == "" || brackets.Attributes?["right"]?.Value == "")
                 {
                     desc.leftBracket = '\x0';
                     desc.rightBracket = '\x0';
                 }
                 else
                 {
-                    desc.leftBracket = brackets.Attributes["left"].Value[0];
-                    desc.rightBracket = brackets.Attributes["right"].Value[0];
+                    desc.leftBracket = brackets.Attributes!["left"]!.Value[0];
+                    desc.rightBracket = brackets.Attributes!["right"]!.Value[0];
                 }
 
-                if (brackets.Attributes["left2"] == null || brackets.Attributes["right2"] == null ||
-                    brackets.Attributes["left2"].Value == "" || brackets.Attributes["right2"].Value == "")
+                if (brackets.Attributes?["left2"] == null || brackets.Attributes?["right2"] == null ||
+                    brackets.Attributes?["left2"]?.Value == "" || brackets.Attributes?["right2"]?.Value == "")
                 {
                     desc.leftBracket2 = '\x0';
                     desc.rightBracket2 = '\x0';
                 }
                 else
                 {
-                    desc.leftBracket2 = brackets.Attributes["left2"].Value[0];
-                    desc.rightBracket2 = brackets.Attributes["right2"].Value[0];
+                    desc.leftBracket2 = brackets.Attributes!["left2"]!.Value[0];
+                    desc.rightBracket2 = brackets.Attributes!["right2"]!.Value[0];
                 }
 
-                if (brackets.Attributes["strategy"] == null || brackets.Attributes["strategy"].Value == "")
+                if (brackets.Attributes?["strategy"] == null || brackets.Attributes?["strategy"]?.Value == "")
                     desc.bracketsHighlightStrategy = BracketsHighlightStrategy.Strategy2;
                 else
-                    desc.bracketsHighlightStrategy = (BracketsHighlightStrategy)Enum.Parse(typeof(BracketsHighlightStrategy), brackets.Attributes["strategy"].Value);
+                    desc.bracketsHighlightStrategy = Enum.Parse<BracketsHighlightStrategy>(brackets.Attributes!["strategy"]!.Value);
             }
 
             var styleByName = new Dictionary<string, Style>();
 
-            foreach (XmlNode style in doc.SelectNodes("doc/style"))
-            {
-                Style s = ParseStyle(style);
-                styleByName[style.Attributes["name"].Value] = s;
-                desc.styles.Add(s);
-            }
-            foreach (XmlNode rule in doc.SelectNodes("doc/rule"))
+            var styleNodes = doc.SelectNodes("doc/style");
+            if(styleNodes != null)
+                foreach (XmlNode style in styleNodes)
+                {
+                    Style s = ParseStyle(style);
+                    styleByName[style.Attributes!["name"]!.Value] = s;
+                    desc.styles.Add(s);
+                }
+
+            var ruleNodes = doc.SelectNodes("doc/rule");
+            if(ruleNodes != null)
+            foreach (XmlNode rule in ruleNodes)
                 desc.rules.Add(ParseRule(rule, styleByName));
-            foreach (XmlNode folding in doc.SelectNodes("doc/folding"))
+
+            var foldingNodes = doc.SelectNodes("doc/folding");
+            if(foldingNodes != null)
+            foreach (XmlNode folding in foldingNodes)
                 desc.foldings.Add(ParseFolding(folding));
 
             return desc;
@@ -516,69 +526,70 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
 
         protected static FoldingDesc ParseFolding(XmlNode foldingNode)
         {
-            var folding = new FoldingDesc();
-            //regex
-            folding.startMarkerRegex = foldingNode.Attributes["start"].Value;
-            folding.finishMarkerRegex = foldingNode.Attributes["finish"].Value;
+            var folding = new FoldingDesc
+            {
+                //regex
+                startMarkerRegex = foldingNode.Attributes?["start"]?.Value,
+                finishMarkerRegex = foldingNode.Attributes?["finish"]?.Value
+            };
             //options
-            XmlAttribute optionsA = foldingNode.Attributes["options"];
+            XmlAttribute? optionsA = foldingNode.Attributes?["options"];
             if (optionsA != null)
-                folding.options = (RegexOptions)Enum.Parse(typeof(RegexOptions), optionsA.Value);
+                folding.options = Enum.Parse<RegexOptions>(optionsA.Value);
 
             return folding;
         }
 
         protected static RuleDesc ParseRule(XmlNode ruleNode, Dictionary<string, Style> styles)
         {
-            var rule = new RuleDesc();
-            rule.pattern = ruleNode.InnerText;
+            var rule = new RuleDesc(ruleNode.InnerText);
             //
-            XmlAttribute styleA = ruleNode.Attributes["style"];
-            XmlAttribute optionsA = ruleNode.Attributes["options"];
+            XmlAttribute? styleA = ruleNode.Attributes?["style"];
+            XmlAttribute? optionsA = ruleNode.Attributes?["options"];
             //Style
             if (styleA == null)
                 throw new Exception("Rule must contain style name.");
-            if (!styles.ContainsKey(styleA.Value))
+            if (!styles.TryGetValue(styleA.Value, out Style? value))
                 throw new Exception("Style '" + styleA.Value + "' is not found.");
-            rule.style = styles[styleA.Value];
+            rule.style = value;
             //options
             if (optionsA != null)
-                rule.options = (RegexOptions)Enum.Parse(typeof(RegexOptions), optionsA.Value);
+                rule.options = Enum.Parse<RegexOptions>(optionsA.Value);
 
             return rule;
         }
 
         protected static Style ParseStyle(XmlNode styleNode)
         {
-            XmlAttribute typeA = styleNode.Attributes["type"];
-            XmlAttribute colorA = styleNode.Attributes["color"];
-            XmlAttribute backColorA = styleNode.Attributes["backColor"];
-            XmlAttribute fontStyleA = styleNode.Attributes["fontStyle"];
-            XmlAttribute nameA = styleNode.Attributes["name"];
+            //XmlAttribute? typeA = styleNode.Attributes!["type"];
+            XmlAttribute? colorA = styleNode.Attributes!["color"];
+            XmlAttribute? backColorA = styleNode.Attributes!["backColor"];
+            XmlAttribute? fontStyleA = styleNode.Attributes!["fontStyle"];
+            //XmlAttribute? nameA = styleNode.Attributes!["name"];
             //colors
-            SolidBrush foreBrush = null;
+            SolidBrush? foreBrush = null;
             if (colorA != null)
                 foreBrush = new SolidBrush(ParseColor(colorA.Value));
-            SolidBrush backBrush = null;
+            SolidBrush? backBrush = null;
             if (backColorA != null)
                 backBrush = new SolidBrush(ParseColor(backColorA.Value));
             //fontStyle
             FontStyle fontStyle = FontStyle.Regular;
             if (fontStyleA != null)
-                fontStyle = (FontStyle)Enum.Parse(typeof(FontStyle), fontStyleA.Value);
+                fontStyle = Enum.Parse<FontStyle>(fontStyleA.Value);
 
             return new TextStyle(foreBrush, backBrush, fontStyle);
         }
 
         protected static Color ParseColor(string s)
         {
-            if (s.StartsWith("#"))
+            if (s.StartsWith('#'))
             {
                 if (s.Length <= 7)
                     return Color.FromArgb(255,
-                                          Color.FromArgb(Int32.Parse(s.Substring(1), NumberStyles.AllowHexSpecifier)));
+                                          Color.FromArgb(Int32.Parse(s[1..], NumberStyles.AllowHexSpecifier)));
                 else
-                    return Color.FromArgb(Int32.Parse(s.Substring(1), NumberStyles.AllowHexSpecifier));
+                    return Color.FromArgb(Int32.Parse(s[1..], NumberStyles.AllowHexSpecifier));
             }
             else
                 return Color.FromName(s);
@@ -601,21 +612,21 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
             range.tb.LeftBracket2 = desc.leftBracket2;
             range.tb.RightBracket2 = desc.rightBracket2;
             //clear styles of range
-            range.ClearStyle(desc.styles.ToArray());
+            range.ClearStyle([.. desc.styles]);
             //highlight syntax
             foreach (RuleDesc rule in desc.rules)
-                range.SetStyle(rule.style, rule.Regex);
+                range.SetStyle(rule.style!, rule.Regex);
             //clear folding
             range.ClearFoldingMarkers();
             //folding markers
             foreach (FoldingDesc folding in desc.foldings)
-                range.SetFoldingMarkers(folding.startMarkerRegex, folding.finishMarkerRegex, folding.options);
+                range.SetFoldingMarkers(folding.startMarkerRegex!, folding.finishMarkerRegex!, folding.options);
 
             //
             RestoreBrackets(range.tb, oldBrackets);
         }
 
-        protected void RestoreBrackets(FastColoredTextBox tb, char[] oldBrackets)
+        protected static void RestoreBrackets(FastColoredTextBox tb, char[] oldBrackets)
         {
             tb.LeftBracket = oldBrackets[0];
             tb.RightBracket = oldBrackets[1];
@@ -623,9 +634,9 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
             tb.RightBracket2 = oldBrackets[3];
         }
 
-        protected char[] RememberBrackets(FastColoredTextBox tb)
+        protected static char[] RememberBrackets(FastColoredTextBox tb)
         {
-            return new[] { tb.LeftBracket, tb.RightBracket, tb.LeftBracket2, tb.RightBracket2 };
+            return [tb.LeftBracket, tb.RightBracket, tb.LeftBracket2, tb.RightBracket2];
         }
 
         protected void InitCShaprRegex()
@@ -794,24 +805,24 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
 ^\s*(case|default)\s*[^:]*(?<range>:)\s*(?<range>[^;]+);
 ";
             //clear style of changed range
-            range.ClearStyle(StringStyle, CommentStyle, NumberStyle, AttributeStyle, ClassNameStyle, KeywordStyle);
+            range.ClearStyle(StringStyle!, CommentStyle!, NumberStyle!, AttributeStyle!, ClassNameStyle!, KeywordStyle!);
             //
             if (CSharpStringRegex == null)
                 InitCShaprRegex();
             //string highlighting
-            range.SetStyle(StringStyle, CSharpStringRegex);
+            range.SetStyle(StringStyle!, CSharpStringRegex!);
             //comment highlighting
-            range.SetStyle(CommentStyle, CSharpCommentRegex1);
-            range.SetStyle(CommentStyle, CSharpCommentRegex2);
-            range.SetStyle(CommentStyle, CSharpCommentRegex3);
+            range.SetStyle(CommentStyle!, CSharpCommentRegex1!);
+            range.SetStyle(CommentStyle!, CSharpCommentRegex2!);
+            range.SetStyle(CommentStyle!, CSharpCommentRegex3!);
             //number highlighting
-            range.SetStyle(NumberStyle, CSharpNumberRegex);
+            range.SetStyle(NumberStyle!, CSharpNumberRegex!);
             //attribute highlighting
-            range.SetStyle(AttributeStyle, CSharpAttributeRegex);
+            range.SetStyle(AttributeStyle!, CSharpAttributeRegex!);
             //class name highlighting
-            range.SetStyle(ClassNameStyle, CSharpClassNameRegex);
+            range.SetStyle(ClassNameStyle!, CSharpClassNameRegex!);
             //keyword highlighting
-            range.SetStyle(KeywordStyle, CSharpKeywordRegex);
+            range.SetStyle(KeywordStyle!, CSharpKeywordRegex!);
 
             //find document comments
             foreach (Range r in range.GetRanges(@"^\s*///.*$", RegexOptions.Multiline))
@@ -822,18 +833,18 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
                 if (HTMLTagRegex == null)
                     InitHTMLRegex();
                 //
-                r.SetStyle(CommentStyle);
+                r.SetStyle(CommentStyle!);
                 //tags
-                foreach (Range rr in r.GetRanges(HTMLTagContentRegex))
+                foreach (Range rr in r.GetRanges(HTMLTagContentRegex!))
                 {
                     rr.ClearStyle(StyleIndex.All);
-                    rr.SetStyle(CommentTagStyle);
+                    rr.SetStyle(CommentTagStyle!);
                 }
                 //prefix '///'
                 foreach (Range rr in r.GetRanges(@"^\s*///", RegexOptions.Multiline))
                 {
                     rr.ClearStyle(StyleIndex.All);
-                    rr.SetStyle(CommentTagStyle);
+                    rr.SetStyle(CommentTagStyle!);
                 }
             }
 
@@ -875,20 +886,20 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
 ^\s*[\w\.\(\)]+\s*(?<range>=)\s*(?<range>.+)
 ";
             //clear style of changed range
-            range.ClearStyle(StringStyle, CommentStyle, NumberStyle, ClassNameStyle, KeywordStyle);
+            range.ClearStyle(StringStyle!, CommentStyle!, NumberStyle!, ClassNameStyle!, KeywordStyle!);
             //
             if (VBStringRegex == null)
                 InitVBRegex();
             //string highlighting
-            range.SetStyle(StringStyle, VBStringRegex);
+            range.SetStyle(StringStyle!, VBStringRegex!);
             //comment highlighting
-            range.SetStyle(CommentStyle, VBCommentRegex);
+            range.SetStyle(CommentStyle!, VBCommentRegex!);
             //number highlighting
-            range.SetStyle(NumberStyle, VBNumberRegex);
+            range.SetStyle(NumberStyle!, VBNumberRegex!);
             //class name highlighting
-            range.SetStyle(ClassNameStyle, VBClassNameRegex);
+            range.SetStyle(ClassNameStyle!, VBClassNameRegex!);
             //keyword highlighting
-            range.SetStyle(KeywordStyle, VBKeywordRegex);
+            range.SetStyle(KeywordStyle!, VBKeywordRegex!);
 
             //clear folding markers
             range.ClearFoldingMarkers();
@@ -942,26 +953,26 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
             range.tb.RightBracket2 = ')';
             range.tb.AutoIndentCharsPatterns = @"";
             //clear style of changed range
-            range.ClearStyle(CommentStyle, TagBracketStyle, TagNameStyle, AttributeStyle, AttributeValueStyle,
-                             HtmlEntityStyle);
+            range.ClearStyle(CommentStyle!, TagBracketStyle!, TagNameStyle!, AttributeStyle!, AttributeValueStyle!,
+                             HtmlEntityStyle!);
             //
             if (HTMLTagRegex == null)
                 InitHTMLRegex();
             //comment highlighting
-            range.SetStyle(CommentStyle, HTMLCommentRegex1);
-            range.SetStyle(CommentStyle, HTMLCommentRegex2);
+            range.SetStyle(CommentStyle!, HTMLCommentRegex1!);
+            range.SetStyle(CommentStyle!, HTMLCommentRegex2!);
             //tag brackets highlighting
-            range.SetStyle(TagBracketStyle, HTMLTagRegex);
+            range.SetStyle(TagBracketStyle!, HTMLTagRegex!);
             //tag name
-            range.SetStyle(TagNameStyle, HTMLTagNameRegex);
+            range.SetStyle(TagNameStyle!, HTMLTagNameRegex!);
             //end of tag
-            range.SetStyle(TagNameStyle, HTMLEndTagRegex);
+            range.SetStyle(TagNameStyle!, HTMLEndTagRegex!);
             //attributes
-            range.SetStyle(AttributeStyle, HTMLAttrRegex);
+            range.SetStyle(AttributeStyle!, HTMLAttrRegex!);
             //attribute values
-            range.SetStyle(AttributeValueStyle, HTMLAttrValRegex);
+            range.SetStyle(AttributeValueStyle!, HTMLAttrValRegex!);
             //html entity
-            range.SetStyle(HtmlEntityStyle, HTMLEntityRegex);
+            range.SetStyle(HtmlEntityStyle!, HTMLEntityRegex!);
 
             //clear folding markers
             range.ClearFoldingMarkers();
@@ -1012,8 +1023,8 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
             range.tb.RightBracket2 = ')';
             range.tb.AutoIndentCharsPatterns = @"";
             //clear style of changed range
-            range.ClearStyle(CommentStyle, XmlTagBracketStyle, XmlTagNameStyle, XmlAttributeStyle, XmlAttributeValueStyle,
-                             XmlEntityStyle, XmlCDataStyle);
+            range.ClearStyle(CommentStyle!, XmlTagBracketStyle!, XmlTagNameStyle!, XmlAttributeStyle!, XmlAttributeValueStyle!,
+                             XmlEntityStyle!, XmlCDataStyle!);
 
             //
             if (XMLTagRegex == null)
@@ -1022,29 +1033,29 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
             }
 
             //xml CData
-            range.SetStyle(XmlCDataStyle, XMLCDataRegex);
+            range.SetStyle(XmlCDataStyle!, XMLCDataRegex!);
 
             //comment highlighting
-            range.SetStyle(CommentStyle, XMLCommentRegex1);
-            range.SetStyle(CommentStyle, XMLCommentRegex2);
+            range.SetStyle(CommentStyle!, XMLCommentRegex1!);
+            range.SetStyle(CommentStyle!, XMLCommentRegex2!);
 
             //tag brackets highlighting
-            range.SetStyle(XmlTagBracketStyle, XMLTagRegex);
+            range.SetStyle(XmlTagBracketStyle!, XMLTagRegex!);
 
             //tag name
-            range.SetStyle(XmlTagNameStyle, XMLTagNameRegex);
+            range.SetStyle(XmlTagNameStyle!, XMLTagNameRegex!);
 
             //end of tag
-            range.SetStyle(XmlTagNameStyle, XMLEndTagRegex);
+            range.SetStyle(XmlTagNameStyle!, XMLEndTagRegex!);
 
             //attributes
-            range.SetStyle(XmlAttributeStyle, XMLAttrRegex);
+            range.SetStyle(XmlAttributeStyle!, XMLAttrRegex!);
 
             //attribute values
-            range.SetStyle(XmlAttributeValueStyle, XMLAttrValRegex);
+            range.SetStyle(XmlAttributeValueStyle!, XMLAttrValRegex!);
 
             //xml entity
-            range.SetStyle(XmlEntityStyle, XMLEntityRegex);
+            range.SetStyle(XmlEntityStyle!, XMLEntityRegex!);
 
             //clear folding markers
             range.ClearFoldingMarkers();
@@ -1059,12 +1070,15 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
             var id = 0;
             var fctb = range.tb;
             //extract opening and closing tags (exclude open-close tags: <TAG/>)
+            if (XMLFoldingRegex == null)
+                return;
+
             foreach (var r in range.GetRanges(XMLFoldingRegex))
             {
                 var tagName = r.Text;
                 var iLine = r.Start.iLine;
                 //if it is opening tag...
-                if (tagName[0] != '/')
+                if (tagName![0] != '/')
                 {
                     // ...push into stack
                     var tag = new XmlFoldingTag { Name = tagName, id = id++, startLine = r.Start.iLine };
@@ -1099,7 +1113,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
 
         class XmlFoldingTag
         {
-            public string Name;
+            public string? Name;
             public int id;
             public int startLine;
             public string Marker { get { return Name + id; } }
@@ -1137,30 +1151,30 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
 
             range.tb.AutoIndentCharsPatterns = @"";
             //clear style of changed range
-            range.ClearStyle(CommentStyle, StringStyle, NumberStyle, VariableStyle, StatementsStyle, KeywordStyle,
-                             FunctionsStyle, TypesStyle);
+            range.ClearStyle(CommentStyle!, StringStyle!, NumberStyle!, VariableStyle!, StatementsStyle!, KeywordStyle!,
+                             FunctionsStyle!, TypesStyle!);
             //
             if (SQLStringRegex == null)
                 InitSQLRegex();
             //comment highlighting
-            range.SetStyle(CommentStyle, SQLCommentRegex1);
-            range.SetStyle(CommentStyle, SQLCommentRegex2);
-            range.SetStyle(CommentStyle, SQLCommentRegex3);
-            range.SetStyle(CommentStyle, SQLCommentRegex4);
+            range.SetStyle(CommentStyle!, SQLCommentRegex1!);
+            range.SetStyle(CommentStyle!, SQLCommentRegex2!);
+            range.SetStyle(CommentStyle!, SQLCommentRegex3!);
+            range.SetStyle(CommentStyle!, SQLCommentRegex4!);
             //string highlighting
-            range.SetStyle(StringStyle, SQLStringRegex);
+            range.SetStyle(StringStyle!, SQLStringRegex!);
             //number highlighting
-            range.SetStyle(NumberStyle, SQLNumberRegex);
+            range.SetStyle(NumberStyle!, SQLNumberRegex!);
             //types highlighting
-            range.SetStyle(TypesStyle, SQLTypesRegex);
+            range.SetStyle(TypesStyle!, SQLTypesRegex!);
             //var highlighting
-            range.SetStyle(VariableStyle, SQLVarRegex);
+            range.SetStyle(VariableStyle!, SQLVarRegex!);
             //statements
-            range.SetStyle(StatementsStyle, SQLStatementsRegex);
+            range.SetStyle(StatementsStyle!, SQLStatementsRegex!);
             //keywords
-            range.SetStyle(KeywordStyle, SQLKeywordsRegex);
+            range.SetStyle(KeywordStyle!, SQLKeywordsRegex!);
             //functions
-            range.SetStyle(FunctionsStyle, SQLFunctionsRegex);
+            range.SetStyle(FunctionsStyle!, SQLFunctionsRegex!);
 
             //clear folding markers
             range.ClearFoldingMarkers();
@@ -1204,8 +1218,8 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
             range.tb.RightBracket2 = '}';
             range.tb.BracketsHighlightStrategy = BracketsHighlightStrategy.Strategy2;
             //clear style of changed range
-            range.ClearStyle(StringStyle, CommentStyle, NumberStyle, VariableStyle, KeywordStyle, KeywordStyle2,
-                             KeywordStyle3);
+            range.ClearStyle(StringStyle!, CommentStyle!, NumberStyle!, VariableStyle!, KeywordStyle!, KeywordStyle2!,
+                             KeywordStyle3!);
 
             range.tb.AutoIndentCharsPatterns
                 = @"
@@ -1216,19 +1230,19 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
             if (PHPStringRegex == null)
                 InitPHPRegex();
             //string highlighting
-            range.SetStyle(StringStyle, PHPStringRegex);
+            range.SetStyle(StringStyle!, PHPStringRegex!);
             //comment highlighting
-            range.SetStyle(CommentStyle, PHPCommentRegex1);
-            range.SetStyle(CommentStyle, PHPCommentRegex2);
-            range.SetStyle(CommentStyle, PHPCommentRegex3);
+            range.SetStyle(CommentStyle!, PHPCommentRegex1!);
+            range.SetStyle(CommentStyle!, PHPCommentRegex2!);
+            range.SetStyle(CommentStyle!, PHPCommentRegex3!);
             //number highlighting
-            range.SetStyle(NumberStyle, PHPNumberRegex);
+            range.SetStyle(NumberStyle!, PHPNumberRegex!);
             //var highlighting
-            range.SetStyle(VariableStyle, PHPVarRegex);
+            range.SetStyle(VariableStyle!, PHPVarRegex!);
             //keyword highlighting
-            range.SetStyle(KeywordStyle, PHPKeywordRegex1);
-            range.SetStyle(KeywordStyle2, PHPKeywordRegex2);
-            range.SetStyle(KeywordStyle3, PHPKeywordRegex3);
+            range.SetStyle(KeywordStyle!, PHPKeywordRegex1!);
+            range.SetStyle(KeywordStyle2!, PHPKeywordRegex2!);
+            range.SetStyle(KeywordStyle3!, PHPKeywordRegex3!);
 
             //clear folding markers
             range.ClearFoldingMarkers();
@@ -1271,20 +1285,20 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
 ";
 
             //clear style of changed range
-            range.ClearStyle(StringStyle, CommentStyle, NumberStyle, KeywordStyle);
+            range.ClearStyle(StringStyle!, CommentStyle!, NumberStyle!, KeywordStyle!);
             //
             if (JScriptStringRegex == null)
                 InitJScriptRegex();
             //string highlighting
-            range.SetStyle(StringStyle, JScriptStringRegex);
+            range.SetStyle(StringStyle!, JScriptStringRegex!);
             //comment highlighting
-            range.SetStyle(CommentStyle, JScriptCommentRegex1);
-            range.SetStyle(CommentStyle, JScriptCommentRegex2);
-            range.SetStyle(CommentStyle, JScriptCommentRegex3);
+            range.SetStyle(CommentStyle!, JScriptCommentRegex1!);
+            range.SetStyle(CommentStyle!, JScriptCommentRegex2!);
+            range.SetStyle(CommentStyle!, JScriptCommentRegex3!);
             //number highlighting
-            range.SetStyle(NumberStyle, JScriptNumberRegex);
+            range.SetStyle(NumberStyle!, JScriptNumberRegex!);
             //keyword highlighting
-            range.SetStyle(KeywordStyle, JScriptKeywordRegex);
+            range.SetStyle(KeywordStyle!, JScriptKeywordRegex!);
             //clear folding markers
             range.ClearFoldingMarkers();
             //set folding markers
@@ -1331,22 +1345,22 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
 ";
 
             //clear style of changed range
-            range.ClearStyle(StringStyle, CommentStyle, NumberStyle, KeywordStyle, FunctionsStyle);
+            range.ClearStyle(StringStyle!, CommentStyle!, NumberStyle!, KeywordStyle!, FunctionsStyle!);
             //
             if (LuaStringRegex == null)
                 InitLuaRegex();
             //string highlighting
-            range.SetStyle(StringStyle, LuaStringRegex);
+            range.SetStyle(StringStyle!, LuaStringRegex!);
             //comment highlighting
-            range.SetStyle(CommentStyle, LuaCommentRegex1);
-            range.SetStyle(CommentStyle, LuaCommentRegex2);
-            range.SetStyle(CommentStyle, LuaCommentRegex3);
+            range.SetStyle(CommentStyle!, LuaCommentRegex1!);
+            range.SetStyle(CommentStyle!, LuaCommentRegex2!);
+            range.SetStyle(CommentStyle!, LuaCommentRegex3!);
             //number highlighting
-            range.SetStyle(NumberStyle, LuaNumberRegex);
+            range.SetStyle(NumberStyle!, LuaNumberRegex!);
             //keyword highlighting
-            range.SetStyle(KeywordStyle, LuaKeywordRegex);
+            range.SetStyle(KeywordStyle!, LuaKeywordRegex!);
             //functions highlighting
-            range.SetStyle(FunctionsStyle, LuaFunctionsRegex);
+            range.SetStyle(FunctionsStyle!, LuaFunctionsRegex!);
             //clear folding markers
             range.ClearFoldingMarkers();
             //set folding markers
@@ -1357,24 +1371,24 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         protected void LuaAutoIndentNeeded(object sender, AutoIndentEventArgs args)
         {
             //end of block
-            if (Regex.IsMatch(args.LineText, @"^\s*(end|until)\b"))
+            if (LuaEndOfBlockRegex().IsMatch(args.LineText))
             {
                 args.Shift = -args.TabLength;
                 args.ShiftNextLines = -args.TabLength;
                 return;
             }
             // then ...
-            if (Regex.IsMatch(args.LineText, @"\b(then)\s*\S+"))
+            if (LuaThenRegex().IsMatch(args.LineText))
                 return;
             //start of operator block
-            if (Regex.IsMatch(args.LineText, @"^\s*(function|do|for|while|repeat|if)\b"))
+            if (LuaStartOfOperatorRegex().IsMatch(args.LineText))
             {
                 args.ShiftNextLines = args.TabLength;
                 return;
             }
 
             //Statements else, elseif, case etc
-            if (Regex.IsMatch(args.LineText, @"^\s*(else|elseif)\b", RegexOptions.IgnoreCase))
+            if (LuaStatementsRegex().IsMatch(args.LineText))
             {
                 args.Shift = -args.TabLength;
                 return;
@@ -1406,16 +1420,16 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
 ";
 
             //clear style of changed range
-            range.ClearStyle(StringStyle, NumberStyle, KeywordStyle);
+            range.ClearStyle(StringStyle!, NumberStyle!, KeywordStyle!);
             //
             if (JSONStringRegex == null)
                 InitJSONRegex();
             //keyword highlighting
-            range.SetStyle(KeywordStyle, JSONKeywordRegex);
+            range.SetStyle(KeywordStyle!, JSONKeywordRegex!);
             //string highlighting
-            range.SetStyle(StringStyle, JSONStringRegex);
+            range.SetStyle(StringStyle!, JSONStringRegex!);
             //number highlighting
-            range.SetStyle(NumberStyle, JSONNumberRegex);
+            range.SetStyle(NumberStyle!, JSONNumberRegex!);
             //clear folding markers
             range.ClearFoldingMarkers();
             //set folding markers
@@ -1447,24 +1461,24 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
             range.tb.CommentPrefix = ";";
 
             //clear style of changed range
-            range.ClearStyle(StringStyle, CommentStyle, NumberStyle, AttributeStyle, ClassNameStyle, KeywordStyle, AssemblyRegisterStyle);
+            range.ClearStyle(StringStyle!, CommentStyle!, NumberStyle!, AttributeStyle!, ClassNameStyle!, KeywordStyle!, AssemblyRegisterStyle!);
             //
             if (AssemblyStringRegex == null)
                 InitAssemblyRegex();
             //string highlighting
-            range.SetStyle(StringStyle, AssemblyStringRegex);
+            range.SetStyle(StringStyle!, AssemblyStringRegex!);
             //comment highlighting
-            range.SetStyle(CommentStyle, AssemblyCommentRegex);
+            range.SetStyle(CommentStyle!, AssemblyCommentRegex!);
             //number highlighting
-            range.SetStyle(NumberStyle, AssemblyNumberRegex);
+            range.SetStyle(NumberStyle!, AssemblyNumberRegex!);
             //attribute highlighting
-            range.SetStyle(AttributeStyle, AssemblyAttributeRegex);
+            range.SetStyle(AttributeStyle!, AssemblyAttributeRegex!);
             //class name highlighting
-            range.SetStyle(ClassNameStyle, AssemblyInstructionsRegex);
+            range.SetStyle(ClassNameStyle!, AssemblyInstructionsRegex!);
             //keyword highlighting
-            range.SetStyle(KeywordStyle, AssemblyKeywordsRegex);
+            range.SetStyle(KeywordStyle!, AssemblyKeywordsRegex!);
             //Register highlighting
-            range.SetStyle(AssemblyRegisterStyle, AssemblyRegisterRegex);
+            range.SetStyle(AssemblyRegisterStyle!, AssemblyRegisterRegex!);
 
 
             //find document comments
@@ -1474,13 +1488,13 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
                 r.ClearStyle(StyleIndex.All);
 
                 //
-                r.SetStyle(CommentStyle);
+                r.SetStyle(CommentStyle!);
 
                 //prefix '///'
                 foreach (var rr in r.GetRanges(@"^\s*///", RegexOptions.Multiline))
                 {
                     rr.ClearStyle(StyleIndex.All);
-                    rr.SetStyle(CommentTagStyle);
+                    rr.SetStyle(CommentTagStyle!);
                 }
             }
 
@@ -1497,30 +1511,30 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
 
         protected void InitBatchFileRegex()
         {
-            BatchFileStringRegex1 = new Regex("(\".+?\"|\'.+?\')", RegexOptions.Singleline);
+            BatchFileStringRegex1 = BatchFileString1Regex();
 
-            BatchFileVariableRegex1 = new Regex(@"(?<!(^(?i)(rem|::).*))(?i)(%[a-zA-Z0-9]+?%|!.+?!)", RegexOptions.Multiline);
-            BatchFileVariableRegex2 = new Regex(@"(%%)(?:(?i:~[fdpnxsatz]*(?:\\$PATH:)?)?[a-zA-Z])");
+            BatchFileVariableRegex1 = BatchFileVariable1Regex();
+            BatchFileVariableRegex2 = BatchFileVariable2Regex();
 
-            BatchFileAttrRegex = new Regex(@"^\s*(?<range>\[.+?\])\s*$", RegexOptions.Multiline);
+            BatchFileAttrRegex = BatchFileAttr1Regex();
 
-            BatchFileClassNameRegex = new Regex(@"^:[a-zA-Z0-9!@#$%^&*()_]+", RegexOptions.Multiline);
+            BatchFileClassNameRegex = BatchFileClassName1Regex();
 
-            BatchFileSymbolRegex1 = new Regex(@"^(@)(?=(?i)echo)", RegexOptions.Multiline);
-            BatchFileSymbolRegex2 = new Regex(@"(\*)", RegexOptions.Singleline);
-            BatchFileSymbolRegex3 = new Regex(@"(?<!(^(?i)(rem|::).*))(?i)(>|<|&)", RegexOptions.Multiline);
+            BatchFileSymbolRegex1 = BatchFileSymbol1Regex();
+            BatchFileSymbolRegex2 = BatchFileSymbol2Regex();
+            BatchFileSymbolRegex3 = BatchFileSymbol3Regex();
 
             // Command keywords
-            BatchFileKeywordRegex1 = new Regex(@"(?<!(^(?i)(rem|::|echo).*))(?i)(goto|do|cd|start)", RegexOptions.Multiline);
+            BatchFileKeywordRegex1 = BatchFileKeyword1Regex();
             // Standard keywords
-            BatchFileKeywordRegex2 = new Regex(@"^([ ]{0,}|@)?\b(?i)(arp|assoc|at|attrib|aux|bcdedit|break|cacls|call|cd|chcp|chdir|chkdsk|chkntfs|choice|cipher|clip|cls|cmd|cmdextversion|color|com|com1|com2|com3|com4|comp|compact|con|convert|copy|ctty|date|defined|del|dir|diskcomp|diskpart|do|doskey|dpath|driverquery|echo|else|endlocal|equ|erase|errorlevel|exist|exit|expand|fc|find|findstr|for|forfiles|format|fsutil|ftype|geq|goto|gpresult|graftabl|gtr|help|icacls|if|in|ipconfig|label|leq|lpt|lpt1|lpt2|lpt3|lpt4|lss|makecab|md|mkdir|mklink|mode|more|move|neq|net|netsh|not|nul|openfiles|path|pause|ping|popd|print|prompt|pushd|rd|recover|reg|rem|ren|rename|replace|rmdir|robocopy|rundll32|sc|schtasks|set|setlocal|setx|shift|shutdown|sort|start|subst|systeminfo|taskkill|tasklist|time|timeout|title|tree|type|ver|verify|vol|wmic|xcopy)(?![a-zA-Z]|[0-9])", RegexOptions.Multiline);
+            BatchFileKeywordRegex2 = BatchFileKeyword2Regex();
             // Special keywords
-            BatchFileKeywordRegex3 = new Regex(@"(?<!(^(?i)(rem|::).*))(?i)NUL", RegexOptions.Multiline);
+            BatchFileKeywordRegex3 = BatchFileKeyword3Regex();
 
-            BatchFileOutKeyRegex = new Regex(@"^([ ]{1,}|@)?\b(?i)(git)(?![a-zA-Z]|[0-9])", RegexOptions.Multiline);
+            BatchFileOutKeyRegex = BatchFileOutKey1Regex();
 
-            BatchFileCommentRegex1 = new Regex(@"(?(REM).*)", RegexOptions.Multiline);
-            BatchFileCommentRegex2 = new Regex(@"(?(:{2}).*)", RegexOptions.Multiline);
+            BatchFileCommentRegex1 = BatchFileComment1Regex();
+            BatchFileCommentRegex2 = BatchFileComment2Regex();
         }
 
         /// <summary>
@@ -1537,27 +1551,27 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
             if (BatchFileAttrRegex == null)
                 InitBatchFileRegex();
             //string highlighting
-            range.SetStyle(StringStyle, BatchFileStringRegex1);
+            range.SetStyle(StringStyle!, BatchFileStringRegex1!);
             //variable highlighting
-            range.SetStyle(VariableStyle, BatchFileVariableRegex1);
-            range.SetStyle(VariableStyle, BatchFileVariableRegex2);
+            range.SetStyle(VariableStyle!, BatchFileVariableRegex1!);
+            range.SetStyle(VariableStyle!, BatchFileVariableRegex2!);
             //attribute highlighting
-            range.SetStyle(GrayStyle, BatchFileAttrRegex);
+            range.SetStyle(GrayStyle!, BatchFileAttrRegex!);
             //class name highlighting
-            range.SetStyle(RedBkgdYellowStyle, BatchFileClassNameRegex);
+            range.SetStyle(RedBkgdYellowStyle!, BatchFileClassNameRegex!);
             //symbol highlighting
-            range.SetStyle(BatchSymbolStyle1, BatchFileSymbolRegex1);
-            range.SetStyle(BatchSymbolStyle2, BatchFileSymbolRegex2);
-            range.SetStyle(BatchSymbolStyle3, BatchFileSymbolRegex3);
+            range.SetStyle(BatchSymbolStyle1!, BatchFileSymbolRegex1!);
+            range.SetStyle(BatchSymbolStyle2!, BatchFileSymbolRegex2!);
+            range.SetStyle(BatchSymbolStyle3!, BatchFileSymbolRegex3!);
             //keyword highlighting
-            range.SetStyle(KeywordStyle, BatchFileKeywordRegex1);
-            range.SetStyle(KeywordStyle, BatchFileKeywordRegex2);
-            range.SetStyle(KeywordStyle, BatchFileKeywordRegex3);
+            range.SetStyle(KeywordStyle!, BatchFileKeywordRegex1!);
+            range.SetStyle(KeywordStyle!, BatchFileKeywordRegex2!);
+            range.SetStyle(KeywordStyle!, BatchFileKeywordRegex3!);
             //outside keyword highlighting
-            range.SetStyle(LightBlueStyle, BatchFileOutKeyRegex);
+            range.SetStyle(LightBlueStyle!, BatchFileOutKeyRegex!);
             //comment highlighting
-            range.SetStyle(CommentStyle, BatchFileCommentRegex1);
-            range.SetStyle(CommentStyle, BatchFileCommentRegex2);
+            range.SetStyle(CommentStyle!, BatchFileCommentRegex1!);
+            range.SetStyle(CommentStyle!, BatchFileCommentRegex2!);
             //clear folding markers
             range.ClearFoldingMarkers();
         }
@@ -1567,137 +1581,214 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         /// <summary>
         /// String style
         /// </summary>
-        public Style StringStyle { get; set; }
+        public Style? StringStyle { get; set; }
 
         /// <summary>
         /// Comment style
         /// </summary>
-        public Style CommentStyle { get; set; }
+        public Style? CommentStyle { get; set; }
 
         /// <summary>
         /// Number style
         /// </summary>
-        public Style NumberStyle { get; set; }
+        public Style? NumberStyle { get; set; }
 
         /// <summary>
         /// C# attribute style
         /// </summary>
-        public Style AttributeStyle { get; set; }
+        public Style? AttributeStyle { get; set; }
 
         /// <summary>
         /// Class name style
         /// </summary>
-        public Style ClassNameStyle { get; set; }
+        public Style? ClassNameStyle { get; set; }
 
         /// <summary>
         /// Keyword style
         /// </summary>
-        public Style KeywordStyle { get; set; }
+        public Style? KeywordStyle { get; set; }
 
         /// <summary>
-        /// Style of tags in comments of C#
+        /// Style? of tags in comments of C#
         /// </summary>
-        public Style CommentTagStyle { get; set; }
+        public Style? CommentTagStyle { get; set; }
 
         /// <summary>
         /// HTML attribute value style
         /// </summary>
-        public Style AttributeValueStyle { get; set; }
+        public Style? AttributeValueStyle { get; set; }
 
         /// <summary>
         /// HTML tag brackets style
         /// </summary>
-        public Style TagBracketStyle { get; set; }
+        public Style? TagBracketStyle { get; set; }
 
         /// <summary>
         /// HTML tag name style
         /// </summary>
-        public Style TagNameStyle { get; set; }
+        public Style? TagNameStyle { get; set; }
 
         /// <summary>
         /// HTML Entity style
         /// </summary>
-        public Style HtmlEntityStyle { get; set; }
+        public Style? HtmlEntityStyle { get; set; }
 
         /// <summary>
         /// XML attribute style
         /// </summary>
-        public Style XmlAttributeStyle { get; set; }
+        public Style? XmlAttributeStyle { get; set; }
 
         /// <summary>
         /// XML attribute value style
         /// </summary>
-        public Style XmlAttributeValueStyle { get; set; }
+        public Style? XmlAttributeValueStyle { get; set; }
 
         /// <summary>
         /// XML tag brackets style
         /// </summary>
-        public Style XmlTagBracketStyle { get; set; }
+        public Style? XmlTagBracketStyle { get; set; }
 
         /// <summary>
         /// XML tag name style
         /// </summary>
-        public Style XmlTagNameStyle { get; set; }
+        public Style? XmlTagNameStyle { get; set; }
 
         /// <summary>
         /// XML Entity style
         /// </summary>
-        public Style XmlEntityStyle { get; set; }
+        public Style? XmlEntityStyle { get; set; }
 
         /// <summary>
         /// XML CData style
         /// </summary>
-        public Style XmlCDataStyle { get; set; }
+        public Style? XmlCDataStyle { get; set; }
 
         /// <summary>
         /// Variable style
         /// </summary>
-        public Style VariableStyle { get; set; }
+        public Style? VariableStyle { get; set; }
 
         /// <summary>
         /// Specific PHP keyword style
         /// </summary>
-        public Style KeywordStyle2 { get; set; }
+        public Style? KeywordStyle2 { get; set; }
 
         /// <summary>
         /// Specific PHP keyword style
         /// </summary>
-        public Style KeywordStyle3 { get; set; }
+        public Style? KeywordStyle3 { get; set; }
 
         /// <summary>
         /// SQL Statements style
         /// </summary>
-        public Style StatementsStyle { get; set; }
+        public Style? StatementsStyle { get; set; }
 
         /// <summary>
         /// SQL Functions style
         /// </summary>
-        public Style FunctionsStyle { get; set; }
+        public Style? FunctionsStyle { get; set; }
 
         /// <summary>
         /// SQL Types style
         /// </summary>
-        public Style TypesStyle { get; set; }
+        public Style? TypesStyle { get; set; }
 
         /// <summary>
         /// Assembly register style
         /// </summary>
-        public Style AssemblyRegisterStyle { get; set; }
+        public Style? AssemblyRegisterStyle { get; set; }
 
         /// <summary>Add commentMore actions
         /// Specific Batch file symbol style
         /// </summary>
-        public Style BatchSymbolStyle1 { get; set; }
+        public Style? BatchSymbolStyle1 { get; set; }
 
         /// <summary>
         /// Specific Batch file symbol style
         /// </summary>
-        public Style BatchSymbolStyle2 { get; set; }
+        public Style? BatchSymbolStyle2 { get; set; }
 
         /// <summary>Add commentMore actions
         /// Specific Batch file symbol style
         /// </summary>
-        public Style BatchSymbolStyle3 { get; set; }
+        public Style? BatchSymbolStyle3 { get; set; }
+
+        [GeneratedRegex(@"^[^""']*\{.*\}[^""']*$")]
+        private static partial Regex PhpBlockRegex();
+        [GeneratedRegex(@"^[^""']*\{")]
+        private static partial Regex PhpStartOfBlockRegex();
+        [GeneratedRegex(@"}[^""']*$")]
+        private static partial Regex PhpEndOfBlockRegex();
+        [GeneratedRegex(@"^\s*(if|for|foreach|while|[\}\s]*else)\b[^{]*$")]
+        private static partial Regex PhpCheckIfOperatorIsUnclosedRegex();
+        [GeneratedRegex(@"(;\s*$)|(;\s*//)")]
+        private static partial Regex PhpOperatorIsUnclosedRegex();
+        [GeneratedRegex(@"^\s*(End|EndIf|Next|Loop)\b", RegexOptions.IgnoreCase, "es-ES")]
+        private static partial Regex VbEndOfBlockRegex();
+        [GeneratedRegex(@"\b(Class|Property|Enum|Structure|Sub|Function|Namespace|Interface|Get)\b|(Set\s*\()", RegexOptions.IgnoreCase, "es-ES")]
+        private static partial Regex VbStartOfDeclarationRegex();
+        [GeneratedRegex(@"\b(Then)\s*\S+", RegexOptions.IgnoreCase, "es-ES")]
+        private static partial Regex VbThenRegex();
+        [GeneratedRegex(@"^\s*(If|While|For|Do|Try|With|Using|Select)\b", RegexOptions.IgnoreCase, "es-ES")]
+        private static partial Regex VbStartOfOperatorBlockRegex();
+        [GeneratedRegex(@"^\s*(Else|ElseIf|Case|Catch|Finally)\b", RegexOptions.IgnoreCase, "es-ES")]
+        private static partial Regex VbStatementsRegex();
+        [GeneratedRegex(@"^[^""']*\{.*\}[^""']*$")]
+        private static partial Regex CsharpBlockRegex();
+        [GeneratedRegex(@"^[^""']*\{")]
+        private static partial Regex CsharpStartOfBlockRegex();
+        [GeneratedRegex(@"}[^""']*$")]
+        private static partial Regex CsharpEndOfBlockRegex();
+        [GeneratedRegex(@"^\s*\w+\s*:\s*($|//)")]
+        private static partial Regex CsharpLabelRegex();
+        [GeneratedRegex(@"^\s*default\s*:")]
+        private static partial Regex CsharpLabelDefaultRegex();
+        [GeneratedRegex(@"^\s*(case|default)\b.*:\s*($|//)")]
+        private static partial Regex CsharpCaseDefaultRegex();
+        [GeneratedRegex(@"^\s*(if|for|foreach|while|[\}\s]*else)\b[^{]*$")]
+        private static partial Regex CsharpStatementRegex();
+        [GeneratedRegex(@"(;\s*$)|(;\s*//)")]
+        private static partial Regex CsharpOperatorUnclosedRegex();
+        [GeneratedRegex(@"^\s*\w+\s*:\s*($|//)")]
+        private static partial Regex AssemblyLabelRegex();
+        [GeneratedRegex(@"^\s*default\s*:")]
+        private static partial Regex AssemblyLabelDefaultRegex();
+        [GeneratedRegex(@"^\s*(end|until)\b")]
+        private static partial Regex LuaEndOfBlockRegex();
+        [GeneratedRegex(@"\b(then)\s*\S+")]
+        private static partial Regex LuaThenRegex();
+        [GeneratedRegex(@"^\s*(function|do|for|while|repeat|if)\b")]
+        private static partial Regex LuaStartOfOperatorRegex();
+        [GeneratedRegex(@"^\s*(else|elseif)\b", RegexOptions.IgnoreCase, "es-ES")]
+        private static partial Regex LuaStatementsRegex();
+        [GeneratedRegex("(\".+?\"|\'.+?\')", RegexOptions.Singleline)]
+        private static partial Regex BatchFileString1Regex();
+        [GeneratedRegex(@"(?<!(^(?i)(rem|::).*))(?i)(%[a-zA-Z0-9]+?%|!.+?!)", RegexOptions.Multiline, "es-ES")]
+        private static partial Regex BatchFileVariable1Regex();
+        [GeneratedRegex(@"(%%)(?:(?i:~[fdpnxsatz]*(?:\\$PATH:)?)?[a-zA-Z])", RegexOptions.None, "es-ES")]
+        private static partial Regex BatchFileVariable2Regex();
+        [GeneratedRegex(@"^\s*(?<range>\[.+?\])\s*$", RegexOptions.Multiline)]
+        private static partial Regex BatchFileAttr1Regex();
+        [GeneratedRegex(@"^:[a-zA-Z0-9!@#$%^&*()_]+", RegexOptions.Multiline)]
+        private static partial Regex BatchFileClassName1Regex();
+        [GeneratedRegex(@"^(@)(?=(?i)echo)", RegexOptions.Multiline, "es-ES")]
+        private static partial Regex BatchFileSymbol1Regex();
+        [GeneratedRegex(@"(\*)", RegexOptions.Singleline)]
+        private static partial Regex BatchFileSymbol2Regex();
+        [GeneratedRegex(@"(?<!(^(?i)(rem|::).*))(?i)(>|<|&)", RegexOptions.Multiline, "es-ES")]
+        private static partial Regex BatchFileSymbol3Regex();
+        [GeneratedRegex(@"(?<!(^(?i)(rem|::|echo).*))(?i)(goto|do|cd|start)", RegexOptions.Multiline, "es-ES")]
+        private static partial Regex BatchFileKeyword1Regex();
+        [GeneratedRegex(@"^([ ]{0,}|@)?\b(?i)(arp|assoc|at|attrib|aux|bcdedit|break|cacls|call|cd|chcp|chdir|chkdsk|chkntfs|choice|cipher|clip|cls|cmd|cmdextversion|color|com|com1|com2|com3|com4|comp|compact|con|convert|copy|ctty|date|defined|del|dir|diskcomp|diskpart|do|doskey|dpath|driverquery|echo|else|endlocal|equ|erase|errorlevel|exist|exit|expand|fc|find|findstr|for|forfiles|format|fsutil|ftype|geq|goto|gpresult|graftabl|gtr|help|icacls|if|in|ipconfig|label|leq|lpt|lpt1|lpt2|lpt3|lpt4|lss|makecab|md|mkdir|mklink|mode|more|move|neq|net|netsh|not|nul|openfiles|path|pause|ping|popd|print|prompt|pushd|rd|recover|reg|rem|ren|rename|replace|rmdir|robocopy|rundll32|sc|schtasks|set|setlocal|setx|shift|shutdown|sort|start|subst|systeminfo|taskkill|tasklist|time|timeout|title|tree|type|ver|verify|vol|wmic|xcopy)(?![a-zA-Z]|[0-9])", RegexOptions.Multiline, "es-ES")]
+        private static partial Regex BatchFileKeyword2Regex();
+        [GeneratedRegex(@"(?<!(^(?i)(rem|::).*))(?i)NUL", RegexOptions.Multiline, "es-ES")]
+        private static partial Regex BatchFileKeyword3Regex();
+        [GeneratedRegex(@"^([ ]{1,}|@)?\b(?i)(git)(?![a-zA-Z]|[0-9])", RegexOptions.Multiline, "es-ES")]
+        private static partial Regex BatchFileOutKey1Regex();
+        [GeneratedRegex(@"(?(REM).*)", RegexOptions.Multiline)]
+        private static partial Regex BatchFileComment1Regex();
+        [GeneratedRegex(@"(?(:{2}).*)", RegexOptions.Multiline)]
+        private static partial Regex BatchFileComment2Regex();
 
         #endregion
     }

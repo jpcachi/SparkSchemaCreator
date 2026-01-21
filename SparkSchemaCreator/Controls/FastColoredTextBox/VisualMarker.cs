@@ -6,14 +6,9 @@ using System.Windows.Forms;
 
 namespace SparkSchemaCreator.Controls.FastColoredTextBox
 {
-    public class VisualMarker
+    public class VisualMarker(Rectangle rectangle)
     {
-        public readonly Rectangle rectangle;
-
-        public VisualMarker(Rectangle rectangle)
-        {
-            this.rectangle = rectangle;
-        }
+        public readonly Rectangle rectangle = rectangle;
 
         public virtual void Draw(Graphics gr, Pen pen)
         {
@@ -25,15 +20,9 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         }
     }
 
-    public class CollapseFoldingMarker: VisualMarker
+    public class CollapseFoldingMarker(int iLine, Rectangle rectangle) : VisualMarker(rectangle)
     {
-        public readonly int iLine;
-
-        public CollapseFoldingMarker(int iLine, Rectangle rectangle)
-            : base(rectangle)
-        {
-            this.iLine = iLine;
-        }
+        public readonly int iLine = iLine;
 
         public void Draw(Graphics gr, Pen pen, Brush backgroundBrush, Pen forePen)
         {
@@ -44,15 +33,9 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         }
     }
 
-    public class ExpandFoldingMarker : VisualMarker
+    public class ExpandFoldingMarker(int iLine, Rectangle rectangle) : VisualMarker(rectangle)
     {
-        public readonly int iLine;
-
-        public ExpandFoldingMarker(int iLine, Rectangle rectangle)
-            : base(rectangle)
-        {
-            this.iLine = iLine;
-        }
+        public readonly int iLine = iLine;
 
         public void Draw(Graphics gr, Pen pen,  Brush backgroundBrush, Pen forePen)
         {
@@ -64,15 +47,9 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         }
     }
 
-    public class FoldedAreaMarker : VisualMarker
+    public class FoldedAreaMarker(int iLine, Rectangle rectangle) : VisualMarker(rectangle)
     {
-        public readonly int iLine;
-
-        public FoldedAreaMarker(int iLine, Rectangle rectangle)
-            : base(rectangle)
-        {
-            this.iLine = iLine;
-        }
+        public readonly int iLine = iLine;
 
         public override void Draw(Graphics gr, Pen pen)
         {
@@ -80,27 +57,14 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         }
     }
 
-    public class StyleVisualMarker : VisualMarker
+    public class StyleVisualMarker(Rectangle rectangle, Style style) : VisualMarker(rectangle)
     {
-        public Style Style{get;private set;}
-
-        public StyleVisualMarker(Rectangle rectangle, Style style)
-            : base(rectangle)
-        {
-            this.Style = style;
-        }
+        public Style Style { get; private set; } = style;
     }
 
-    public class VisualMarkerEventArgs : MouseEventArgs
+    public class VisualMarkerEventArgs(Style style, StyleVisualMarker marker, MouseEventArgs args) : MouseEventArgs(args.Button, args.Clicks, args.X, args.Y, args.Delta)
     {
-        public Style Style { get; private set; }
-        public StyleVisualMarker Marker { get; private set; }
-
-        public VisualMarkerEventArgs(Style style, StyleVisualMarker marker, MouseEventArgs args)
-            : base(args.Button, args.Clicks, args.X, args.Y, args.Delta)
-        {
-            this.Style = style;
-            this.Marker = marker;
-        }
+        public Style Style { get; private set; } = style;
+        public StyleVisualMarker Marker { get; private set; } = marker;
     }
 }

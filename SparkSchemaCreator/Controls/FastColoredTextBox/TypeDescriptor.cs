@@ -7,13 +7,8 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
     ///
     /// These classes are required for correct data binding to Text property of FastColoredTextbox
     /// 
-    class FCTBDescriptionProvider : TypeDescriptionProvider
+    class FCTBDescriptionProvider(Type type) : TypeDescriptionProvider(GetDefaultTypeProvider(type))
     {
-        public FCTBDescriptionProvider(Type type)
-            : base(GetDefaultTypeProvider(type))
-        {
-        }
-
         private static TypeDescriptionProvider GetDefaultTypeProvider(Type type)
         {
             return TypeDescriptor.GetProvider(type);
@@ -28,22 +23,15 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         }
     }
 
-    class FCTBTypeDescriptor : CustomTypeDescriptor
+    class FCTBTypeDescriptor(ICustomTypeDescriptor? parent, object? instance) : CustomTypeDescriptor(parent)
     {
-        ICustomTypeDescriptor? parent;
-        object? instance;
-
-        public FCTBTypeDescriptor(ICustomTypeDescriptor? parent, object? instance)
-            : base(parent)
-        {
-            this.parent = parent;
-            this.instance = instance;
-        }
+        private readonly ICustomTypeDescriptor? parent = parent;
+        private readonly object? instance = instance;
 
         public override string? GetComponentName()
         {
             var ctrl = (instance as Control);
-            return ctrl == null ? null : ctrl.Name;
+            return ctrl?.Name;
         }
 
         public override EventDescriptorCollection GetEvents()
@@ -65,13 +53,8 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         }
     }
 
-    class FooTextChangedDescriptor : EventDescriptor
+    class FooTextChangedDescriptor(MemberDescriptor desc) : EventDescriptor(desc)
     {
-        public FooTextChangedDescriptor(MemberDescriptor desc)
-            : base(desc)
-        {
-        }
-
         public override void AddEventHandler(object component, Delegate value)
         {
             (component as FastColoredTextBox)?.BindingTextChanged += value as EventHandler;

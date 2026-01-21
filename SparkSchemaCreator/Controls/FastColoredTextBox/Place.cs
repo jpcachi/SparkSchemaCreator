@@ -5,16 +5,10 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
     /// <summary>
     /// Line index and char index
     /// </summary>
-    public struct Place : IEquatable<Place>
+    public struct Place(int iChar, int iLine) : IEquatable<Place>
     {
-        public int iChar;
-        public int iLine;
-
-        public Place(int iChar, int iLine)
-        {
-            this.iChar = iChar;
-            this.iLine = iLine;
-        }
+        public int iChar = iChar;
+        public int iLine = iLine;
 
         public void Offset(int dx, int dy)
         {
@@ -22,19 +16,19 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
             iLine += dy;
         }
 
-        public bool Equals(Place other)
+        public readonly bool Equals(Place other)
         {
             return iChar == other.iChar && iLine == other.iLine;
         }
 
-        public override bool Equals(object? obj)
+        public override readonly bool Equals(object? obj)
         {
-            return (obj is Place) && Equals((Place)obj);
+            return obj is Place place && Equals(place);
         }
 
-        public override int GetHashCode()
+        public override readonly int GetHashCode()
         {
-            return iChar.GetHashCode() ^ iLine.GetHashCode();
+            return HashCode.Combine(iChar, iLine);
         }
 
         public static bool operator !=(Place p1, Place p2)
@@ -91,9 +85,9 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
             get { return new Place(); }
         }
 
-        public override string ToString()
+        public override readonly string ToString()
         {
-            return "(" + iChar + "," + iLine + ")";
+            return $"({iChar},{iLine})";
         }
     }
 }

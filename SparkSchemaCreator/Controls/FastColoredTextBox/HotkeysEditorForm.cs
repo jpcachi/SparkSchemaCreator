@@ -10,7 +10,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
 {
     public partial class HotkeysEditorForm : Form
     {
-        BindingList<HotkeyWrapper> wrappers = new BindingList<HotkeyWrapper>();
+        readonly BindingList<HotkeyWrapper> wrappers = [];
 
         public HotkeysEditorForm(HotkeysMapping hotkeys)
         {
@@ -51,37 +51,37 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
             return result;
         }
 
-        private void btAdd_Click(object sender, EventArgs e)
+        private void BtAdd_Click(object sender, EventArgs e)
         {
             wrappers.Add(new HotkeyWrapper(Keys.None, FCTBAction.None));
         }
 
-        private void dgv_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
+        private void Dgv_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
         {
             var cell = (dgv[0, e.RowIndex] as DataGridViewComboBoxCell);
-            if(cell.Items.Count == 0)
+            if(cell?.Items.Count == 0)
             foreach(var item in new string[]{"", "Ctrl", "Ctrl + Shift", "Ctrl + Alt", "Shift", "Shift + Alt", "Alt", "Ctrl + Shift + Alt"})
                 cell.Items.Add(item);
 
             cell = (dgv[1, e.RowIndex] as DataGridViewComboBoxCell);
-            if (cell.Items.Count == 0)
-            foreach (var item in Enum.GetValues(typeof(Keys)))
+            if (cell?.Items.Count == 0)
+            foreach (var item in Enum.GetValues<Keys>())
                 cell.Items.Add(item);
 
             cell = (dgv[2, e.RowIndex] as DataGridViewComboBoxCell);
-            if (cell.Items.Count == 0)
-            foreach (var item in Enum.GetValues(typeof(FCTBAction)))
+            if (cell?.Items.Count == 0)
+            foreach (var item in Enum.GetValues<FCTBAction>())
                 cell.Items.Add(item);
         }
 
-        private void btResore_Click(object sender, EventArgs e)
+        private void BtResore_Click(object sender, EventArgs e)
         {
-            HotkeysMapping h = new HotkeysMapping();
+            HotkeysMapping h = [];
             h.InitDefault();
             BuildWrappers(h);
         }
 
-        private void btRemove_Click(object sender, EventArgs e)
+        private void BtRemove_Click(object sender, EventArgs e)
         {
             for (int i = dgv.RowCount - 1; i >= 0; i--)
                 if (dgv.Rows[i].Selected) dgv.Rows.RemoveAt(i);
@@ -102,17 +102,17 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
 
         private string GetUnAssignedActions()
         {
-            StringBuilder sb = new StringBuilder();
+            StringBuilder sb = new();
             var dic = new Dictionary<FCTBAction, FCTBAction>();
 
             foreach (var w in wrappers)
                 dic[w.Action] = w.Action;
 
-            foreach (var item in Enum.GetValues(typeof(FCTBAction)))
-            if ((FCTBAction)item != FCTBAction.None)
-            if(!((FCTBAction)item).ToString().StartsWith("CustomAction"))
+            foreach (var item in Enum.GetValues<FCTBAction>())
+            if (item != FCTBAction.None)
+            if(!item.ToString().StartsWith("CustomAction"))
             {
-                if(!dic.ContainsKey((FCTBAction)item))
+                if(!dic.ContainsKey(item))
                     sb.Append(item+", ");
             }
 
@@ -124,7 +124,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
     {
         public HotkeyWrapper(Keys keyData, FCTBAction action)
         {
-            KeyEventArgs a = new KeyEventArgs(keyData);
+            KeyEventArgs a = new(keyData);
             Ctrl = a.Control;
             Shift = a.Shift;
             Alt = a.Alt;

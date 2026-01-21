@@ -5,6 +5,7 @@ using SparkSchemaCreator.Json;
 using SparkSchemaCreator.Types;
 using SparkSchemaCreator.Utils;
 using SparkSchemaCreator.Views;
+using System.Reflection.Metadata.Ecma335;
 
 namespace SparkSchemaCreator
 {

@@ -7,7 +7,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
 {
     public partial class ReplaceForm : Form
     {
-        FastColoredTextBox tb;
+        readonly FastColoredTextBox tb;
         bool firstSearch = true;
         Place startPlace;
 
@@ -17,12 +17,12 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
             this.tb = tb;
         }
 
-        private void btClose_Click(object sender, EventArgs e)
+        private void BtClose_Click(object sender, EventArgs e)
         {
             Close();
         }
 
-        private void btFindNext_Click(object sender, EventArgs e)
+        private void BtFindNext_Click(object sender, EventArgs? e)
         {
             try
             {
@@ -91,10 +91,10 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
             return false;
         }
 
-        private void tbFind_KeyPress(object sender, KeyPressEventArgs e)
+        private void TbFind_KeyPress(object sender, KeyPressEventArgs e)
         {
             if (e.KeyChar == '\r')
-                btFindNext_Click(sender, null);
+                BtFindNext_Click(sender, null);
             if (e.KeyChar == '\x1b')
                 Hide();
         }
@@ -119,14 +119,14 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
             this.tb.Focus();
         }
 
-        private void btReplace_Click(object sender, EventArgs e)
+        private void BtReplace_Click(object sender, EventArgs e)
         {
             try
             {
                 if (tb.SelectionLength != 0)
                 if (!tb.Selection.ReadOnly)
                     tb.InsertText(tbReplace.Text);
-                btFindNext_Click(sender, null);
+                BtFindNext_Click(sender, null);
             }
             catch (Exception ex)
             {
@@ -134,7 +134,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
             }
         }
 
-        private void btReplaceAll_Click(object sender, EventArgs e)
+        private void BtReplaceAll_Click(object sender, EventArgs e)
         {
             try
             {
@@ -179,7 +179,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
             firstSearch = true;
         }
 
-        private void cbMatchCase_CheckedChanged(object sender, EventArgs e)
+        private void CbMatchCase_CheckedChanged(object sender, EventArgs e)
         {
             ResetSerach();
         }

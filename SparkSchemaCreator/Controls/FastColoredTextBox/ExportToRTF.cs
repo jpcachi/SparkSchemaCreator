@@ -20,8 +20,8 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         /// </summary>
         public bool UseOriginalFont { get; set; }
 
-        FastColoredTextBox tb;
-        Dictionary<Color, int> colorTable = new Dictionary<Color, int>();
+        FastColoredTextBox? tb;
+        private readonly Dictionary<Color, int> colorTable = [];
 
         public ExportToRTF()
         {
@@ -31,7 +31,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         public string GetRtf(FastColoredTextBox tb)
         {
             this.tb = tb;
-            Range sel = new Range(tb);
+            Range sel = new(tb);
             sel.SelectAll();
             return GetRtf(sel);
         }
@@ -39,7 +39,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         public string GetRtf(Range r)
         {
             this.tb = r.tb;
-            var styles = new Dictionary<StyleIndex, object>();
+            var styles = new Dictionary<StyleIndex, object?>();
             var sb = new StringBuilder();
             var tempSB = new StringBuilder();
             var currentStyleId = StyleIndex.None;
@@ -111,8 +111,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
             //
             if (UseOriginalFont)
             {
-                sb.Insert(0, string.Format(@"{{\fonttbl{{\f0\fmodern {0};}}}}{{\fs{1} ",
-                                tb.Font.Name, (int)(2 * tb.Font.SizeInPoints), tb.CharHeight));
+                sb.Insert(0, string.Format(@"{{\fonttbl{{\f0\fmodern {0};}}}}{{\fs{1} ", tb.Font.Name, (int)(2 * tb.Font.SizeInPoints)));
                 sb.AppendLine(@"}");
             }
 
@@ -126,12 +125,12 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
 
         private RTFStyleDescriptor GetRtfDescriptor(StyleIndex styleIndex)
         {
-            List<Style> styles = new List<Style>();
+            List<Style> styles = [];
             //find text renderer
-            TextStyle textStyle = null;
+            TextStyle? textStyle = null;
             int mask = 1;
             bool hasTextStyle = false;
-            for (int i = 0; i < tb.Styles.Length; i++)
+            for (int i = 0; i < tb?.Styles.Length; i++)
             {
                 if (tb.Styles[i] != null && ((int)styleIndex & mask) != 0)
                     if (tb.Styles[i].IsExportable)
@@ -147,22 +146,22 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
                                 textStyle = style as TextStyle;
                             }
                     }
-                mask = mask << 1;
+                mask <<= 1;
             }
             //add TextStyle css
-            RTFStyleDescriptor result = null;
+            RTFStyleDescriptor? result;
 
             if (!hasTextStyle)
             {
                 //draw by default renderer
-                result = tb.DefaultStyle.GetRTF();
+                result = tb?.DefaultStyle.GetRTF();
             }
             else
             {
-                result = textStyle.GetRTF();
+                result = textStyle?.GetRTF();
             }
 
-            return result;
+            return result!;
         }
 
         public static string GetColorAsString(Color color)
@@ -192,7 +191,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
             if(tags.Length > 0)
                 sb.AppendFormat(@"{{{0} {1}}}", tags, tempSB.ToString());
             else
-                sb.Append(tempSB.ToString());
+                sb.Append(tempSB);
             tempSB.Length = 0;
         }
 
@@ -212,6 +211,6 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
     {
         public Color ForeColor { get; set; }
         public Color BackColor { get; set; }
-        public string AdditionalTags { get; set; }
+        public string? AdditionalTags { get; set; }
     }
 }

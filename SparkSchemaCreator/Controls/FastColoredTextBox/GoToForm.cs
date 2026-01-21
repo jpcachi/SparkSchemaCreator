@@ -32,10 +32,9 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
             this.tbLineNumber.Focus();
         }
 
-        private void btnOk_Click(object sender, EventArgs e)
+        private void BtnOk_Click(object sender, EventArgs e)
         {
-            int enteredLine;
-            if (int.TryParse(this.tbLineNumber.Text, out enteredLine))
+            if (int.TryParse(this.tbLineNumber.Text, out int enteredLine))
             {
                 enteredLine = Math.Min(enteredLine, this.TotalLineCount);
                 enteredLine = Math.Max(1, enteredLine);
@@ -47,7 +46,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
             this.Close();
         }
 
-        private void btnCancel_Click(object sender, EventArgs e)
+        private void BtnCancel_Click(object sender, EventArgs e)
         {
             this.DialogResult = DialogResult.Cancel;
             this.Close();

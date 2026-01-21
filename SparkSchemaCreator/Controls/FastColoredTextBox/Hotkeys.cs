@@ -99,7 +99,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         {
             var cult = Thread.CurrentThread.CurrentUICulture;
             Thread.CurrentThread.CurrentUICulture = CultureInfo.InvariantCulture;
-            StringBuilder sb = new StringBuilder();
+            StringBuilder sb = new();
             var kc = new KeysConverter();
             foreach (var pair in this)
             {
@@ -121,13 +121,16 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
             Thread.CurrentThread.CurrentUICulture = CultureInfo.InvariantCulture;
 
             var kc = new KeysConverter();
-            
-            foreach (var p in s.Split(','))
+
+            if (s != null)
             {
-                var pp = p.Split('=');
-                var k = (Keys)kc.ConvertFromString(pp[0].Trim());
-                var a = (FCTBAction)Enum.Parse(typeof(FCTBAction), pp[1].Trim());
-                result[k] = a;
+                foreach (var p in s.Split(','))
+                {
+                    var pp = p.Split('=');
+                    var k = (KEYS)kc.ConvertFromString(pp[0].Trim())!;
+                    var a = Enum.Parse<FCTBAction>(pp[1].Trim());
+                    result[k] = a;
+                }
             }
 
             Thread.CurrentThread.CurrentUICulture = cult;

@@ -12,8 +12,8 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
     {
         protected List<Char> chars;
 
-        public string FoldingStartMarker { get; set; }
-        public string FoldingEndMarker { get; set; }
+        public string? FoldingStartMarker { get; set; }
+        public string? FoldingEndMarker { get; set; }
         /// <summary>
         /// Text of line was changed
         /// </summary>
@@ -26,7 +26,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         /// <summary>
         /// Background brush.
         /// </summary>
-        public Brush BackgroundBrush { get; set;}
+        public Brush? BackgroundBrush { get; set;}
         /// <summary>
         /// Unique ID
         /// </summary>
@@ -43,7 +43,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         internal Line(int uid)
         {
             this.UniqueId = uid;
-            chars = new List<Char>();
+            chars = [];
         }
 
 
@@ -68,7 +68,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         public virtual string Text
         {
             get{
-                StringBuilder sb = new StringBuilder(Count);
+                StringBuilder sb = new(Count);
                 foreach(Char c in this)
                     sb.Append(c.c);
                 return sb.ToString();
@@ -194,27 +194,19 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         }
     }
 
-    public struct LineInfo
+    public struct LineInfo(int startY)
     {
-        List<int> cutOffPositions;
+        List<int>? cutOffPositions = null;
         //Y coordinate of line on screen
-        internal int startY;
-        internal int bottomPadding;
+        internal int startY = startY;
+        internal int bottomPadding = 0;
         //indent of secondary wordwrap strings (in chars)
-        internal int wordWrapIndent;
+        internal int wordWrapIndent = 0;
         /// <summary>
         /// Visible state
         /// </summary>
-        public VisibleState VisibleState;
+        public VisibleState VisibleState = VisibleState.Visible;
 
-        public LineInfo(int startY)
-        {
-            cutOffPositions = null;
-            VisibleState = VisibleState.Visible;
-            this.startY = startY;
-            bottomPadding = 0;
-            wordWrapIndent = 0;
-        }
         /// <summary>
         /// Positions for wordwrap cutoffs
         /// </summary>
@@ -222,8 +214,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         {
             get
             {
-                if (cutOffPositions == null)
-                    cutOffPositions = new List<int>();
+                cutOffPositions ??= [];
                 return cutOffPositions;
             }
         }
@@ -231,7 +222,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         /// <summary>
         /// Count of wordwrap string count for this line
         /// </summary>
-        public int WordWrapStringsCount
+        public readonly int WordWrapStringsCount
         {
             get
             {
@@ -265,7 +256,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         /// <summary>
         /// Gets index of wordwrap string for given char position
         /// </summary>
-        public int GetWordWrapStringIndex(int iChar)
+        public readonly int GetWordWrapStringIndex(int iChar)
         {
             if (cutOffPositions == null || cutOffPositions.Count == 0) return 0;
             for (int i = 0; i < cutOffPositions.Count; i++)

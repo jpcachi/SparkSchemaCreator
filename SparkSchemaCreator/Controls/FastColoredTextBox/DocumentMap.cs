@@ -14,9 +14,9 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
     /// </summary>
     public class DocumentMap : Control
     {
-        public EventHandler TargetChanged;
+        public EventHandler? TargetChanged;
 
-        FastColoredTextBox target;
+        FastColoredTextBox? target;
         private float scale = 0.3f;
         private bool needRepaint = true;
         private Place startPlace = Place.Empty;
@@ -24,7 +24,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
 
         [Description("Target FastColoredTextBox")]
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public FastColoredTextBox Target
+        public FastColoredTextBox? Target
         {
             get { return target; }
             set
@@ -35,7 +35,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
                 target = value;
                 if (value != null)
                 {
-                    Subscribe(target);
+                    Subscribe(target!);
                 }
                 OnTargetChanged();
             }
@@ -78,7 +78,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
             Application.Idle += Application_Idle;
         }
 
-        void Application_Idle(object sender, EventArgs e)
+        void Application_Idle(object? sender, EventArgs e)
         {
             if(needRepaint)
                 Invalidate();
@@ -88,8 +88,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         {
             NeedRepaint();
 
-            if (TargetChanged != null)
-                TargetChanged(this, EventArgs.Empty);
+            TargetChanged?.Invoke(this, EventArgs.Empty);
         }
 
         protected virtual void UnSubscribe(FastColoredTextBox target)
@@ -106,17 +105,17 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
             target.VisibleRangeChanged += new EventHandler(Target_VisibleRangeChanged);
         }
 
-        protected virtual void Target_VisibleRangeChanged(object sender, EventArgs e)
+        protected virtual void Target_VisibleRangeChanged(object? sender, EventArgs e)
         {
             NeedRepaint();
         }
 
-        protected virtual void Target_SelectionChanged(object sender, EventArgs e)
+        protected virtual void Target_SelectionChanged(object? sender, EventArgs e)
         {
             NeedRepaint();
         }
 
-        protected virtual void Target_Scroll(object sender, ScrollEventArgs e)
+        protected virtual void Target_Scroll(object? sender, ScrollEventArgs e)
         {
             NeedRepaint();
         }
@@ -189,12 +188,10 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
                 e.Graphics.ResetTransform();
                 e.Graphics.SmoothingMode = SmoothingMode.None;
 
-                using (var brush = new SolidBrush(Color.FromArgb(200, ForeColor)))
-                {
-                    var rect = new RectangleF(ClientSize.Width - 3, ClientSize.Height*sp1, 2,
-                                              ClientSize.Height*(sp2 - sp1));
-                    e.Graphics.FillRectangle(brush, rect);
-                }
+                using var brush = new SolidBrush(Color.FromArgb(200, ForeColor));
+                var rect = new RectangleF(ClientSize.Width - 3, ClientSize.Height * sp1, 2,
+                                          ClientSize.Height * (sp2 - sp1));
+                e.Graphics.FillRectangle(brush, rect);
             }
 
             needRepaint = false;
@@ -234,7 +231,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         private void OnScroll()
         {
             Refresh();
-            target.Refresh();
+            target?.Refresh();
         }
 
         protected override void Dispose(bool disposing)

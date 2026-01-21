@@ -102,86 +102,13 @@ namespace SparkSchemaCreator.Types
 
         public override int GetHashCode()
         {
-            int resul = TypeName.GetHashCode();
+            HashCode resul = new();
+            resul.Add(TypeName);
 
-            foreach(StructField f in Fields)
-                resul ^= f.GetHashCode();
+            foreach(StructField field in Fields)
+                resul.Add(field);
 
-            return resul;
-        }
-
-        public static StructType Merge(StructType str1, StructType str2)
-        {
-            IEnumerable<StructField> fieldsInStr1NotInStr2 = str1.Fields.Where(x => !str2.Fields.Any(y => y.Name == x.Name));
-            IEnumerable<StructField> fieldsInStr2NotInStr1 = str2.Fields.Where(x => !str1.Fields.Any(y => y.Name == x.Name));
-            IEnumerable<StructField> fieldsCommonToKeep = str1.Fields.Where(x => str1.Fields.Any(y => y == x));
-
-
-            IEnumerable<string> fieldsInCommonToChange = str1.Fields.Where(x => str1.Fields.Any(y => y.Name == x.Name && x != y)).Select(x => x.Name);
-
-
-            List<StructField> fields = [.. fieldsInStr1NotInStr2.Concat(fieldsInStr2NotInStr1).Concat(fieldsCommonToKeep)];
-
-            foreach (string field in fieldsInCommonToChange)
-            {
-                StructField field1 = str1.Fields.Find(x => x.Name == field) ?? throw new Exception("Merge Exception");
-                StructField field2 = str2.Fields.Find(x => x.Name == field) ?? throw new Exception("Merge Exception");
-
-                Metadata metadata = field1.Metadata == Metadata.Empty ? field2.Metadata : field1.Metadata;
-
-                //si ambos tipos son struct
-                if(field1.DataType is StructType s1 && field2.DataType is StructType s2)
-                {
-                    bool nullable = field1.IsNullable || field2.IsNullable;
-                    fields.Add(new StructField(field, Merge(s1,s2), nullable, metadata));
-                }
-                //si uno de los dos es struct y el otro no
-                else if ((field1.DataType is StructType && field2.DataType is not StructType) || (field2.DataType is StructType && field1.DataType is not StructType))
-                {
-                    throw new Exception("Merge Exception");
-                }
-                //si ambos son array
-                else if (field1.DataType is ArrayType a1 && field2.DataType is ArrayType a2)
-                {
-
-                    bool nullable = field1.IsNullable || field2.IsNullable;
-                    bool containsNull = a1.ContainsNull || a2.ContainsNull;
-
-                    //comparamos elementTypes de los array
-                    if (a1.ElementType is StructType a1s && a2.ElementType is StructType a2s)
-                    {
-                        fields.Add(new StructField(field, new ArrayType(Merge(a1s, a2s), containsNull), nullable, metadata));
-
-                    }
-                    //si uno de los dos es struct y el otro no
-                    else if ((a1.ElementType is StructType && a2.ElementType is not StructType) || (a2.ElementType is StructType && a1.ElementType is not StructType))
-                    {
-                        throw new Exception("Merge Exception");
-                    }
-                    //else solo puede ser SimpleType
-                    else
-                    {
-
-                        if (a1.ElementType != a2.ElementType)
-                        {
-                            fields.Add(new StructField(field, new ArrayType(new StringType(), containsNull), nullable, metadata));
-                        }
-                        else
-                        {
-                            DataType element = a1.ElementType ?? throw new Exception("Merge Exception");
-                            fields.Add(new StructField(field, new ArrayType(a1.ElementType, containsNull), nullable, metadata));
-                        }
-                        
-                    }
-                }
-                //si uno de los dos es array y el otro no
-                else if ((field1.DataType is ArrayType && field2.DataType is not ArrayType) || (field2.DataType is ArrayType && field1.DataType is not ArrayType))
-                {
-                    throw new Exception("Merge Exception");
-                }
-            }
-
-            return new StructType([.. fields]);
+            return resul.ToHashCode();
         }
 
         public override void BuildFormattedString(string prefix, StringConcat stringConcat, int maxDepth)
@@ -241,8 +168,7 @@ namespace SparkSchemaCreator.Types
                 return;
 
             Fields.Clear();
-            foreach (StructField f in structType.Fields)
-                Fields.Add(f);
+            AddFields(structType.Fields);
             
             ArrayParent = structType.ArrayParent;
             MapParent = structType.MapParent;

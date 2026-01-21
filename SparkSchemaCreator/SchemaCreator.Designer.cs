@@ -494,10 +494,10 @@ namespace SparkSchemaCreator
             customTabControl1.TabIndex = 2;
             customTabControl1.TabLanguages = new Controls.FastColoredTextBox.Language[]
     {
-        SparkSchemaCreator.Controls.FastColoredTextBox.Language.Custom,
-        SparkSchemaCreator.Controls.FastColoredTextBox.Language.Custom,
-        SparkSchemaCreator.Controls.FastColoredTextBox.Language.Custom,
-        SparkSchemaCreator.Controls.FastColoredTextBox.Language.Custom
+    SparkSchemaCreator.Controls.FastColoredTextBox.Language.Custom,
+    SparkSchemaCreator.Controls.FastColoredTextBox.Language.Custom,
+    SparkSchemaCreator.Controls.FastColoredTextBox.Language.Custom,
+    SparkSchemaCreator.Controls.FastColoredTextBox.Language.Custom
     };
             customTabControl1.TabMouseDownBackColor = Color.FromArgb(221, 244, 254);
             customTabControl1.TabMouseOverBackColor = Color.FromArgb(167, 217, 253);
@@ -835,7 +835,7 @@ namespace SparkSchemaCreator
             toolStrip1.Items.AddRange(new ToolStripItem[] { nuevoToolStripButton, abrirToolStripButton, editorToolStripButton, toolStripSeparator6, undoToolStripButton, redoToolStripButton, toolStripSeparator7, addToolStripButton, editToolStripButton, deleteToolStripButton, advanceEditToolStripButton, toolStripSeparator15, moveUpToolStripButton, moveDownToolStripButton, toolStripSeparator16, generateSchemaToolStripButton, SchemaDiffToolStripButton, toolStripSeparator18, toolStripButton1, aboutToolStripButton });
             toolStrip1.Location = new Point(3, 24);
             toolStrip1.Name = "toolStrip1";
-            toolStrip1.Size = new Size(387, 25);
+            toolStrip1.Size = new Size(418, 25);
             toolStrip1.TabIndex = 1;
             // 
             // nuevoToolStripButton
@@ -936,7 +936,7 @@ namespace SparkSchemaCreator
             // advanceEditToolStripButton
             // 
             advanceEditToolStripButton.DisplayStyle = ToolStripItemDisplayStyle.Image;
-            advanceEditToolStripButton.Image = Properties.Resources.edit_field_advance;
+            advanceEditToolStripButton.Image = Properties.Resources.advance_editor;
             advanceEditToolStripButton.ImageTransparentColor = Color.Magenta;
             advanceEditToolStripButton.Name = "advanceEditToolStripButton";
             advanceEditToolStripButton.Size = new Size(23, 22);
@@ -1240,7 +1240,7 @@ namespace SparkSchemaCreator
             // 
             saveFileDialog1.Filter = "Json Files (*.json)|*.json|Text files (*.txt)|*.txt|All files (*.*)|*.*";
             // 
-            // SparkSchemaCreator
+            // SchemaCreator
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
@@ -1249,7 +1249,7 @@ namespace SparkSchemaCreator
             Controls.Add(toolStripContainer1);
             Icon = (Icon)resources.GetObject("$this.Icon");
             MainMenuStrip = menuStrip1;
-            Name = "SparkSchemaCreator";
+            Name = "SchemaCreator";
             Text = "Spark Schema Creator";
             toolStripContainer1.ContentPanel.ResumeLayout(false);
             toolStripContainer1.TopToolStripPanel.ResumeLayout(false);

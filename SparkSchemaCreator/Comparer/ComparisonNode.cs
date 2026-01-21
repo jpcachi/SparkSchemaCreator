@@ -33,24 +33,24 @@ namespace SparkSchemaCreator.Comparer
 
         public string GetComparisonResultString()
         {
-            List<string> result = [];
+            StringBuilder sb = new();
 
             if (ComparisonResult.HasFlag(ComparisonResult.TypeDifference))
-                result.Add("Type");
+                sb.Append("Type, ");
 
             if (ComparisonResult.HasFlag(ComparisonResult.NullableDifference))
-                result.Add("Nullable");
+                sb.Append("Nullable, ");
 
             if (ComparisonResult.HasFlag(ComparisonResult.ContainsNullDifference))
-                result.Add(Left is ArrayType || Left is StructField field && field.DataType is ArrayType ? "ContainsNull" : "ValueContainsNull");
+                sb.Append(Left is ArrayType || Left is StructField field && field.DataType is ArrayType ? "ContainsNull, " : "ValueContainsNull, ");
 
             if (ComparisonResult.HasFlag(ComparisonResult.MissingField))
-                result.Add(Left == null ? "AddedField" : "MissingField");
+                sb.Append(Left == null ? "AddedField, " : "MissingField, ");
 
             if (ComparisonResult.HasFlag(ComparisonResult.MetadataDifference))
-                result.Add("Metadata");
+                sb.Append("Metadata");
 
-            return string.Join(", ", result);
+            return sb.ToString().TrimEnd(' ', ',');
         }
     }
 }

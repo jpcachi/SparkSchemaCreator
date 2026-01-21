@@ -11,7 +11,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
 {
     public partial class Ruler : UserControl
     {
-        public EventHandler TargetChanged;
+        public EventHandler? TargetChanged;
 
         [DefaultValue(typeof(Color), "ControlLight")]
         public Color BackColor2 { get; set; }
@@ -22,11 +22,11 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         [DefaultValue(typeof(Color), "Black")]
         public Color CaretTickColor { get; set; }
 
-        FastColoredTextBox target;
+        FastColoredTextBox? target;
 
         [Description("Target FastColoredTextBox")]
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
-        public FastColoredTextBox Target
+        public FastColoredTextBox? Target
         {
             get { return target; }
             set
@@ -34,7 +34,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
                 if (target != null)
                     UnSubscribe(target);
                 target = value;
-                Subscribe(target);
+                Subscribe(target!);
                 OnTargetChanged();
             }
         }
@@ -56,35 +56,34 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
 
         protected virtual void OnTargetChanged()
         {
-            if (TargetChanged != null)
-                TargetChanged(this, EventArgs.Empty);
+            TargetChanged?.Invoke(this, EventArgs.Empty);
         }
 
         protected virtual void UnSubscribe(FastColoredTextBox target)
         {
-            target.Scroll -= new ScrollEventHandler(target_Scroll);
-            target.SelectionChanged -= new EventHandler(target_SelectionChanged);
-            target.VisibleRangeChanged -= new EventHandler(target_VisibleRangeChanged);
+            target.Scroll -= new ScrollEventHandler(Target_Scroll);
+            target.SelectionChanged -= new EventHandler(Target_SelectionChanged);
+            target.VisibleRangeChanged -= new EventHandler(Target_VisibleRangeChanged);
         }
 
         protected virtual void Subscribe(FastColoredTextBox target)
         {
-            target.Scroll += new ScrollEventHandler(target_Scroll);
-            target.SelectionChanged += new EventHandler(target_SelectionChanged);
-            target.VisibleRangeChanged += new EventHandler(target_VisibleRangeChanged);
+            target.Scroll += new ScrollEventHandler(Target_Scroll);
+            target.SelectionChanged += new EventHandler(Target_SelectionChanged);
+            target.VisibleRangeChanged += new EventHandler(Target_VisibleRangeChanged);
         }
 
-        void target_VisibleRangeChanged(object sender, EventArgs e)
+        void Target_VisibleRangeChanged(object? sender, EventArgs e)
         {
             Invalidate();
         }
 
-        void target_SelectionChanged(object sender, EventArgs e)
+        void Target_SelectionChanged(object? sender, EventArgs e)
         {
             Invalidate();
         }
 
-        protected virtual void target_Scroll(object sender, ScrollEventArgs e)
+        protected virtual void Target_Scroll(object? sender, ScrollEventArgs e)
         {
             Invalidate();
         }
@@ -108,9 +107,11 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
             e.Graphics.FillRectangle(new LinearGradientBrush(new Rectangle(0, 0, Width, Height), BackColor, BackColor2, 270), new Rectangle(0, 0, Width, Height));
 
             float columnWidth = target.CharWidth;
-            var sf = new StringFormat();
-            sf.Alignment = StringAlignment.Center;
-            sf.LineAlignment = StringAlignment.Near;
+            var sf = new StringFormat
+            {
+                Alignment = StringAlignment.Center,
+                LineAlignment = StringAlignment.Near
+            };
 
             var zeroPoint = target.PositionToPoint(0);
             zeroPoint = PointToClient(target.PointToScreen(zeroPoint));

@@ -9,25 +9,20 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
     /// <summary>
     /// Diapason of text chars
     /// </summary>
-    public class Range : IEnumerable<Place>
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    public class Range(FastColoredTextBox tb) : IEnumerable<Place>
     {
         Place start;
         Place end;
-        public readonly FastColoredTextBox tb;
+        public readonly FastColoredTextBox tb = tb;
         int preferedPos = -1;
         int updating = 0;
 
-        string cachedText;
-        List<Place> cachedCharIndexToPlace;
+        string? cachedText;
+        List<Place>? cachedCharIndexToPlace;
         int cachedTextVersion = -1;
-
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        public Range(FastColoredTextBox tb)
-        {
-            this.tb = tb;
-        }
 
         /// <summary>
         /// Return true if no selected text
@@ -93,9 +88,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
             //normalize start and end
             if (s.iLine > e.iLine || (s.iLine == e.iLine && s.iChar > e.iChar))
             {
-                var temp = s;
-                s = e;
-                e = temp;
+                (e, s) = (s, e);
             }
 
             if (columnSelectionMode)
@@ -206,7 +199,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         /// FastColoredTextBox.Selection range. So, if you want to set text, you need to use FastColoredTextBox.Selection
         /// and FastColoredTextBox.InsertText() mehtod.
         /// </remarks>
-        public virtual string Text
+        public virtual string? Text
         {
             get
             {
@@ -219,7 +212,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
                 int toChar = ToX;
                 if (fromLine < 0) return null;
                 //
-                StringBuilder sb = new StringBuilder();
+                StringBuilder sb = new();
                 for (int y = fromLine; y <= toLine; y++)
                 {
                     int fromX = y == fromLine ? fromChar : 0;
@@ -271,7 +264,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
             }
         }
 
-        internal void GetText(out string text, out List<Place> charIndexToPlace)
+        internal void GetText(out string? text, out List<Place>? charIndexToPlace)
         {
             //try get cached text
             if (tb.TextVersion == cachedTextVersion)
@@ -286,7 +279,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
             int fromChar = FromX;
             int toChar = ToX;
 
-            StringBuilder sb = new StringBuilder((toLine - fromLine) * 50);
+            StringBuilder sb = new((toLine - fromLine) * 50);
             charIndexToPlace = new List<Place>(sb.Capacity);
             if (fromLine >= 0)
             {
@@ -346,7 +339,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         /// <summary>
         /// Returns required char's number before start of the Range
         /// </summary>
-        public string GetCharsBeforeStart(int charsCount)
+        public string? GetCharsBeforeStart(int charsCount)
         {
             var pos = tb.PlaceToPosition(Start) - charsCount;
             if (pos < 0) pos = 0;
@@ -357,7 +350,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         /// <summary>
         /// Returns required char's number after start of the Range
         /// </summary>
-        public string GetCharsAfterStart(int charsCount)
+        public string? GetCharsAfterStart(int charsCount)
         {
             return GetCharsBeforeStart(-charsCount);
         }
@@ -887,21 +880,19 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         public IEnumerable<Range> GetRanges(string regexPattern, RegexOptions options)
         {
             //get text
-            string text;
-            List<Place> charIndexToPlace;
-            GetText(out text, out charIndexToPlace);
+            GetText(out string? text, out List<Place>? charIndexToPlace);
             //create regex
-            Regex regex = new Regex(regexPattern, options);
+            Regex regex = new(regexPattern, options);
             //
-            foreach (Match m in regex.Matches(text))
+            foreach (Match m in regex.Matches(text!))
             {
-                Range r = new Range(this.tb);
+                Range r = new(this.tb);
                 //try get 'range' group, otherwise use group 0
                 Group group = m.Groups["range"];
                 if (!group.Success)
                     group = m.Groups[0];
                 //
-                r.Start = charIndexToPlace[group.Index];
+                r.Start = charIndexToPlace![group.Index];
                 r.End = charIndexToPlace[group.Index + group.Length];
                 yield return r;
             }
@@ -938,7 +929,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
             for (int iLine = Start.iLine; iLine <= End.iLine; iLine++)
             {
                 //
-                bool isLineLoaded = fts != null ? fts.IsLineLoaded(iLine) : true;
+                bool isLineLoaded = fts == null || fts.IsLineLoaded(iLine);
                 //
                 var r = new Range(tb, new Place(0, iLine), new Place(tb[iLine].Count, iLine));
                 if (iLine == Start.iLine || iLine == End.iLine)
@@ -948,7 +939,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
                     yield return foundRange;
 
                 if (!isLineLoaded)
-                    fts.UnloadLine(iLine);
+                    fts?.UnloadLine(iLine);
             }
         }
 
@@ -963,7 +954,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         {
             Normalize();
             //create regex
-            Regex regex = new Regex(regexPattern, options);
+            Regex regex = new(regexPattern, options);
             //
             var fts = tb.TextSource as FileTextSource; //<----!!!! ugly
 
@@ -971,7 +962,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
             for (int iLine = End.iLine; iLine >= Start.iLine; iLine--)
             {
                 //
-                bool isLineLoaded = fts != null ? fts.IsLineLoaded(iLine) : true;
+                bool isLineLoaded = fts == null || fts.IsLineLoaded(iLine);
                 //
                 var r = new Range(tb, new Place(0, iLine), new Place(tb[iLine].Count, iLine));
                 if (iLine == Start.iLine || iLine == End.iLine)
@@ -986,7 +977,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
                     yield return list[i];
 
                 if (!isLineLoaded)
-                    fts.UnloadLine(iLine);
+                    fts?.UnloadLine(iLine);
             }
         }
 
@@ -997,19 +988,17 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         public IEnumerable<Range> GetRanges(Regex regex)
         {
             //get text
-            string text;
-            List<Place> charIndexToPlace;
-            GetText(out text, out charIndexToPlace);
+            GetText(out string? text, out List<Place>? charIndexToPlace);
             //
-            foreach (Match m in regex.Matches(text))
+            foreach (Match m in regex.Matches(text!))
             {
-                Range r = new Range(this.tb);
+                Range r = new(this.tb);
                 //try get 'range' group, otherwise use group 0
                 Group group = m.Groups["range"];
                 if (!group.Success)
                     group = m.Groups[0];
                 //
-                r.Start = charIndexToPlace[group.Index];
+                r.Start = charIndexToPlace![group.Index];
                 r.End = charIndexToPlace[group.Index + group.Length];
                 yield return r;
             }
@@ -1119,9 +1108,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         /// </summary>
         public void Inverse()
         {
-            var temp = start;
-            start = end;
-            end = temp;
+            (end, start) = (start, end);
         }
 
         /// <summary>
@@ -1211,10 +1198,12 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         /// <returns>Range of found fragment</returns>
         public Range GetFragment(Style style, bool allowLineBreaks)
         {
-            var mask = tb.GetStyleIndexMask(new Style[] { style });
+            var mask = tb.GetStyleIndexMask([style]);
             //
-            Range r = new Range(tb);
-            r.Start = Start;
+            Range r = new(tb)
+            {
+                Start = Start
+            };
             //go left, check style
             while (r.GoLeftThroughFolded())
             {
@@ -1251,9 +1240,11 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         /// <returns>Range of found fragment</returns>
         public Range GetFragment(string allowedSymbolsPattern, RegexOptions options)
         {
-            Range r = new Range(tb);
-            r.Start = Start;
-            Regex regex = new Regex(allowedSymbolsPattern, options);
+            Range r = new(tb)
+            {
+                Start = Start
+            };
+            Regex regex = new(allowedSymbolsPattern, options);
             //go left, check symbols
             while (r.GoLeftThroughFolded())
             {
@@ -1277,12 +1268,12 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
             return new Range(tb, startFragment, endFragment);
         }
 
-        bool IsIdentifierChar(char c)
+        static bool IsIdentifierChar(char c)
         {
             return char.IsLetterOrDigit(c) || c == '_';
         }
 
-        bool IsSpaceChar(char c)
+        static bool IsSpaceChar(char c)
         {
             return c == ' ' || c == '\t';
         }
@@ -1447,11 +1438,11 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
             {
                 if (tb.ReadOnly) return true;
 
-                ReadOnlyStyle readonlyStyle = null;
+                ReadOnlyStyle? readonlyStyle = null;
                 foreach (var style in tb.Styles)
-                    if (style is ReadOnlyStyle)
+                    if (style is ReadOnlyStyle _readOnlyStyle)
                     {
-                        readonlyStyle = (ReadOnlyStyle)style;
+                        readonlyStyle = _readOnlyStyle;
                         break;
                     }
 
@@ -1498,17 +1489,16 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
             set
             {
                 //find exists ReadOnlyStyle of style buffer
-                ReadOnlyStyle readonlyStyle = null;
+                ReadOnlyStyle? readonlyStyle = null;
                 foreach (var style in tb.Styles)
-                    if (style is ReadOnlyStyle)
+                    if (style is ReadOnlyStyle _readOnlyStyle)
                     {
-                        readonlyStyle = (ReadOnlyStyle)style;
+                        readonlyStyle = _readOnlyStyle;
                         break;
                     }
 
                 //create ReadOnlyStyle
-                if (readonlyStyle == null)
-                    readonlyStyle = new ReadOnlyStyle();
+                readonlyStyle ??= new ReadOnlyStyle();
 
                 //set/clear style
                 if (value)
@@ -1654,7 +1644,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         {
             get
             {
-                StringBuilder sb = new StringBuilder();
+                StringBuilder sb = new();
                 var bounds = Bounds;
                 if (bounds.iStartLine < 0) return "";
                 //
@@ -1719,19 +1709,11 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         #endregion
     }
 
-    public struct RangeRect
+    public struct RangeRect(int iStartLine, int iStartChar, int iEndLine, int iEndChar)
     {
-        public RangeRect(int iStartLine, int iStartChar, int iEndLine, int iEndChar)
-        {
-            this.iStartLine = iStartLine;
-            this.iStartChar = iStartChar;
-            this.iEndLine = iEndLine;
-            this.iEndChar = iEndChar;
-        }
-
-        public int iStartLine;
-        public int iStartChar;
-        public int iEndLine;
-        public int iEndChar;
+        public int iStartLine = iStartLine;
+        public int iStartChar = iStartChar;
+        public int iEndLine = iEndLine;
+        public int iEndChar = iEndChar;
     }
 }

@@ -195,7 +195,7 @@ namespace SparkSchemaCreator.Types
 
         public override int GetHashCode()
         {
-            return Name.GetHashCode() ^ DataType.GetHashCode() ^ IsNullable.GetHashCode() ^ Metadata.GetHashCode();
+            return HashCode.Combine(Name, DataType, IsNullable, Metadata);
         }
 
         public override bool Equals(object? other)

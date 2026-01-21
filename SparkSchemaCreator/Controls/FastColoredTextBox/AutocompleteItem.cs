@@ -9,13 +9,13 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
     /// </summary>
     public class AutocompleteItem
     {
-        public string Text;
+        public string? Text;
         public int ImageIndex = -1;
-        public object Tag;
-        string toolTipTitle;
-        string toolTipText;
-        string menuText;
-        public AutocompleteMenu Parent { get; internal set; }
+        public object? Tag;
+        string ?toolTipTitle;
+        string? toolTipText;
+        string? menuText;
+        public AutocompleteMenu? Parent { get; internal set; }
         
 
         public AutocompleteItem()
@@ -51,7 +51,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         /// </summary>
         public virtual string GetTextForReplace()
         {
-            return Text;
+            return Text!;
         }
 
         /// <summary>
@@ -59,7 +59,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         /// </summary>
         public virtual CompareResult Compare(string fragmentText)
         {
-            if (Text.StartsWith(fragmentText, StringComparison.InvariantCultureIgnoreCase) &&
+            if (Text!.StartsWith(fragmentText, StringComparison.InvariantCultureIgnoreCase) &&
                    Text != fragmentText)
                 return CompareResult.VisibleAndSelected;
 
@@ -69,7 +69,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         /// <summary>
         /// Returns text for display into popup menu
         /// </summary>
-        public override string ToString()
+        public override string? ToString()
         {
             return menuText ?? Text;
         }
@@ -88,7 +88,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         /// <remarks>Return null for disable tooltip for this item</remarks>
         public virtual string ToolTipTitle
         {
-            get { return toolTipTitle; }
+            get { return toolTipTitle!; }
             set { toolTipTitle = value; }
         }
 
@@ -98,7 +98,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         /// <remarks>For display tooltip text, ToolTipTitle must be not null</remarks>
         public virtual string ToolTipText 
         {
-            get{ return toolTipText; }
+            get{ return toolTipText!; }
             set { toolTipText = value; }
         }
 
@@ -107,7 +107,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         /// </summary>
         public virtual string MenuText
         {
-            get { return menuText; }
+            get { return menuText!; }
             set { menuText = value; }
         }
 
@@ -161,12 +161,12 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
 
         public override string ToString()
         {
-            return MenuText ?? Text.Replace("\n", " ").Replace("^", "");
+            return MenuText ?? Text!.Replace("\n", " ").Replace("^", "");
         }
 
         public override string GetTextForReplace()
         {
-            return Text;
+            return Text!;
         }
 
         public override void OnSelected(AutocompleteMenu popupMenu, SelectedEventArgs e)
@@ -174,7 +174,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
             e.Tb.BeginUpdate();
             e.Tb.Selection.BeginUpdate();
             //remember places
-            var p1 = popupMenu.Fragment.Start;
+            var p1 = popupMenu.Fragment!.Start;
             var p2 = e.Tb.Selection.Start;
             //do auto indent
             if (e.Tb.AutoIndent)
@@ -203,7 +203,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         /// </summary>
         public override CompareResult Compare(string fragmentText)
         {
-            if (Text.StartsWith(fragmentText, StringComparison.InvariantCultureIgnoreCase) &&
+            if (Text!.StartsWith(fragmentText, StringComparison.InvariantCultureIgnoreCase) &&
                    Text != fragmentText)
                 return CompareResult.Visible;
 
@@ -216,13 +216,13 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
     /// </summary>
     public class MethodAutocompleteItem : AutocompleteItem
     {
-        string firstPart;
-        string lowercaseText;
+        string? firstPart;
+        readonly string lowercaseText;
 
         public MethodAutocompleteItem(string text)
             : base(text)
         {
-            lowercaseText = Text.ToLower();
+            lowercaseText = Text!.ToLower();
         }
 
         public override CompareResult Compare(string fragmentText)
@@ -230,13 +230,13 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
             int i = fragmentText.LastIndexOf('.');
             if (i < 0)
                 return CompareResult.Hidden;
-            string lastPart = fragmentText.Substring(i + 1);
-            firstPart = fragmentText.Substring(0, i);
+            string lastPart = fragmentText[(i + 1)..];
+            firstPart = fragmentText[..i];
 
             if(lastPart=="") return CompareResult.Visible;
-            if(Text.StartsWith(lastPart, StringComparison.InvariantCultureIgnoreCase))
+            if(Text!.StartsWith(lastPart, StringComparison.InvariantCultureIgnoreCase))
                 return CompareResult.VisibleAndSelected;
-            if(lowercaseText.Contains(lastPart.ToLower()))
+            if(lowercaseText.Contains(lastPart, StringComparison.CurrentCultureIgnoreCase))
                 return CompareResult.Visible;
 
             return CompareResult.Hidden;
@@ -252,12 +252,8 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
     /// This Item does not check correspondence to current text fragment.
     /// SuggestItem is intended for dynamic menus.
     /// </summary>
-    public class SuggestItem : AutocompleteItem
+    public class SuggestItem(string text, int imageIndex) : AutocompleteItem(text, imageIndex)
     {
-        public SuggestItem(string text, int imageIndex):base(text, imageIndex)
-        {   
-        }
-
         public override CompareResult Compare(string fragmentText)
         {
             return CompareResult.Visible;

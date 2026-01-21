@@ -45,7 +45,7 @@ namespace SparkSchemaCreator.Types
             int resul = "<empty>".GetHashCode();
 
             foreach(var kvp in Map)
-                resul ^= kvp.GetHashCode();
+                resul = HashCode.Combine(resul, kvp.Key, kvp.Value);
 
             return resul;
         }

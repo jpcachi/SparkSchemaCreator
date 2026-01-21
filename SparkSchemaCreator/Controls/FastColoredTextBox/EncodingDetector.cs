@@ -9,38 +9,32 @@ using System.Text.RegularExpressions;
 
 namespace SparkSchemaCreator.Controls.FastColoredTextBox
 {
-    public static class EncodingDetector
+    public static partial class EncodingDetector
     {
         const long _defaultHeuristicSampleSize = 0x10000; //completely arbitrary - inappropriate for high numbers of files / high speed requirements
 
-        public static Encoding DetectTextFileEncoding(string InputFilename)
+        public static Encoding? DetectTextFileEncoding(string InputFilename)
         {
-            using (FileStream textfileStream = File.OpenRead(InputFilename))
-            {
-                return DetectTextFileEncoding(textfileStream, _defaultHeuristicSampleSize);
-            }
+            using FileStream textfileStream = File.OpenRead(InputFilename);
+            return DetectTextFileEncoding(textfileStream, _defaultHeuristicSampleSize);
         }
 
-        public static Encoding DetectTextFileEncoding(FileStream InputFileStream, long HeuristicSampleSize)
+        public static Encoding? DetectTextFileEncoding(FileStream InputFileStream, long heuristicSampleSize)
         {
-            bool uselessBool = false;
-            return DetectTextFileEncoding(InputFileStream, _defaultHeuristicSampleSize, out uselessBool);
+            return DetectTextFileEncoding(InputFileStream, heuristicSampleSize, out _);
         }
 
-        public static Encoding DetectTextFileEncoding(FileStream InputFileStream, long HeuristicSampleSize, out bool HasBOM)
+        public static Encoding? DetectTextFileEncoding(FileStream InputFileStream, long HeuristicSampleSize, out bool HasBOM)
         {
-            Encoding encodingFound = null;
 
             long originalPos = InputFileStream.Position;
-
             InputFileStream.Position = 0;
-
 
             //First read only what we need for BOM detection
             byte[] bomBytes = new byte[InputFileStream.Length > 4 ? 4 : InputFileStream.Length];
-            InputFileStream.Read(bomBytes, 0, bomBytes.Length);
+            InputFileStream.ReadExactly(bomBytes);
 
-            encodingFound = DetectBOMBytes(bomBytes);
+            Encoding? encodingFound = DetectBOMBytes(bomBytes);
 
             if (encodingFound != null)
             {
@@ -55,7 +49,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
             byte[] sampleBytes = new byte[HeuristicSampleSize > InputFileStream.Length ? InputFileStream.Length : HeuristicSampleSize];
             Array.Copy(bomBytes, sampleBytes, bomBytes.Length);
             if (InputFileStream.Length > bomBytes.Length)
-                InputFileStream.Read(sampleBytes, bomBytes.Length, sampleBytes.Length - bomBytes.Length);
+                InputFileStream.ReadExactly(sampleBytes, bomBytes.Length, sampleBytes.Length - bomBytes.Length);
             InputFileStream.Position = originalPos;
 
             //test byte array content
@@ -65,7 +59,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
             return encodingFound;
         }
 
-        public static Encoding DetectBOMBytes(byte[] BOMBytes)
+        public static Encoding? DetectBOMBytes(byte[] BOMBytes)
         {
             if (BOMBytes.Length < 2)
                 return null;
@@ -91,7 +85,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
                 return Encoding.UTF8;
 
             if (BOMBytes[0] == 0x2b && BOMBytes[1] == 0x2f && BOMBytes[2] == 0x76)
-                return Encoding.UTF7;
+                return null;
 
             if (BOMBytes.Length < 4)
                 return null;
@@ -105,7 +99,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
             return null;
         }
 
-        public static Encoding DetectUnicodeInByteSampleByHeuristics(byte[] SampleBytes)
+        public static Encoding? DetectUnicodeInByteSampleByHeuristics(byte[] SampleBytes)
         {
             long oddBinaryNullsInSample = 0;
             long evenBinaryNullsInSample = 0;
@@ -184,16 +178,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
             //  http://www.w3.org/International/questions/qa-forms-utf-8
             //  adapted here for C#.
             string potentiallyMangledString = Encoding.ASCII.GetString(SampleBytes);
-            Regex UTF8Validator = new Regex(@"\A("
-                + @"[\x09\x0A\x0D\x20-\x7E]"
-                + @"|[\xC2-\xDF][\x80-\xBF]"
-                + @"|\xE0[\xA0-\xBF][\x80-\xBF]"
-                + @"|[\xE1-\xEC\xEE\xEF][\x80-\xBF]{2}"
-                + @"|\xED[\x80-\x9F][\x80-\xBF]"
-                + @"|\xF0[\x90-\xBF][\x80-\xBF]{2}"
-                + @"|[\xF1-\xF3][\x80-\xBF]{3}"
-                + @"|\xF4[\x80-\x8F][\x80-\xBF]{2}"
-                + @")*\z");
+            Regex UTF8Validator = utf8ValidatorRegex();
             if (UTF8Validator.IsMatch(potentiallyMangledString))
             {
                 //Unfortunately, just the fact that it CAN be UTF-8 doesn't tell you much about probabilities.
@@ -359,5 +344,8 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
 
             return lengthFound;
         }
+
+        [GeneratedRegex(@"\A([\x09\x0A\x0D\x20-\x7E]|[\xC2-\xDF][\x80-\xBF]|\xE0[\xA0-\xBF][\x80-\xBF]|[\xE1-\xEC\xEE\xEF][\x80-\xBF]{2}|\xED[\x80-\x9F][\x80-\xBF]|\xF0[\x90-\xBF][\x80-\xBF]{2}|[\xF1-\xF3][\x80-\xBF]{3}|\xF4[\x80-\x8F][\x80-\xBF]{2})*\z")]
+        private static partial Regex utf8ValidatorRegex();
     }
 }

@@ -21,6 +21,7 @@
 // #define Styles32
 
 using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Drawing.Design;
 using System.Drawing.Drawing2D;
 using System.Reflection;
@@ -47,26 +48,26 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         private const int WM_VSCROLL = 0x115;
         private const int SB_ENDSCROLL = 0x8;
 
-        public readonly List<LineInfo> LineInfos = new List<LineInfo>();
+        public readonly List<LineInfo> LineInfos = [];
         private readonly Range selection;
-        private readonly Timer timer = new Timer();
-        private readonly Timer timer2 = new Timer();
-        private readonly Timer timer3 = new Timer();
-        private readonly List<VisualMarker> visibleMarkers = new List<VisualMarker>();
+        private readonly Timer timer = new();
+        private readonly Timer timer2 = new();
+        private readonly Timer timer3 = new();
+        private readonly List<VisualMarker> visibleMarkers = [];
         public int TextHeight;
         public bool AllowInsertRemoveLines = true;
-        private Brush backBrush;
+        private Brush? backBrush;
         private BaseBookmarks bookmarks;
         private bool caretVisible;
         private Color changedLineColor;
         private int charHeight;
         private Color currentLineColor;
-        private Cursor defaultCursor;
+        private Cursor? defaultCursor;
         private Range? delayedTextChangedRange;
-        private string descriptionFile;
+        private string? descriptionFile;
         private int endFoldingLine = -1;
         private Color foldingIndicatorColor;
-        protected Dictionary<int, int> foldingPairs = new Dictionary<int, int>();
+        protected Dictionary<int, int> foldingPairs = [];
         private bool handledChar;
         private bool highlightFoldingIndicator;
         private Hints hints;
@@ -78,15 +79,15 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         private Keys lastModifiers;
         private Point lastMouseCoord;
         private DateTime lastNavigatedDateTime;
-        private Range leftBracketPosition;
-        private Range leftBracketPosition2;
+        private Range? leftBracketPosition;
+        private Range? leftBracketPosition2;
         private int leftPadding;
         private int lineInterval;
         private Color lineNumberColor;
         private uint lineNumberStartValue;
-        private LineNumberFormatting lineNumberFormatting;
+        private LineNumberFormatting? lineNumberFormatting;
         private int lineSelectFrom;
-        private TextSource lines;
+        private TextSource? lines;
         private IntPtr m_hImc;
         private int maxLineLength;
         private bool mouseIsDrag;
@@ -101,24 +102,24 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         private bool needRiseVisibleRangeChangedDelayed;
         private Color paddingBackColor;
         private int preferredLineWidth;
-        private Range rightBracketPosition;
-        private Range rightBracketPosition2;
+        private Range? rightBracketPosition;
+        private Range? rightBracketPosition2;
         private bool scrollBars;
         private Color selectionColor;
         private Color serviceLinesColor;
         private bool showFoldingLines;
         private bool showLineNumbers;
-        private FastColoredTextBox sourceTextBox;
+        private FastColoredTextBox? sourceTextBox;
         private int startFoldingLine = -1;
         private int updating;
-        private Range updatingRange;
-        private Range visibleRange;
+        private Range? updatingRange;
+        private Range? visibleRange;
         private bool wordWrap;
         private WordWrapMode wordWrapMode = WordWrapMode.WordWrapControlWidth;
         private int reservedCountOfLineNumberChars = 1;
         private int zoom = 100;
         private Size localAutoScrollMinSize;
-        private Encoding encoding;
+        private Encoding? encoding;
  
         /// <summary>
         /// Constructor
@@ -138,7 +139,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
             //create one line
             InitTextSource(CreateTextSource());
             if (lines?.Count == 0)
-                lines.InsertLine(0, lines.CreateLine());
+                lines!.InsertLine(0, lines!.CreateLine());
             selection = new Range(this) {Start = new Place(0, 0)};
             //default settings
             Cursor = Cursors.IBeam;
@@ -195,10 +196,10 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
             textAreaBorder = TextAreaBorderType.None;
             textAreaBorderColor = Color.Black;
             macrosManager = new MacrosManager(this);
-            HotkeysMapping = new HotkeysMapping();
+            HotkeysMapping = [];
             HotkeysMapping.InitDefault();
             WordWrapAutoIndent = true;
-            FoldedBlocks = new Dictionary<int, int>();
+            FoldedBlocks = [];
             AutoCompleteBrackets = false;
             AutoIndentCharsPatterns = @"^\s*[\w\.]+(\s\w+)?\s*(?<range>=)\s*(?<range>[^;=]+);
 ^\s*(case|default)\s*[^:]*(?<range>:)\s*(?<range>[^;]+);";
@@ -207,13 +208,13 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
             ServiceColors = new ServiceColors();
             //
             base.AutoScroll = true;
-            timer.Tick += timer_Tick;
-            timer2.Tick += timer2_Tick;
-            timer3.Tick += timer3_Tick;
-            middleClickScrollingTimer.Tick += middleClickScrollingTimer_Tick;
+            timer.Tick += Timer_Tick;
+            timer2.Tick += Timer2_Tick;
+            timer3.Tick += Timer3_Tick;
+            middleClickScrollingTimer.Tick += MiddleClickScrollingTimer_Tick;
         }
 
-        private char[] autoCompleteBracketsList = { '(', ')', '{', '}', '[', ']', '"', '"', '\'', '\'' };
+        private char[] autoCompleteBracketsList = ['(', ')', '{', '}', '[', ']', '"', '"', '\'', '\''];
 
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
         public char[] AutoCompleteBracketsList
@@ -267,7 +268,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         [Description("Indent of secondary wordwrap lines (in chars).")]
         public int WordWrapIndent { get; set; }
 
-        MacrosManager macrosManager;
+        readonly MacrosManager macrosManager;
         /// <summary>
         /// MacrosManager records, stores and executes the macroses
         /// </summary>
@@ -446,7 +447,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         /// Background color for highlighting of changed lines
         /// </summary>
         [DefaultValue(typeof (Color), "Transparent")]
-        [Description("Background color for highlighting of changed lines. Set to Color.Transparent to hide changed line highlighting")]
+        [Description("Background color for highlighting of changed lines!. Set to Color.Transparent to hide changed line highlighting")]
         public Color ChangedLineColor
         {
             get { return changedLineColor; }
@@ -466,7 +467,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
             set
             {
                 base.ForeColor = value;
-                lines.InitDefaultStyle();
+                lines!.InitDefaultStyle();
                 Invalidate();
             }
         }
@@ -529,7 +530,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
             {
                 if (!value)
                     //clear line's IsChanged property
-                    lines.ClearIsChanged();
+                    lines!.ClearIsChanged();
 
                 isChanged = value;
             }
@@ -634,7 +635,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         /// </summary>
         [DefaultValue(typeof(LineNumberFormatting), null)]
         [Description("Format of string displayed when ShowLineNumbers = true")]
-        public LineNumberFormatting LineNumberFormatting
+        public LineNumberFormatting? LineNumberFormatting
         {
             get { return lineNumberFormatting; }
             set
@@ -811,9 +812,9 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         /// Styles
         /// </summary>
         [Browsable(false)]
-        public Style[] Styles
+        public Style?[] Styles
         {
-            get { return lines.Styles; }
+            get { return lines!.Styles; }
         }
 
         /// <summary>
@@ -840,10 +841,10 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         /// </summary>
         [Browsable(false)]
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public TextStyle DefaultStyle
+        public TextStyle? DefaultStyle
         {
-            get { return lines.DefaultStyle; }
-            set { lines.DefaultStyle = value; }
+            get { return lines!.DefaultStyle; }
+            set { lines!.DefaultStyle = value; }
         }
 
         /// <summary>
@@ -851,7 +852,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         /// </summary>
         [Browsable(false)]
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public SelectionStyle SelectionStyle { get; set; }
+        public SelectionStyle? SelectionStyle { get; set; }
 
         /// <summary>
         /// Style for folded block rendering
@@ -911,7 +912,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         /// </summary>
         [DefaultValue("//")]
         [Description("Comment line prefix.")]
-        public string CommentPrefix { get; set; }
+        public string? CommentPrefix { get; set; }
 
         /// <summary>
         /// This property specifies which part of the text will be highlighted as you type (by built-in highlighter).
@@ -935,7 +936,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
                 return isReplaceMode && 
                        Selection.IsEmpty &&
                        (!Selection.ColumnSelectionMode) &&
-                       Selection.Start.iChar < lines[Selection.Start.iLine].Count;
+                       Selection.Start.iChar < lines![Selection.Start.iLine]?.Count;
             }
             set { isReplaceMode = value; }
         }
@@ -968,10 +969,10 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         public bool AutoIndent { get; set; }
 
         /// <summary>
-        /// Does autoindenting in existing lines. It works only if AutoIndent is True.
+        /// Does autoindenting in existing lines!. It works only if AutoIndent is True.
         /// </summary>
         [DefaultValue(true)]
-        [Description("Does autoindenting in existing lines. It works only if AutoIndent is True.")]
+        [Description("Does autoindenting in existing lines!. It works only if AutoIndent is True.")]
         public bool AutoIndentExistingLines { get; set; }
 
         /// <summary>
@@ -1010,8 +1011,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
             set
             {
                 language = value;
-                if (SyntaxHighlighter != null)
-                    SyntaxHighlighter.InitStyleSchema(language);
+                SyntaxHighlighter?.InitStyleSchema(language);
                 Invalidate();
             }
         }
@@ -1033,7 +1033,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         [Description(
             "XML file with description of syntax highlighting. This property works only with Language == Language.Custom."
             )]
-        public string DescriptionFile
+        public string? DescriptionFile
         {
             get { return descriptionFile; }
             set
@@ -1048,7 +1048,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         /// </summary>
         [Browsable(false)]
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public Range LeftBracketPosition
+        public Range? LeftBracketPosition
         {
             get { return leftBracketPosition; }
         }
@@ -1058,7 +1058,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         /// </summary>
         [Browsable(false)]
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public Range RightBracketPosition
+        public Range? RightBracketPosition
         {
             get { return rightBracketPosition; }
         }
@@ -1068,7 +1068,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         /// </summary>
         [Browsable(false)]
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public Range LeftBracketPosition2
+        public Range? LeftBracketPosition2
         {
             get { return leftBracketPosition2; }
         }
@@ -1078,7 +1078,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         /// </summary>
         [Browsable(false)]
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public Range RightBracketPosition2
+        public Range? RightBracketPosition2
         {
             get { return rightBracketPosition2; }
         }
@@ -1110,7 +1110,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public TextSource TextSource
         {
-            get { return lines; }
+            get { return lines!; }
             set { InitTextSource(value); }
         }
 
@@ -1129,7 +1129,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         [DefaultValue(null)]
         [Description("Allows to get text from other FastColoredTextBox.")]
         //[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public FastColoredTextBox SourceTextBox
+        public FastColoredTextBox? SourceTextBox
         {
             get { return sourceTextBox; }
             set
@@ -1142,12 +1142,12 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
                 if (sourceTextBox == null)
                 {
                     InitTextSource(CreateTextSource());
-                    lines.InsertLine(0, TextSource.CreateLine());
+                    lines!.InsertLine(0, TextSource.CreateLine());
                     IsChanged = false;
                 }
                 else
                 {
-                    InitTextSource(SourceTextBox.TextSource);
+                    InitTextSource(SourceTextBox?.TextSource);
                     isChanged = false;
                 }
                 Invalidate();
@@ -1210,7 +1210,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         /// </summary>
         [Browsable(false)]
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public Brush BackBrush
+        public Brush? BackBrush
         {
             get { return backBrush; }
             set
@@ -1258,9 +1258,9 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
                 {
                     base.AutoScroll = false;
                     ShowScrollBars = false;
-                    if (lines.Count > 1)
-                        lines.RemoveLine(1, lines.Count - 1);
-                    lines.Manager.ClearHistory();
+                    if (lines!.Count > 1)
+                        lines!.RemoveLine(1, lines!.Count - 1);
+                    lines!.Manager.ClearHistory();
                 }
                 Invalidate();
             }
@@ -1326,10 +1326,10 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
 
 
         [Browsable(false)]
-        public FindForm findForm { get; private set; }
+        public new FindForm? FindForm { get; private set; }
 
         [Browsable(false)]
-        public ReplaceForm replaceForm { get; private set; }
+        public ReplaceForm? ReplaceForm { get; private set; }
 
         /// <summary>
         /// Do not change this property
@@ -1348,7 +1348,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         [Browsable(false)]
         public int LinesCount
         {
-            get { return lines.Count; }
+            get { return lines!.Count; }
         }
 
         /// <summary>
@@ -1358,16 +1358,16 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
         public Char this[Place place]
         {
-            get { return lines[place.iLine][place.iChar]; }
-            set { lines[place.iLine][place.iChar] = value; }
+            get { return lines![place.iLine]![place.iChar]; }
+            set { lines![place.iLine]?[place.iChar] = value; }
         }
 
         /// <summary>
         /// Gets Line
         /// </summary>
-        public Line this[int iLine]
+        public Line? this[int iLine]
         {
-            get { return lines[iLine]; }
+            get { return lines![iLine]; }
         }
 
         /// <summary>
@@ -1380,6 +1380,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
         [Description("Text of the control.")]
         [Bindable(true)]
+        [AllowNull]
         public override string Text
         {
             get
@@ -1388,7 +1389,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
                     return "";
                 var sel = new Range(this);
                 sel.SelectAll();
-                return sel.Text;
+                return sel.Text!;
             }
 
             set
@@ -1432,7 +1433,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         [Browsable(false)]
         public IList<string> Lines
         {
-            get { return lines.GetLines(); }
+            get { return lines!.GetLines(); }
         }
 
         /// <summary>
@@ -1444,10 +1445,12 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         {
             get
             {
-                var exporter = new ExportToHTML();
-                exporter.UseNbsp = false;
-                exporter.UseStyleTag = false;
-                exporter.UseBr = false;
+                var exporter = new ExportToHTML
+                {
+                    UseNbsp = false,
+                    UseStyleTag = false,
+                    UseBr = false
+                };
                 return "<pre>" + exporter.GetHtml(this) + "</pre>";
             }
         }
@@ -1471,7 +1474,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         /// </summary>
         [Browsable(false)]
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public string SelectedText
+        public string? SelectedText
         {
             get { return Selection.Text; }
             set { InsertText(value); }
@@ -1508,23 +1511,27 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         /// </summary>
         /// <remarks>Use only monospaced font</remarks>
         [DefaultValue(typeof (Font), "Courier New, 9.75")]
+        [AllowNull]
         public override Font Font
         {
-            get { return BaseFont; }
+            get { return BaseFont!; }
             set {
-                originalFont = (Font)value.Clone();
-                SetFont(value);
+                if (value != null)
+                {
+                    originalFont = (Font)value.Clone();
+                    SetFont(value);
+                }
             }
         }
 
 
-        Font baseFont;
+        Font? baseFont;
         /// <summary>
         /// Font
         /// </summary>
         /// <remarks>Use only monospaced font</remarks>
         [DefaultValue(typeof(Font), "Courier New, 9.75")]
-        private Font BaseFont
+        private Font? BaseFont
         {
             get { return baseFont; }
             set
@@ -1613,7 +1620,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         [Browsable(false)]
         public bool UndoEnabled
         {
-            get { return lines.Manager.UndoEnabled; }
+            get { return lines!.Manager.UndoEnabled; }
         }
 
         /// <summary>
@@ -1622,7 +1629,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         [Browsable(false)]
         public bool RedoEnabled
         {
-            get { return lines.Manager.RedoEnabled; }
+            get { return lines!.Manager.RedoEnabled; }
         }
 
         private int LeftIndentLine
@@ -1636,7 +1643,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         [Browsable(false)]
         public Range Range
         {
-            get { return new Range(this, new Place(0, 0), new Place(lines[lines.Count - 1].Count, lines.Count - 1)); }
+            get { return new Range(this, new Place(0, 0), new Place(lines![^1]!.Count, lines!.Count - 1)); }
         }
 
         /// <summary>
@@ -1657,6 +1664,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
             }
         }
 
+        [AllowNull]
         public override Cursor Cursor
         {
             get { return base.Cursor; }
@@ -1693,7 +1701,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         /// </summary>
         [Browsable(true)]
         [Description("Occurs when mouse is moving over text and tooltip is needed.")]
-        public event EventHandler<ToolTipNeededEventArgs> ToolTipNeeded;
+        public event EventHandler<ToolTipNeededEventArgs>? ToolTipNeeded;
 
         /// <summary>
         /// Default size of the markers
@@ -1716,7 +1724,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         /// </summary>
         [Browsable(false)]
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public Encoding Encoding
+        public Encoding? Encoding
         {
             get { return encoding; }
             set
@@ -1733,8 +1741,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         /// </summary>
         public void ClearHints()
         {
-            if (Hints != null)
-                Hints.Clear();
+            Hints?.Clear();
         }
 
         /// <summary>
@@ -1799,11 +1806,10 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         /// <param name="hint"></param>
         public virtual void OnHintClick(Hint hint)
         {
-            if (HintClick != null)
-                HintClick(this, new HintClickEventArgs(hint));
+            HintClick?.Invoke(this, new HintClickEventArgs(hint));
         }
 
-        private void timer3_Tick(object? sender, EventArgs e)
+        private void Timer3_Tick(object? sender, EventArgs e)
         {
             timer3.Stop();
             OnToolTip();
@@ -1826,7 +1832,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
                 return;
             //get word under mouse
             var r = new Range(this, place, place);
-            string hoveredWord = r.GetFragment("[a-zA-Z]").Text;
+            string? hoveredWord = r.GetFragment("[a-zA-Z]").Text;
             //event handler
             var ea = new ToolTipNeededEventArgs(place, hoveredWord);
             ToolTipNeeded(this, ea);
@@ -1850,8 +1856,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
 
             needRiseVisibleRangeChangedDelayed = true;
             ResetTimer(timer);
-            if (VisibleRangeChanged != null)
-                VisibleRangeChanged(this, new EventArgs());
+            VisibleRangeChanged?.Invoke(this, new EventArgs());
         }
 
         /// <summary>
@@ -1879,7 +1884,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         /// </summary>
         [Browsable(true)]
         [Description("It occurs if user click on the hint.")]
-        public event EventHandler<HintClickEventArgs> HintClick;
+        public event EventHandler<HintClickEventArgs>? HintClick;
 
         /// <summary>
         /// TextChanged event.
@@ -1887,19 +1892,19 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         /// </summary>
         [Browsable(true)]
         [Description("It occurs after insert, delete, clear, undo and redo operations.")]
-        public new event EventHandler<TextChangedEventArgs> TextChanged;
+        public new event EventHandler<TextChangedEventArgs>? TextChanged;
 
         /// <summary>
         /// Fake event for correct data binding
         /// </summary>
         [Browsable(false)]
-        internal event EventHandler BindingTextChanged;
+        internal event EventHandler? BindingTextChanged;
 
         /// <summary>
         /// Occurs when user paste text from clipboard
         /// </summary>
         [Description("Occurs when user paste text from clipboard")]
-        public event EventHandler<TextChangingEventArgs> Pasting;
+        public event EventHandler<TextChangingEventArgs>? Pasting;
 
         /// <summary>
         /// TextChanging event.
@@ -1907,7 +1912,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         /// </summary>
         [Browsable(true)]
         [Description("It occurs before insert, delete, clear, undo and redo operations.")]
-        public event EventHandler<TextChangingEventArgs> TextChanging;
+        public event EventHandler<TextChangingEventArgs>? TextChanging;
 
         /// <summary>
         /// SelectionChanged event.
@@ -1915,7 +1920,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         /// </summary>
         [Browsable(true)]
         [Description("It occurs after changing of selection.")]
-        public event EventHandler SelectionChanged;
+        public event EventHandler? SelectionChanged;
 
         /// <summary>
         /// VisibleRangeChanged event.
@@ -1923,7 +1928,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         /// </summary>
         [Browsable(true)]
         [Description("It occurs after changing of visible range.")]
-        public event EventHandler VisibleRangeChanged;
+        public event EventHandler? VisibleRangeChanged;
 
         /// <summary>
         /// TextChangedDelayed event. 
@@ -1934,7 +1939,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         [Description(
             "It occurs after insert, delete, clear, undo and redo operations. This event occurs with a delay relative to TextChanged, and fires only once."
             )]
-        public event EventHandler<TextChangedEventArgs> TextChangedDelayed;
+        public event EventHandler<TextChangedEventArgs>? TextChangedDelayed;
 
         /// <summary>
         /// SelectionChangedDelayed event.
@@ -1945,7 +1950,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         [Description(
             "It occurs after changing of selection. This event occurs with a delay relative to SelectionChanged, and fires only once."
             )]
-        public event EventHandler SelectionChangedDelayed;
+        public event EventHandler? SelectionChangedDelayed;
 
         /// <summary>
         /// VisibleRangeChangedDelayed event.
@@ -1956,14 +1961,14 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         [Description(
             "It occurs after changing of visible range. This event occurs with a delay relative to VisibleRangeChanged, and fires only once."
             )]
-        public event EventHandler VisibleRangeChangedDelayed;
+        public event EventHandler? VisibleRangeChangedDelayed;
 
         /// <summary>
         /// It occurs when user click on VisualMarker.
         /// </summary>
         [Browsable(true)]
         [Description("It occurs when user click on VisualMarker.")]
-        public event EventHandler<VisualMarkerEventArgs> VisualMarkerClick;
+        public event EventHandler<VisualMarkerEventArgs>? VisualMarkerClick;
 
         /// <summary>
         /// It occurs when visible char is enetering (alphabetic, digit, punctuation, DEL, BACKSPACE)
@@ -1971,42 +1976,42 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         /// <remarks>Set Handle to True for cancel key</remarks>
         [Browsable(true)]
         [Description("It occurs when visible char is enetering (alphabetic, digit, punctuation, DEL, BACKSPACE).")]
-        public event KeyPressEventHandler KeyPressing;
+        public event KeyPressEventHandler? KeyPressing;
 
         /// <summary>
         /// It occurs when visible char is enetered (alphabetic, digit, punctuation, DEL, BACKSPACE)
         /// </summary>
         [Browsable(true)]
         [Description("It occurs when visible char is enetered (alphabetic, digit, punctuation, DEL, BACKSPACE).")]
-        public event KeyPressEventHandler KeyPressed;
+        public event KeyPressEventHandler? KeyPressed;
 
         /// <summary>
         /// It occurs when calculates AutoIndent for new line
         /// </summary>
         [Browsable(true)]
         [Description("It occurs when calculates AutoIndent for new line.")]
-        public event EventHandler<AutoIndentEventArgs> AutoIndentNeeded;
+        public event EventHandler<AutoIndentEventArgs>? AutoIndentNeeded;
 
         /// <summary>
         /// It occurs when line background is painting
         /// </summary>
         [Browsable(true)]
         [Description("It occurs when line background is painting.")]
-        public event EventHandler<PaintLineEventArgs> PaintLine;
+        public event EventHandler<PaintLineEventArgs>? PaintLine;
 
         /// <summary>
         /// Occurs when line was inserted/added
         /// </summary>
         [Browsable(true)]
         [Description("Occurs when line was inserted/added.")]
-        public event EventHandler<LineInsertedEventArgs> LineInserted;
+        public event EventHandler<LineInsertedEventArgs>? LineInserted;
 
         /// <summary>
         /// Occurs when line was removed
         /// </summary>
         [Browsable(true)]
         [Description("Occurs when line was removed.")]
-        public event EventHandler<LineRemovedEventArgs> LineRemoved;
+        public event EventHandler<LineRemovedEventArgs>? LineRemoved;
 
         /// <summary>
         /// Occurs when current highlighted folding area is changed.
@@ -2015,7 +2020,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         /// <remarks></remarks>
         [Browsable(true)]
         [Description("Occurs when current highlighted folding area is changed.")]
-        public event EventHandler<EventArgs> FoldingHighlightChanged;
+        public event EventHandler<EventArgs>? FoldingHighlightChanged;
 
         /// <summary>
         /// Occurs when undo/redo stack is changed
@@ -2023,14 +2028,14 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         /// <remarks></remarks>
         [Browsable(true)]
         [Description("Occurs when undo/redo stack is changed.")]
-        public event EventHandler<EventArgs> UndoRedoStateChanged;
+        public event EventHandler<EventArgs>? UndoRedoStateChanged;
 
         /// <summary>
         /// Occurs when component was zoomed
         /// </summary>
         [Browsable(true)]
         [Description("Occurs when component was zoomed.")]
-        public event EventHandler ZoomChanged;
+        public event EventHandler? ZoomChanged;
 
 
         /// <summary>
@@ -2038,37 +2043,37 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         /// </summary>
         [Browsable(true)]
         [Description("Occurs when user pressed key, that specified as CustomAction.")]
-        public event EventHandler<CustomActionEventArgs> CustomAction;
+        public event EventHandler<CustomActionEventArgs>? CustomAction;
 
         /// <summary>
         /// Occurs when scroolbars are updated
         /// </summary>
         [Browsable(true)]
         [Description("Occurs when scroolbars are updated.")]
-        public event EventHandler ScrollbarsUpdated;
+        public event EventHandler? ScrollbarsUpdated;
 
         /// <summary>
         /// Occurs when custom wordwrap is needed
         /// </summary>
         [Browsable(true)]
         [Description("Occurs when custom wordwrap is needed.")]
-        public event EventHandler<WordWrapNeededEventArgs> WordWrapNeeded;
+        public event EventHandler<WordWrapNeededEventArgs>? WordWrapNeeded;
 
         /// <summary>
         /// Occurs when a file is saved
         /// </summary>
         [Browsable(true)]
         [Description("Occurs when a file is saved.")]
-        public event EventHandler<FileSavedEventArgs> FileSaved;
+        public event EventHandler<FileSavedEventArgs>? FileSaved;
 
 
         /// <summary>
         /// Returns list of styles of given place
         /// </summary>
-        public List<Style> GetStylesOfChar(Place place)
+        public List<Style?> GetStylesOfChar(Place place)
         {
-            var result = new List<Style>();
-            if (place.iLine < LinesCount && place.iChar < this[place.iLine].Count)
+            var result = new List<Style?>();
+            if (place.iLine < LinesCount && place.iChar < this[place.iLine]?.Count)
             {
 #if Styles32
                 var s = (uint) this[place].style;
@@ -2096,35 +2101,34 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
             TextSource.CurrentTB = this;
         }
 
-        protected virtual void InitTextSource(TextSource ts)
+        protected virtual void InitTextSource(TextSource? ts)
         {
             if (lines != null)
             {
-                lines.LineInserted -= ts_LineInserted;
-                lines.LineRemoved -= ts_LineRemoved;
-                lines.TextChanged -= ts_TextChanged;
-                lines.RecalcNeeded -= ts_RecalcNeeded;
-                lines.RecalcWordWrap -= ts_RecalcWordWrap;
-                lines.TextChanging -= ts_TextChanging;
+                lines!.LineInserted -= Ts_LineInserted;
+                lines!.LineRemoved -= Ts_LineRemoved;
+                lines!.TextChanged -= Ts_TextChanged;
+                lines!.RecalcNeeded -= Ts_RecalcNeeded;
+                lines!.RecalcWordWrap -= Ts_RecalcWordWrap;
+                lines!.TextChanging -= Ts_TextChanging;
 
-                lines.Dispose();
+                lines!.Dispose();
             }
 
             LineInfos.Clear();
             ClearHints();
-            if (Bookmarks != null)
-                Bookmarks.Clear();
+            Bookmarks?.Clear();
 
             lines = ts;
 
             if (ts != null)
             {
-                ts.LineInserted += ts_LineInserted;
-                ts.LineRemoved += ts_LineRemoved;
-                ts.TextChanged += ts_TextChanged;
-                ts.RecalcNeeded += ts_RecalcNeeded;
-                ts.RecalcWordWrap += ts_RecalcWordWrap;
-                ts.TextChanging += ts_TextChanging;
+                ts.LineInserted += Ts_LineInserted;
+                ts.LineRemoved += Ts_LineRemoved;
+                ts.TextChanged += Ts_TextChanged;
+                ts.RecalcNeeded += Ts_RecalcNeeded;
+                ts.RecalcWordWrap += Ts_RecalcWordWrap;
+                ts.TextChanging += Ts_TextChanging;
 
                 while (LineInfos.Count < ts.Count)
                     LineInfos.Add(new LineInfo(-1));
@@ -2134,24 +2138,24 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
             needRecalc = true;
         }
 
-        private void ts_RecalcWordWrap(object? sender, TextSource.TextChangedEventArgs e)
+        private void Ts_RecalcWordWrap(object? sender, TextSource.TextChangedEventArgs e)
         {
             RecalcWordWrap(e.iFromLine, e.iToLine);
         }
 
-        private void ts_TextChanging(object? sender, TextChangingEventArgs e)
+        private void Ts_TextChanging(object? sender, TextChangingEventArgs e)
         {
             if (TextSource.CurrentTB == this)
             {
-                string text = e.InsertingText;
+                string? text = e.InsertingText;
                 OnTextChanging(ref text);
                 e.InsertingText = text;
             }
         }
 
-        private void ts_RecalcNeeded(object? sender, TextSource.TextChangedEventArgs e)
+        private void Ts_RecalcNeeded(object? sender, TextSource.TextChangedEventArgs e)
         {
-            if (e.iFromLine == e.iToLine && !WordWrap && lines.Count > minLinesForAccuracy)
+            if (e.iFromLine == e.iToLine && !WordWrap && lines!.Count > minLinesForAccuracy)
                 RecalcScrollByOneLine(e.iFromLine);
             else
             {
@@ -2193,7 +2197,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
                 Recalc();
         }
 
-        private void ts_TextChanged(object? sender, TextSource.TextChangedEventArgs e)
+        private void Ts_TextChanged(object? sender, TextSource.TextChangedEventArgs e)
         {
             if (e.iFromLine == e.iToLine && !WordWrap)
                 RecalcScrollByOneLine(e.iFromLine);
@@ -2205,13 +2209,13 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
                 OnTextChanged(e.iFromLine, e.iToLine);
         }
 
-        private void ts_LineRemoved(object? sender, LineRemovedEventArgs e)
+        private void Ts_LineRemoved(object? sender, LineRemovedEventArgs e)
         {
             LineInfos.RemoveRange(e.Index, e.Count);
             OnLineRemoved(e.Index, e.Count, e.RemovedLineUniqueIds);
         }
 
-        private void ts_LineInserted(object? sender, LineInsertedEventArgs e)
+        private void Ts_LineInserted(object? sender, LineInsertedEventArgs e)
         {
             VisibleState newState = VisibleState.Visible;
             if (e.Index >= 0 && e.Index < LineInfos.Count && LineInfos[e.Index].VisibleState == VisibleState.Hidden)
@@ -2250,10 +2254,10 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
             DateTime min = DateTime.Now;
             int iLine = -1;
             for (int i = 0; i < LinesCount; i++)
-                if (lines.IsLineLoaded(i))
-                    if (lines[i].LastVisit > lastNavigatedDateTime && lines[i].LastVisit < min)
+                if (lines!.IsLineLoaded(i))
+                    if (lines![i]!.LastVisit > lastNavigatedDateTime && lines![i]!.LastVisit < min)
                     {
-                        min = lines[i].LastVisit;
+                        min = lines![i]!.LastVisit;
                         iLine = i;
                     }
             if (iLine >= 0)
@@ -2273,10 +2277,10 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
             var max = new DateTime();
             int iLine = -1;
             for (int i = 0; i < LinesCount; i++)
-                if (lines.IsLineLoaded(i))
-                    if (lines[i].LastVisit < lastNavigatedDateTime && lines[i].LastVisit > max)
+                if (lines!.IsLineLoaded(i))
+                    if (lines![i]!.LastVisit < lastNavigatedDateTime && lines![i]!.LastVisit > max)
                     {
-                        max = lines[i].LastVisit;
+                        max = lines![i]!.LastVisit;
                         iLine = i;
                     }
             if (iLine >= 0)
@@ -2294,7 +2298,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         public void Navigate(int iLine)
         {
             if (iLine >= LinesCount) return;
-            lastNavigatedDateTime = lines[iLine].LastVisit;
+            lastNavigatedDateTime = lines![iLine]!.LastVisit;
             Selection.Start = new Place(0, iLine);
             DoSelectionVisible();
         }
@@ -2305,7 +2309,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
             m_hImc = ImmGetContext(Handle);
         }
 
-        private void timer2_Tick(object? sender, EventArgs e)
+        private void Timer2_Tick(object? sender, EventArgs e)
         {
             timer2.Enabled = false;
             if (needRiseTextChangedDelayed)
@@ -2325,7 +2329,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
             visibleMarkers.Add(marker);
         }
 
-        private void timer_Tick(object? sender, EventArgs e)
+        private void Timer_Tick(object? sender, EventArgs e)
         {
             timer.Enabled = false;
             if (needRiseSelectionChangedDelayed)
@@ -2342,8 +2346,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
 
         public virtual void OnTextChangedDelayed(Range changedRange)
         {
-            if (TextChangedDelayed != null)
-                TextChangedDelayed(this, new TextChangedEventArgs(changedRange));
+            TextChangedDelayed?.Invoke(this, new TextChangedEventArgs(changedRange));
         }
 
         public virtual void OnSelectionChangedDelayed()
@@ -2358,24 +2361,22 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
             //remember last visit time
             if (Selection.IsEmpty && Selection.Start.iLine < LinesCount)
             {
-                if (lastNavigatedDateTime != lines[Selection.Start.iLine].LastVisit)
+                if (lastNavigatedDateTime != lines![Selection.Start.iLine]!.LastVisit)
                 {
-                    lines[Selection.Start.iLine].LastVisit = DateTime.Now;
-                    lastNavigatedDateTime = lines[Selection.Start.iLine].LastVisit;
+                    lines![Selection.Start.iLine]!.LastVisit = DateTime.Now;
+                    lastNavigatedDateTime = lines![Selection.Start.iLine]!.LastVisit;
                 }
             }
 
-            if (SelectionChangedDelayed != null)
-                SelectionChangedDelayed(this, new EventArgs());
+            SelectionChangedDelayed?.Invoke(this, new EventArgs());
         }
 
         public virtual void OnVisibleRangeChangedDelayed()
         {
-            if (VisibleRangeChangedDelayed != null)
-                VisibleRangeChangedDelayed(this, new EventArgs());
+            VisibleRangeChangedDelayed?.Invoke(this, new EventArgs());
         }
 
-        Dictionary<Timer, Timer> timersToReset = new Dictionary<Timer, Timer>();
+        private readonly Dictionary<Timer, Timer> timersToReset = [];
 
         private void ResetTimer(Timer timer)
         {
@@ -2449,19 +2450,18 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         /// <summary>
         /// Shows find dialog
         /// </summary>
-        public virtual void ShowFindDialog(string findText)
+        public virtual void ShowFindDialog(string? findText)
         {
-            if (findForm == null)
-                findForm = new FindForm(this);
+            FindForm ??= new FindForm(this);
 
             if (findText != null)
-                findForm.tbFind.Text = findText;
+                FindForm.tbFind.Text = findText;
             else if (!Selection.IsEmpty && Selection.Start.iLine == Selection.End.iLine)
-                findForm.tbFind.Text = Selection.Text;
+                FindForm.tbFind.Text = Selection.Text;
 
-            findForm.tbFind.SelectAll();
-            findForm.Show();
-            findForm.Focus();
+            FindForm.tbFind.SelectAll();
+            FindForm.Show();
+            FindForm.Focus();
         }
 
         /// <summary>
@@ -2475,21 +2475,20 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         /// <summary>
         /// Shows replace dialog
         /// </summary>
-        public virtual void ShowReplaceDialog(string findText)
+        public virtual void ShowReplaceDialog(string? findText)
         {
             if (ReadOnly)
                 return;
-            if (replaceForm == null)
-                replaceForm = new ReplaceForm(this);
+            ReplaceForm ??= new ReplaceForm(this);
 
             if (findText != null)
-                replaceForm.tbFind.Text = findText;
+                ReplaceForm.tbFind.Text = findText;
             else if (!Selection.IsEmpty && Selection.Start.iLine == Selection.End.iLine)
-                replaceForm.tbFind.Text = Selection.Text;
+                ReplaceForm.tbFind.Text = Selection.Text;
 
-            replaceForm.tbFind.SelectAll();
-            replaceForm.Show();
-            replaceForm.Focus();
+            ReplaceForm.tbFind.SelectAll();
+            ReplaceForm.Show();
+            ReplaceForm.Focus();
         }
 
         /// <summary>
@@ -2499,10 +2498,10 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         /// <returns>Length of line</returns>
         public int GetLineLength(int iLine)
         {
-            if (iLine < 0 || iLine >= lines.Count)
-                throw new ArgumentOutOfRangeException("Line index out of range");
+            if (iLine < 0 || iLine >= lines!.Count)
+                throw new ArgumentOutOfRangeException(nameof(iLine), "Line index out of range");
 
-            return lines[iLine].Count;
+            return lines![iLine]!.Count;
         }
 
         /// <summary>
@@ -2511,12 +2510,14 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         /// <param name="iLine">Line index</param>
         public Range GetLine(int iLine)
         {
-            if (iLine < 0 || iLine >= lines.Count)
-                throw new ArgumentOutOfRangeException("Line index out of range");
+            if (iLine < 0 || iLine >= lines!.Count)
+                throw new ArgumentOutOfRangeException(nameof(iLine), "Line index out of range");
 
-            var sel = new Range(this);
-            sel.Start = new Place(0, iLine);
-            sel.End = new Place(lines[iLine].Count, iLine);
+            var sel = new Range(this)
+            {
+                Start = new Place(0, iLine),
+                End = new Place(lines![iLine]!.Count, iLine)
+            };
             return sel;
         }
 
@@ -2541,10 +2542,12 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
 
         protected virtual void OnCreateClipboardData(DataObject data)
         {
-            var exp = new ExportToHTML();
-            exp.UseBr = false;
-            exp.UseNbsp = false;
-            exp.UseStyleTag = true;
+            var exp = new ExportToHTML
+            {
+                UseBr = false,
+                UseNbsp = false,
+                UseStyleTag = true
+            };
             string html = "<pre>" + exp.GetHtml(Selection.Clone()) + "</pre>";
 
             data.SetData(DataFormats.UnicodeText, true, Selection.Text);
@@ -2552,13 +2555,13 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
             data.SetData(DataFormats.Rtf, new ExportToRTF().GetRtf(Selection.Clone()));
         }
 
-        [DllImport("user32.dll")]
-        static extern IntPtr GetOpenClipboardWindow();
+        [LibraryImport("user32.dll")]
+        private static partial IntPtr GetOpenClipboardWindow();
 
-        [DllImport("user32.dll")]
-        static extern IntPtr CloseClipboard();
+        [LibraryImport("user32.dll")]
+        private static partial IntPtr CloseClipboard();
 
-        protected void SetClipboard(DataObject data)
+        protected static void SetClipboard(DataObject data)
         {
                 try
                 {
@@ -2640,7 +2643,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
                 if (Selection.Start.iLine >= 0 && Selection.Start.iLine < LinesCount)
                 {
                     int iLine = Selection.Start.iLine;
-                    RemoveLines(new List<int> {iLine});
+                    RemoveLines([iLine]);
                     Selection.Start = new Place(0, Math.Max(0, Math.Min(iLine, LinesCount - 1)));
                 }
             }
@@ -2651,7 +2654,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         /// </summary>
         public virtual void Paste()
         {
-            string text = null;
+            string? text = null;
             var thread = new Thread(() =>
                                         {
                                             if (Clipboard.ContainsText())
@@ -2696,32 +2699,33 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
             File.WriteAllText((string)Tag, text);
 
             /* Raise file saved event for parent to handle */
-            FileSaved(this, new FileSavedEventArgs(true));
+            FileSaved?.Invoke(this, new FileSavedEventArgs(true));
             return true;
         }
 
         public bool SaveAs(string text)
         {
-            SaveFileDialog dialog = new SaveFileDialog();
-
-            dialog.Filter = "Normal text file (*.txt)|*.txt|"
-            + "C# source file (*.cs)" + "|*.cs|"
-            + "Hyper Text Markup Language File (*.html)" + "|*.html|"
-            + "Javascript source file (*.js)" + "|*.js|"
-            + "JSON file (*.json)" + "|*.json|"
-            + "Lua source file (*.lua)" + "|*.lua|"
-            + "PHP file (*.php)" + "|*.php|"
-            + "Structured Query Language file (*.sql)" + "|*.sql|"
-            + "Visual Basic file (*.vb)" + "|*.vb|"
-            + "VBScript file (*.vbs)" + "|*.vbs|"
-            + "JSON file (*.json)" + "|*.json|"
-            + "Windows Batch file (*.bat)" + "|*.bat|"
-            + "Assembly Program file (*.asm)" + "|*.asm|"
-            + "All files (*.*)" + "|*.*";
+            SaveFileDialog dialog = new()
+            {
+                Filter = "Normal text file (*.txt)|*.txt|"
+                + "C# source file (*.cs)" + "|*.cs|"
+                + "Hyper Text Markup Language File (*.html)" + "|*.html|"
+                + "Javascript source file (*.js)" + "|*.js|"
+                + "JSON file (*.json)" + "|*.json|"
+                + "Lua source file (*.lua)" + "|*.lua|"
+                + "PHP file (*.php)" + "|*.php|"
+                + "Structured Query Language file (*.sql)" + "|*.sql|"
+                + "Visual Basic file (*.vb)" + "|*.vb|"
+                + "VBScript file (*.vbs)" + "|*.vbs|"
+                + "JSON file (*.json)" + "|*.json|"
+                + "Windows Batch file (*.bat)" + "|*.bat|"
+                + "Assembly Program file (*.asm)" + "|*.asm|"
+                + "All files (*.*)" + "|*.*"
+            };
 
             if (dialog.ShowDialog() != DialogResult.OK)
             {
-                FileSaved(this, new FileSavedEventArgs(false));
+                FileSaved?.Invoke(this, new FileSavedEventArgs(false));
                 return false;
             }
             Tag = dialog.FileName;
@@ -2729,7 +2733,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
             File.WriteAllText((string)Tag, text);
 
             /* Raise file saved event for parent to handle */
-            FileSaved(this, new FileSavedEventArgs(true));
+            FileSaved?.Invoke(this, new FileSavedEventArgs(true));
             return true;
         }
 
@@ -2746,8 +2750,8 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         /// </summary>
         public void GoEnd()
         {
-            if (lines.Count > 0)
-                Selection.Start = new Place(lines[lines.Count - 1].Count, lines.Count - 1);
+            if (lines!.Count > 0)
+                Selection.Start = new Place(lines![^1]!.Count, lines!.Count - 1);
             else
                 Selection.Start = new Place(0, 0);
 
@@ -2776,7 +2780,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
             {
                 Selection.SelectAll();
                 ClearSelected();
-                lines.Manager.ClearHistory();
+                lines!.Manager.ClearHistory();
                 Invalidate();
             }
             finally
@@ -2799,8 +2803,9 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         /// </summary>
         public void ClearStyle(StyleIndex styleIndex)
         {
-            foreach (Line line in lines)
-                line.ClearStyle(styleIndex);
+            if(lines != null)
+                foreach (Line line in lines)
+                    line.ClearStyle(styleIndex);
 
             for (int i = 0; i < LineInfos.Count; i++)
                 SetVisibleState(i, VisibleState.Visible);
@@ -2814,7 +2819,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         /// </summary>
         public void ClearUndo()
         {
-            lines.Manager.ClearHistory();
+            lines!.Manager.ClearHistory();
         }
 
         /// <summary>
@@ -2836,24 +2841,24 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
             if (text == "\r")
                 text = "\n";
 
-            lines.Manager.BeginAutoUndoCommands();
+            lines!.Manager.BeginAutoUndoCommands();
             try
             {
                 if (!Selection.IsEmpty)
-                    lines.Manager.ExecuteCommand(new ClearSelectedCommand(TextSource));
+                    lines!.Manager.ExecuteCommand(new ClearSelectedCommand(TextSource));
 
                 //insert virtual spaces
                 if(this.TextSource.Count > 0)
                 if (Selection.IsEmpty && Selection.Start.iChar > GetLineLength(Selection.Start.iLine) && VirtualSpace)
                     InsertVirtualSpaces();
 
-                lines.Manager.ExecuteCommand(new InsertTextCommand(TextSource, text));
+                lines!.Manager.ExecuteCommand(new InsertTextCommand(TextSource, text));
                 if (updating <= 0 && jumpToCaret)
                     DoCaretVisible();
             }
             finally
             {
-                lines.Manager.EndAutoUndoCommands();
+                lines!.Manager.EndAutoUndoCommands();
             }
             //
             Invalidate();
@@ -2863,7 +2868,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         /// Insert text into current selection position (with predefined style)
         /// </summary>
         /// <param name="text"></param>
-        public virtual Range InsertText(string text, Style style)
+        public virtual Range? InsertText(string? text, Style style)
         {
             return InsertText(text, style, true);
         }
@@ -2871,7 +2876,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         /// <summary>
         /// Insert text into current selection position (with predefined style)
         /// </summary>
-        public virtual Range InsertText(string text, Style style, bool jumpToCaret)
+        public virtual Range? InsertText(string? text, Style style, bool jumpToCaret)
         {
             if (text == null)
                 return null;
@@ -2892,21 +2897,21 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         /// <summary>
         /// Insert text into replaceRange and restore previous selection
         /// </summary>
-        public virtual Range InsertTextAndRestoreSelection(Range replaceRange, string text, Style style)
+        public virtual Range? InsertTextAndRestoreSelection(Range replaceRange, string? text, Style style)
         {
             if (text == null)
                 return null;
 
             var oldStart = PlaceToPosition(Selection.Start);
             var oldEnd = PlaceToPosition(Selection.End);
-            var count = replaceRange.Text.Length;
+            var count = replaceRange.Text?.Length ?? 0;
             var pos = PlaceToPosition(replaceRange.Start);
             //
             Selection.BeginUpdate();
             Selection = replaceRange;
             var range = InsertText(text, style);
             //
-            count = range.Text.Length - count;
+            count = (range?.Text?.Length ?? 0) - count;
             Selection.Start = PositionToPlace(oldStart + (oldStart >= pos ? count : 0));
             Selection.End = PositionToPlace(oldEnd + (oldEnd >= pos ? count : 0));
             Selection.EndUpdate();
@@ -2917,7 +2922,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         /// <summary>
         /// Append string to end of the Text
         /// </summary>
-        public virtual void AppendText(string text)
+        public virtual void AppendText(string? text)
         {
             AppendText(text, null);
         }
@@ -2925,7 +2930,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         /// <summary>
         /// Append string to end of the Text
         /// </summary>
-        public virtual void AppendText(string text, Style style)
+        public virtual void AppendText(string? text, Style? style)
         {
             if (text == null)
                 return;
@@ -2936,25 +2941,25 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
             Place oldEnd = Selection.End;
 
             Selection.BeginUpdate();
-            lines.Manager.BeginAutoUndoCommands();
+            lines!.Manager.BeginAutoUndoCommands();
             try
             {
-                if (lines.Count > 0)
-                    Selection.Start = new Place(lines[lines.Count - 1].Count, lines.Count - 1);
+                if (lines!.Count > 0)
+                    Selection.Start = new Place(lines![^1]!.Count, lines!.Count - 1);
                 else
                     Selection.Start = new Place(0, 0);
 
                 //remember last caret position
                 Place last = Selection.Start;
 
-                lines.Manager.ExecuteCommand(new InsertTextCommand(TextSource, text));
+                lines!.Manager.ExecuteCommand(new InsertTextCommand(TextSource, text));
 
                 if (style != null)
                     new Range(this, last, Selection.Start).SetStyle(style);
             }
             finally
             {
-                lines.Manager.EndAutoUndoCommands();
+                lines!.Manager.EndAutoUndoCommands();
                 Selection.Start = oldStart;
                 Selection.End = oldEnd;
                 Selection.EndUpdate();
@@ -3008,11 +3013,11 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
             return new SizeF(sz2.Width - sz3.Width + 1, /*sz2.Height*/font.Height);
         }
 
-        [DllImport("Imm32.dll")]
-        public static extern IntPtr ImmGetContext(IntPtr hWnd);
+        [LibraryImport("Imm32.dll")]
+        private static partial IntPtr ImmGetContext(IntPtr hWnd);
 
-        [DllImport("Imm32.dll")]
-        public static extern IntPtr ImmAssociateContext(IntPtr hWnd, IntPtr hIMC);
+        [LibraryImport("Imm32.dll")]
+        private static partial IntPtr ImmAssociateContext(IntPtr hWnd, IntPtr hIMC);
 
         protected override void WndProc(ref Message m)
         {
@@ -3029,7 +3034,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
                 }
         }
 
-        List<Control> tempHintsList = new List<Control>();
+        readonly List<Control> tempHintsList = [];
 
         void HideHints()
         {
@@ -3095,22 +3100,22 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
 
         protected virtual void InsertChar(char c)
         {
-            lines.Manager.BeginAutoUndoCommands();
+            lines!.Manager.BeginAutoUndoCommands();
             try
             {
                 if (!Selection.IsEmpty)
-                    lines.Manager.ExecuteCommand(new ClearSelectedCommand(TextSource));
+                    lines!.Manager.ExecuteCommand(new ClearSelectedCommand(TextSource));
 
                 //insert virtual spaces
                 if (Selection.IsEmpty && Selection.Start.iChar > GetLineLength(Selection.Start.iLine) && VirtualSpace)
                     InsertVirtualSpaces();
 
                 //insert char
-                lines.Manager.ExecuteCommand(new InsertCharCommand(TextSource, c));
+                lines!.Manager.ExecuteCommand(new InsertCharCommand(TextSource, c));
             }
             finally
             {
-                lines.Manager.EndAutoUndoCommands();
+                lines!.Manager.EndAutoUndoCommands();
             }
 
             Invalidate();
@@ -3124,7 +3129,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
             try
             {
                 Selection.Start = new Place(lineLength, Selection.Start.iLine);
-                lines.Manager.ExecuteCommand(new InsertTextCommand(TextSource, new string(' ', count)));
+                lines!.Manager.ExecuteCommand(new InsertTextCommand(TextSource, new string(' ', count)));
             }
             finally
             {
@@ -3139,7 +3144,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         {
             if (!Selection.IsEmpty)
             {
-                lines.Manager.ExecuteCommand(new ClearSelectedCommand(TextSource));
+                lines!.Manager.ExecuteCommand(new ClearSelectedCommand(TextSource));
                 Invalidate();
             }
         }
@@ -3151,11 +3156,11 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         {
             Selection.Expand();
 
-            lines.Manager.ExecuteCommand(new ClearSelectedCommand(TextSource));
+            lines!.Manager.ExecuteCommand(new ClearSelectedCommand(TextSource));
             if (Selection.Start.iLine == 0)
                 if (!Selection.GoRightThroughFolded()) return;
             if (Selection.Start.iLine > 0)
-                lines.Manager.ExecuteCommand(new InsertCharCommand(TextSource, '\b')); //backspace
+                lines!.Manager.ExecuteCommand(new InsertCharCommand(TextSource, '\b')); //backspace
             Invalidate();
         }
 
@@ -3199,9 +3204,8 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
             maxLineLength = RecalcMaxLineLength();
 
             //adjust AutoScrollMinSize
-            int minWidth;
-            CalcMinAutosizeWidth(out minWidth, ref maxLineLength);
-            
+            CalcMinAutosizeWidth(out int minWidth, ref maxLineLength);
+
             AutoScrollMinSize = new Size(minWidth, TextHeight + Paddings.Top + Paddings.Bottom);
             UpdateScrollbars();
 #if debug
@@ -3234,15 +3238,14 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
 
         private void RecalcScrollByOneLine(int iLine)
         {
-            if (iLine >= lines.Count)
+            if (iLine >= lines!.Count)
                 return;
 
-            int maxLineLength = lines[iLine].Count;
+            int maxLineLength = lines![iLine]!.Count;
             if (this.maxLineLength < maxLineLength && !WordWrap)
                 this.maxLineLength = maxLineLength;
 
-            int minWidth;
-            CalcMinAutosizeWidth(out minWidth, ref maxLineLength);
+            CalcMinAutosizeWidth(out int minWidth, ref maxLineLength);
 
             if (AutoScrollMinSize.Width < minWidth)
                 AutoScrollMinSize = new Size(minWidth, AutoScrollMinSize.Height);
@@ -3251,15 +3254,15 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         private int RecalcMaxLineLength()
         {
             int maxLineLength = 0;
-            TextSource lines = this.lines;
-            int count = lines.Count;
+            TextSource? lines = this.lines;
+            int count = lines!.Count;
             int charHeight = CharHeight;
             int topIndent = Paddings.Top;
             TextHeight = topIndent;
 
             for (int i = 0; i < count; i++)
             {
-                int lineLength = lines.GetLineLength(i);
+                int lineLength = lines!.GetLineLength(i);
                 LineInfo lineInfo = LineInfos[i];
                 if (lineLength > maxLineLength && lineInfo.VisibleState == VisibleState.Visible)
                     maxLineLength = lineLength;
@@ -3315,7 +3318,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
             }
 
             for (int iLine = fromLine; iLine <= toLine; iLine++)
-                if (lines.IsLineLoaded(iLine))
+                if (lines!.IsLineLoaded(iLine))
                 {
                     if (!wordWrap)
                         LineInfos[iLine].CutOffPositions.Clear();
@@ -3323,15 +3326,14 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
                     {
                         LineInfo li = LineInfos[iLine];
 
-                        li.wordWrapIndent = WordWrapAutoIndent ? lines[iLine].StartSpacesCount + WordWrapIndent : WordWrapIndent;
+                        li.wordWrapIndent = WordWrapAutoIndent ? lines![iLine]!.StartSpacesCount + WordWrapIndent : WordWrapIndent;
 
                         if (WordWrapMode == WordWrapMode.Custom)
                         {
-                            if (WordWrapNeeded != null)
-                                WordWrapNeeded(this, new WordWrapNeededEventArgs(li.CutOffPositions, ImeAllowed, lines[iLine]));
+                            WordWrapNeeded?.Invoke(this, new WordWrapNeededEventArgs(li.CutOffPositions, ImeAllowed, lines![iLine]!));
                         }
                         else
-                            CalcCutOffs(li.CutOffPositions, maxCharsPerLine, maxCharsPerLine - li.wordWrapIndent, ImeAllowed, charWrap, lines[iLine]);
+                            CalcCutOffs(li.CutOffPositions, maxCharsPerLine, maxCharsPerLine - li.wordWrapIndent, ImeAllowed, charWrap, lines![iLine]!);
 
                         LineInfos[iLine] = li;
                     }
@@ -3376,7 +3378,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
 
                 if (segmentLength == maxCharsPerLine)
                 {
-                    if (cutOff == 0 || (cutOffPositions.Count > 0 && cutOff == cutOffPositions[cutOffPositions.Count - 1]))
+                    if (cutOff == 0 || (cutOffPositions.Count > 0 && cutOff == cutOffPositions[^1]))
                         cutOff = i + 1;
                     cutOffPositions.Add(cutOff);
                     segmentLength = 1 + i - cutOff;
@@ -3419,7 +3421,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
             base.OnClientSizeChanged(e);
             if (WordWrap)
             {
-                //RecalcWordWrap(0, lines.Count - 1);
+                //RecalcWordWrap(0, lines!.Count - 1);
                 NeedRecalc(false, true);
                 Invalidate();
             }
@@ -3505,9 +3507,8 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         }
 
         protected virtual void OnScrollbarsUpdated()
-        {           
-            if (ScrollbarsUpdated != null)
-                ScrollbarsUpdated(this, EventArgs.Empty);
+        {
+            ScrollbarsUpdated?.Invoke(this, EventArgs.Empty);
         }
 
         /// <summary>
@@ -3601,7 +3602,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
             ResetModifiers(e);
         }
 
-        public void ResetModifiers(KeyEventArgs e)
+        public void ResetModifiers(KeyEventArgs? e)
         {
             if (e == null)
             {
@@ -3663,26 +3664,25 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
             return base.ProcessDialogKey(keyData);
         }
 
-        static Dictionary<FCTBAction, bool> scrollActions = new Dictionary<FCTBAction, bool>() { { FCTBAction.ScrollDown, true }, { FCTBAction.ScrollUp, true }, { FCTBAction.ZoomOut, true }, { FCTBAction.ZoomIn, true }, { FCTBAction.ZoomNormal, true } };
+        static readonly Dictionary<FCTBAction, bool> scrollActions = new() { { FCTBAction.ScrollDown, true }, { FCTBAction.ScrollUp, true }, { FCTBAction.ZoomOut, true }, { FCTBAction.ZoomIn, true }, { FCTBAction.ZoomNormal, true } };
 
         /// <summary>
         /// Process control keys
         /// </summary>
         public virtual bool ProcessKey(Keys keyData)
         {
-            KeyEventArgs a = new KeyEventArgs(keyData);
+            KeyEventArgs a = new(keyData);
 
             if(a.KeyCode == Keys.Tab && !AcceptsTab)
                  return false;
 
 
             if (macrosManager != null)
-            if (!HotkeysMapping.ContainsKey(keyData) || (HotkeysMapping[keyData] != FCTBAction.MacroExecute && HotkeysMapping[keyData] != FCTBAction.MacroRecord))
+            if (!HotkeysMapping.TryGetValue(keyData, out FCTBAction value) || (value != FCTBAction.MacroExecute && value != FCTBAction.MacroRecord))
                 macrosManager.ProcessKey(keyData);
 
-            if (HotkeysMapping.ContainsKey(keyData))
+            if (HotkeysMapping.TryGetValue(keyData, out FCTBAction act))
             {
-                var act = HotkeysMapping[keyData];
                 DoAction(act);
                 if (scrollActions.ContainsKey(act))
                     return true;
@@ -3749,10 +3749,10 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
                     break;
 
                 case FCTBAction.FindNext:
-                    if (findForm == null || findForm.tbFind.Text == "")
+                    if (FindForm == null || FindForm.tbFind.Text == "")
                         ShowFindDialog();
                     else
-                        findForm.FindNext(findForm.tbFind.Text);
+                        FindForm.FindNext(FindForm.tbFind.Text);
                     break;
 
                 case FCTBAction.ReplaceDialog:
@@ -3812,10 +3812,10 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
                         if(sel.Start.iLine == sel.End.iLine)
                         {
                             var line = this[sel.Start.iLine];
-                            if (sel.Start.iChar == 0 && sel.End.iChar == line.Count)
+                            if (sel.Start.iChar == 0 && sel.End.iChar == line?.Count)
                                 Selection = new Range(this, line.StartSpacesCount, sel.Start.iLine, line.Count, sel.Start.iLine);
                             else
-                            if (sel.Start.iChar == line.Count && sel.End.iChar == 0)
+                            if (sel.Start.iChar == line?.Count && sel.End.iChar == 0)
                                 Selection = new Range(this, line.Count, sel.Start.iLine, line.StartSpacesCount, sel.Start.iLine);
                         }
 
@@ -3830,15 +3830,15 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
                         var sel = Selection.Clone();
                         var inverted = sel.Start > sel.End;
                         sel.Normalize();
-                        var spaces = this[sel.Start.iLine].StartSpacesCount;
+                        var spaces = this[sel.Start.iLine]?.StartSpacesCount;
                         if (sel.Start.iLine != sel.End.iLine || //selected several lines
-                           (sel.Start.iChar <= spaces && sel.End.iChar == this[sel.Start.iLine].Count) || //selected whole line
+                           (sel.Start.iChar <= spaces && sel.End.iChar == this[sel.Start.iLine]?.Count) || //selected whole line
                            sel.End.iChar <= spaces)//selected space prefix
                         {
                             IncreaseIndent();
                             if (sel.Start.iLine == sel.End.iLine && !sel.IsEmpty)
                             {
-                                Selection = new Range(this, this[sel.Start.iLine].StartSpacesCount, sel.End.iLine, this[sel.Start.iLine].Count, sel.End.iLine); //select whole line
+                                Selection = new Range(this, this[sel.Start.iLine]?.StartSpacesCount ?? 0, sel.End.iLine, this[sel.Start.iLine]?.Count ?? 0, sel.End.iLine); //select whole line
                                 if (inverted)
                                     Selection.Inverse();
                             }
@@ -3906,7 +3906,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
                         else
                         {
                             //if line contains only spaces then delete line
-                            if (this[Selection.Start.iLine].StartSpacesCount == this[Selection.Start.iLine].Count)
+                            if (this[Selection.Start.iLine]?.StartSpacesCount == this[Selection.Start.iLine]?.Count)
                                 RemoveSpacesAfterCaret();
 
                             if (!Selection.IsReadOnlyRightChar())
@@ -4089,8 +4089,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
 
                 case FCTBAction.ClearHints:
                     ClearHints();
-                    if(MacrosManager != null)
-                        MacrosManager.IsRecording = false;
+                    MacrosManager?.IsRecording = false;
                     break;
 
                 case FCTBAction.MacroRecord:
@@ -4137,11 +4136,10 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
 
         protected virtual void OnCustomAction(CustomActionEventArgs e)
         {
-            if (CustomAction != null)
-                CustomAction(this, e);
+            CustomAction?.Invoke(this, e);
         }
 
-        Font originalFont;
+        Font? originalFont;
 
         private void RestoreFontSize()
         {
@@ -4154,9 +4152,9 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         /// <param name="iLine">Current bookmark line index</param>
         public bool GotoNextBookmark(int iLine)
         {
-            Bookmark nearestBookmark = null;
+            Bookmark? nearestBookmark = null;
             int minNextLineIndex = int.MaxValue;
-            Bookmark minBookmark = null;
+            Bookmark? minBookmark = null;
             int minLineIndex = int.MaxValue;
             foreach (Bookmark bookmark in bookmarks)
             {
@@ -4193,9 +4191,9 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         /// <param name="iLine">Current bookmark line index</param>
         public bool GotoPrevBookmark(int iLine)
         {
-            Bookmark nearestBookmark = null;
+            Bookmark? nearestBookmark = null;
             int maxPrevLineIndex = -1;
-            Bookmark maxBookmark = null;
+            Bookmark? maxBookmark = null;
             int maxLineIndex = -1;
             foreach (Bookmark bookmark in bookmarks)
             {
@@ -4258,7 +4256,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
                     Selection = prevSelection;
                     return;
                 }
-                string text = SelectedText;
+                string? text = SelectedText;
                 var temp = new List<int>();
                 for (int i = Selection.Start.iLine; i <= Selection.End.iLine; i++)
                     temp.Add(i);
@@ -4286,7 +4284,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
                     Selection = prevSelection;
                     return;
                 }
-                string text = SelectedText;
+                string? text = SelectedText;
                 var temp = new List<int>();
                 for (int i = Selection.Start.iLine; i <= Selection.End.iLine; i++)
                     temp.Add(i);
@@ -4305,7 +4303,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
             try
             {
                 int iLine = Selection.Start.iLine;
-                int spaces = this[iLine].StartSpacesCount;
+                int spaces = this[iLine]?.StartSpacesCount ?? 0;
                 if (Selection.Start.iChar <= spaces)
                     Selection.GoHome(shift);
                 else
@@ -4327,7 +4325,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         public virtual void UpperCase()
         {
             Range old = Selection.Clone();
-            SelectedText = SelectedText.ToUpper();
+            SelectedText = SelectedText?.ToUpper();
             Selection.Start = old.Start;
             Selection.End = old.End;
         }
@@ -4338,7 +4336,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         public virtual void LowerCase()
         {
             Range old = Selection.Clone();
-            SelectedText = SelectedText.ToLower();
+            SelectedText = SelectedText?.ToLower();
             Selection.Start = old.Start;
             Selection.End = old.End;
         }
@@ -4349,7 +4347,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         public virtual void TitleCase()
         {
             Range old = Selection.Clone();
-            SelectedText = Thread.CurrentThread.CurrentCulture.TextInfo.ToTitleCase(SelectedText.ToLower());
+            SelectedText = Thread.CurrentThread.CurrentCulture.TextInfo.ToTitleCase(SelectedText!.ToLower());
             Selection.Start = old.Start;
             Selection.End = old.End;
         }
@@ -4360,9 +4358,12 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         public virtual void SentenceCase()
         {
             Range old = Selection.Clone();
-            var lowerCase = SelectedText.ToLower();
-            var r = new Regex(@"(^\S)|[\.\?!:]\s+(\S)", RegexOptions.ExplicitCapture);
-            SelectedText = r.Replace(lowerCase, s => s.Value.ToUpper());
+            var lowerCase = SelectedText?.ToLower();
+            var r = SentenceCaseRegex();
+
+            if(lowerCase != null)
+                SelectedText = r.Replace(lowerCase, s => s.Value.ToUpper());
+
             Selection.Start = old.Start;
             Selection.End = old.End;
         }
@@ -4378,12 +4379,12 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         /// <summary>
         /// Insert/remove comment prefix into selected lines
         /// </summary>
-        public virtual void CommentSelected(string commentPrefix)
+        public virtual void CommentSelected(string? commentPrefix)
         {
             if (string.IsNullOrEmpty(commentPrefix))
                 return;
             Selection.Normalize();
-            bool isCommented = lines[Selection.Start.iLine].Text.TrimStart().StartsWith(commentPrefix);
+            bool isCommented = lines![Selection.Start.iLine]!.Text.TrimStart().StartsWith(commentPrefix);
             if (isCommented)
                 RemoveLinePrefix(commentPrefix);
             else
@@ -4392,8 +4393,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
 
         public void OnKeyPressing(KeyPressEventArgs args)
         {
-            if (KeyPressing != null)
-                KeyPressing(this, args);
+            KeyPressing?.Invoke(this, args);
         }
 
         private bool OnKeyPressing(char c)
@@ -4412,8 +4412,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         public void OnKeyPressed(char c)
         {
             var args = new KeyPressEventArgs(c);
-            if (KeyPressed != null)
-                KeyPressed(this, args);
+            KeyPressed?.Invoke(this, args);
         }
 
         protected override bool ProcessMnemonic(char charCode)
@@ -4445,8 +4444,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
             if (handledChar)
                 return true;
 
-            if (macrosManager != null)
-                macrosManager.ProcessKey(c, modifiers);
+            macrosManager?.ProcessKey(c, modifiers);
             /*  !!!!
             if (c == ' ')
                 return true;*/
@@ -4559,11 +4557,11 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         /// </summary>
         public void DoAutoIndentChars(int iLine)
         {
-            var patterns = AutoIndentCharsPatterns.Split(new char[] {'\r', '\n'}, StringSplitOptions.RemoveEmptyEntries);
+            var patterns = AutoIndentCharsPatterns.Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries);
 
             foreach (var pattern in patterns)
             {
-                var m = Regex.Match(this[iLine].Text, pattern);
+                var m = Regex.Match(this[iLine]!.Text, pattern);
                 if (m.Success)
                 {
                     DoAutoIndentChars(iLine, new Regex(pattern));
@@ -4577,18 +4575,18 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
             var oldSel = Selection.Clone();
 
             var captures = new SortedDictionary<int, CaptureCollection>();
-            var texts = new SortedDictionary<int, string>();
+            var texts = new SortedDictionary<int, string?>();
             var maxCapturesCount = 0;
 
-            var spaces = this[iLine].StartSpacesCount;
+            var spaces = this[iLine]?.StartSpacesCount;
 
             for(var i = iLine; i >= 0; i--)
             {
-                if (spaces != this[i].StartSpacesCount)
+                if (spaces != this[i]?.StartSpacesCount)
                     break;
 
-                var text = this[i].Text;
-                var m = regex.Match(text);
+                var text = this[i]?.Text;
+                var m = regex.Match(text!);
                 if (m.Success)
                 {
                     captures[i] = m.Groups["range"].Captures;
@@ -4603,11 +4601,11 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
 
             for (var i = iLine + 1; i < LinesCount; i++)
             {
-                if (spaces != this[i].StartSpacesCount)
+                if (spaces != this[i]?.StartSpacesCount)
                     break;
 
-                var text = this[i].Text;
-                var m = regex.Match(text);
+                var text = this[i]?.Text;
+                var m = regex.Match(text!);
                 if (m.Success)
                 {
                     captures[i] = m.Groups["range"].Captures;
@@ -4639,7 +4637,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
                     var index = cap.Index;
 
                     var text = texts[i];
-                    while (index > 0 && text[index - 1] == ' ') index--;
+                    while (index > 0 && text?[index - 1] == ' ') index--;
 
                     if (iCapture == 0)
                         dist = index;
@@ -4673,9 +4671,9 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
                         oldSel.Start = new Place(oldSel.Start.iChar + addSpaces, i);
 
                     if (addSpaces > 0)
-                        texts[i] = texts[i].Insert(cap.Index, new string(' ', addSpaces));
+                        texts[i] = texts[i]?.Insert(cap.Index, new string(' ', addSpaces));
                     else
-                        texts[i] = texts[i].Remove(cap.Index + addSpaces, -addSpaces);
+                        texts[i] = texts[i]?.Remove(cap.Index + addSpaces, -addSpaces);
                     
                     changed[i] = true;
                     was = true;
@@ -4694,7 +4692,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
                 foreach (var i in texts.Keys)
                 if (changed.ContainsKey(i))
                 {
-                    Selection = new Range(this, 0, i, this[i].Count, i);
+                    Selection = new Range(this, 0, i, this[i]!.Count, i);
                     if(!Selection.ReadOnly)
                         InsertText(texts[i]);
                 }
@@ -4789,10 +4787,10 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
             {
                 DoCaretVisible();
                 int needSpaces = CalcAutoIndent(Selection.Start.iLine);
-                if (this[Selection.Start.iLine].AutoIndentSpacesNeededCount != needSpaces)
+                if (this[Selection.Start.iLine]?.AutoIndentSpacesNeededCount != needSpaces)
                 {
                     DoAutoIndent(Selection.Start.iLine);
-                    this[Selection.Start.iLine].AutoIndentSpacesNeededCount = needSpaces;
+                    this[Selection.Start.iLine]?.AutoIndentSpacesNeededCount = needSpaces;
                 }
             }
         }
@@ -4801,7 +4799,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         {
             if (!Selection.IsEmpty)
                 return;
-            Place end = Selection.Start;
+            //Place end = Selection.Start;
             while (Selection.CharAfterStart == ' ')
                 Selection.GoRight(true);
             ClearSelected();
@@ -4818,7 +4816,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
             //
             int needSpaces = CalcAutoIndent(iLine);
             //
-            int spaces = lines[iLine].StartSpacesCount;
+            int spaces = lines![iLine]!.StartSpacesCount;
             int needToInsert = needSpaces - spaces;
             if (needToInsert < 0)
                 needToInsert = -Math.Min(-needToInsert, spaces);
@@ -4835,7 +4833,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
                 ClearSelected();
             }
 
-            Selection.Start = new Place(Math.Min(lines[iLine].Count, Math.Max(0, oldStart.iChar + needToInsert)), iLine);
+            Selection.Start = new Place(Math.Min(lines![iLine]!.Count, Math.Max(0, oldStart.iChar + needToInsert)), iLine);
         }
 
         /// <summary>
@@ -4846,7 +4844,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
             if (iLine < 0 || iLine >= LinesCount) return 0;
 
 
-            EventHandler<AutoIndentEventArgs> calculator = AutoIndentNeeded;
+            EventHandler<AutoIndentEventArgs>? calculator = AutoIndentNeeded;
             if (calculator == null)
                 if (Language != Language.Custom && SyntaxHighlighter != null)
                     calculator = SyntaxHighlighter.AutoIndentNeeded;
@@ -4860,13 +4858,13 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
             int i;
             for (i = iLine - 1; i >= 0; i--)
             {
-                var args = new AutoIndentEventArgs(i, lines[i].Text, i > 0 ? lines[i - 1].Text : "", TabLength, 0);
+                var args = new AutoIndentEventArgs(i, lines![i]!.Text, i > 0 ? lines![i - 1]!.Text : "", TabLength, 0);
                 calculator(this, args);
                 stack.Push(args);
                 if (args.Shift == 0 && args.AbsoluteIndentation == 0 && args.LineText.Trim() != "")
                     break;
             }
-            int indent = lines[i >= 0 ? i : 0].StartSpacesCount;
+            int indent = lines![i >= 0 ? i : 0]!.StartSpacesCount;
             while (stack.Count != 0)
             {
                 var arg = stack.Pop();
@@ -4876,25 +4874,25 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
                     indent += arg.ShiftNextLines;
             }
             //clalc shift for current line
-            var a = new AutoIndentEventArgs(iLine, lines[iLine].Text, iLine > 0 ? lines[iLine - 1].Text : "", TabLength, indent);
+            var a = new AutoIndentEventArgs(iLine, lines![iLine]!.Text, iLine > 0 ? lines![iLine - 1]!.Text : "", TabLength, indent);
             calculator(this, a);
             needSpaces = a.AbsoluteIndentation + a.Shift;
 
             return needSpaces;
         }
 
-        internal virtual void CalcAutoIndentShiftByCodeFolding(object sender, AutoIndentEventArgs args)
+        internal virtual void CalcAutoIndentShiftByCodeFolding(object? sender, AutoIndentEventArgs args)
         {
             //inset TAB after start folding marker
-            if (string.IsNullOrEmpty(lines[args.iLine].FoldingEndMarker) &&
-                !string.IsNullOrEmpty(lines[args.iLine].FoldingStartMarker))
+            if (string.IsNullOrEmpty(lines![args.ILine]?.FoldingEndMarker) &&
+                !string.IsNullOrEmpty(lines![args.ILine]?.FoldingStartMarker))
             {
                 args.ShiftNextLines = TabLength;
                 return;
             }
             //remove TAB before end folding marker
-            if (!string.IsNullOrEmpty(lines[args.iLine].FoldingEndMarker) &&
-                string.IsNullOrEmpty(lines[args.iLine].FoldingStartMarker))
+            if (!string.IsNullOrEmpty(lines![args.ILine]?.FoldingEndMarker) &&
+                string.IsNullOrEmpty(lines![args.ILine]?.FoldingStartMarker))
             {
                 args.Shift = -TabLength;
                 args.ShiftNextLines = -TabLength;
@@ -4911,7 +4909,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
             int result = int.MaxValue;
             for (int i = fromLine; i <= toLine; i++)
             {
-                int count = lines[i].StartSpacesCount;
+                int count = lines![i]!.StartSpacesCount;
                 if (count < result)
                     result = count;
             }
@@ -4927,7 +4925,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
             int result = 0;
             for (int i = fromLine; i <= toLine; i++)
             {
-                int count = lines[i].StartSpacesCount;
+                int count = lines![i]!.StartSpacesCount;
                 if (count > result)
                     result = count;
             }
@@ -4940,7 +4938,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         /// </summary>
         public virtual void Undo()
         {
-            lines.Manager.Undo();
+            lines!.Manager.Undo();
             DoCaretVisible();
             Invalidate();
         }
@@ -4950,7 +4948,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         /// </summary>
         public virtual void Redo()
         {
-            lines.Manager.Redo();
+            lines!.Manager.Redo();
             DoCaretVisible();
             Invalidate();
         }
@@ -4994,20 +4992,25 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
             return base.IsInputKey(keyData);
         }
 
-        [DllImport("User32.dll")]
-        private static extern bool CreateCaret(IntPtr hWnd, int hBitmap, int nWidth, int nHeight);
+        [LibraryImport("User32.dll")]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        private static partial bool CreateCaret(IntPtr hWnd, int hBitmap, int nWidth, int nHeight);
 
-        [DllImport("User32.dll")]
-        private static extern bool SetCaretPos(int x, int y);
+        [LibraryImport("User32.dll")]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        private static partial bool SetCaretPos(int x, int y);
 
-        [DllImport("User32.dll")]
-        private static extern bool DestroyCaret();
+        [LibraryImport("User32.dll")]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        private static partial bool DestroyCaret();
 
-        [DllImport("User32.dll")]
-        private static extern bool ShowCaret(IntPtr hWnd);
+        [LibraryImport("User32.dll")]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        private static partial bool ShowCaret(IntPtr hWnd);
 
-        [DllImport("User32.dll")]
-        private static extern bool HideCaret(IntPtr hWnd);
+        [LibraryImport("User32.dll")]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        private static partial bool HideCaret(IntPtr hWnd);
 
         protected override void OnPaintBackground(PaintEventArgs e)
         {
@@ -5039,9 +5042,9 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
 
             var startLine = start.iLine;
             //draw text
-            for (int iLine = startLine; iLine < lines.Count; iLine++)
+            for (int iLine = startLine; iLine < lines!.Count; iLine++)
             {
-                Line line = lines[iLine];
+                Line? line = lines![iLine];
                 LineInfo lineInfo = LineInfos[iLine];
                 //
                 if (lineInfo.startY > startY + size.Height)
@@ -5056,7 +5059,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
                 gr.SmoothingMode = SmoothingMode.None;
                 //draw line background
                 if (lineInfo.VisibleState == VisibleState.Visible)
-                    if (line.BackgroundBrush != null)
+                    if (line?.BackgroundBrush != null)
                         gr.FillRectangle(line.BackgroundBrush, new Rectangle(0, y, size.Width, CharHeight * lineInfo.WordWrapStringsCount));
                 //
                 gr.SmoothingMode = SmoothingMode.AntiAlias;
@@ -5145,9 +5148,9 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
             e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
 
             //draw text
-            for (iLine = startLine; iLine < lines.Count; iLine++)
+            for (iLine = startLine; iLine < lines!.Count; iLine++)
             {
-                Line line = lines[iLine];
+                Line? line = lines![iLine];
                 LineInfo lineInfo = LineInfos[iLine];
                 //
                 if (lineInfo.startY > VerticalScroll.Value + ClientSize.Height)
@@ -5162,7 +5165,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
                 e.Graphics.SmoothingMode = SmoothingMode.None;
                 //draw line background
                 if (lineInfo.VisibleState == VisibleState.Visible)
-                    if (line.BackgroundBrush != null)
+                    if (line?.BackgroundBrush != null)
                         e.Graphics.FillRectangle(line.BackgroundBrush,
                                                  new Rectangle(textAreaRect.Left, y, textAreaRect.Width,
                                                                CharHeight*lineInfo.WordWrapStringsCount));
@@ -5172,15 +5175,15 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
                         e.Graphics.FillRectangle(currentLineBrush,
                                                  new Rectangle(textAreaRect.Left, y, textAreaRect.Width, CharHeight));
                 //draw changed line marker
-                if (ChangedLineColor != Color.Transparent && line.IsChanged)
+                if (ChangedLineColor != Color.Transparent && (line?.IsChanged ?? false))
                     e.Graphics.FillRectangle(changedLineBrush,
                                              new RectangleF(-10, y, LeftIndent - minLeftIndent - 2 + 10, CharHeight + 1));
                 //
                 e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
                 //
                 //draw bookmark
-                if (bookmarksByLineIndex.ContainsKey(iLine))
-                    bookmarksByLineIndex[iLine].Paint(e.Graphics,
+                if (bookmarksByLineIndex.TryGetValue(iLine, out Bookmark? value))
+                    value.Paint(e.Graphics,
                                                       new Rectangle(LeftIndent, y, Width,
                                                                     CharHeight*lineInfo.WordWrapStringsCount));
                 //OnPaintLine event
@@ -5195,10 +5198,10 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
                     var lineNumber = iLine + (int)lineNumberStartValue;
                     var lineNumberText = LineNumberFormatting?.FromLineNumberToString(lineNumber) ?? $"{lineNumber}";
 
-                    using (var lineNumberBrush = new SolidBrush(LineNumberColor))
-                        e.Graphics.DrawString(lineNumberText, Font, lineNumberBrush,
-                                               new RectangleF(-10, y, LeftIndent - minLeftIndent - 2 + 10, CharHeight + (int)(lineInterval * 0.5f)),
-                                               new StringFormat(StringFormatFlags.DirectionRightToLeft) { LineAlignment = StringAlignment.Center });
+                    using var lineNumberBrush = new SolidBrush(LineNumberColor);
+                    e.Graphics.DrawString(lineNumberText, Font, lineNumberBrush,
+                                           new RectangleF(-10, y, LeftIndent - minLeftIndent - 2 + 10, CharHeight + (int)(lineInterval * 0.5f)),
+                                           new StringFormat(StringFormatFlags.DirectionRightToLeft) { LineAlignment = StringAlignment.Center });
                 }
 
                 //create markers
@@ -5207,11 +5210,11 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
                 if (lineInfo.VisibleState == VisibleState.StartOfHiddenBlock)
                     visibleMarkers.Add(new ExpandFoldingMarker(iLine, new Rectangle(LeftIndentLine - markerRadius, y + CharHeight/2 - markerRadius + 1, markerSize, markerSize)));
 
-                if (!string.IsNullOrEmpty(line.FoldingStartMarker) && lineInfo.VisibleState == VisibleState.Visible &&
+                if (!string.IsNullOrEmpty(line?.FoldingStartMarker) && lineInfo.VisibleState == VisibleState.Visible &&
                     string.IsNullOrEmpty(line.FoldingEndMarker))
                         visibleMarkers.Add(new CollapseFoldingMarker(iLine, new Rectangle(LeftIndentLine - markerRadius, y + CharHeight/2 - markerRadius + 1, markerSize, markerSize)));
 
-                if (lineInfo.VisibleState == VisibleState.Visible && !string.IsNullOrEmpty(line.FoldingEndMarker) &&
+                if (lineInfo.VisibleState == VisibleState.Visible && !string.IsNullOrEmpty(line?.FoldingEndMarker) &&
                     string.IsNullOrEmpty(line.FoldingStartMarker))
                     e.Graphics.DrawLine(servicePen, LeftIndentLine, y + CharHeight*lineInfo.WordWrapStringsCount - 1,
                                         LeftIndentLine + 4, y + CharHeight*lineInfo.WordWrapStringsCount - 1);
@@ -5241,16 +5244,16 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
 
             //draw column selection
             if (Selection.ColumnSelectionMode)
-                if (SelectionStyle.BackgroundBrush is SolidBrush)
+                if (SelectionStyle?.BackgroundBrush is SolidBrush brush)
                 {
-                    Color color = ((SolidBrush) SelectionStyle.BackgroundBrush).Color;
+                    Color color = brush.Color;
                     Point p1 = PlaceToPoint(Selection.Start);
                     Point p2 = PlaceToPoint(Selection.End);
-                    using (var pen = new Pen(color))
-                        e.Graphics.DrawRectangle(pen,
-                                                 Rectangle.FromLTRB(Math.Min(p1.X, p2.X) - 1, Math.Min(p1.Y, p2.Y),
-                                                                    Math.Max(p1.X, p2.X),
-                                                                    Math.Max(p1.Y, p2.Y) + CharHeight));
+                    using var pen = new Pen(color);
+                    e.Graphics.DrawRectangle(pen,
+                                             Rectangle.FromLTRB(Math.Min(p1.X, p2.X) - 1, Math.Min(p1.Y, p2.Y),
+                                                                Math.Max(p1.X, p2.X),
+                                                                Math.Max(p1.Y, p2.Y) + CharHeight));
                 }
             //draw brackets highlighting
             if (BracketsStyle != null && leftBracketPosition != null && rightBracketPosition != null)
@@ -5277,8 +5280,8 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
                                              (LineInfos[endFoldingLine].WordWrapStringsCount - 1)*CharHeight
                                            : TextHeight + CharHeight) - VerticalScroll.Value + CharHeight;
 
-                    using (var indicatorPen = new Pen(Color.FromArgb(100, FoldingIndicatorColor), 4))
-                        e.Graphics.DrawLine(indicatorPen, LeftIndent - 5, startFoldingY, LeftIndent - 5, endFoldingY);
+                    using var indicatorPen = new Pen(Color.FromArgb(100, FoldingIndicatorColor), 4);
+                    e.Graphics.DrawLine(indicatorPen, LeftIndent - 5, startFoldingY, LeftIndent - 5, endFoldingY);
                 }
             //draw hint's brackets
             PaintHintBrackets(e.Graphics);
@@ -5294,8 +5297,8 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
                 int carWidth = (IsReplaceMode || WideCaret) ? CharWidth : 1;
                 if (WideCaret)
                 {
-                    using (var brush = new SolidBrush(CaretColor))
-                        e.Graphics.FillRectangle(brush, car.X, car.Y, carWidth, caretHeight + 1);
+                    using var brush = new SolidBrush(CaretColor);
+                    e.Graphics.FillRectangle(brush, car.X, car.Y, carWidth, caretHeight + 1);
                 }
                 else
                     using (var pen = new Pen(CaretColor))
@@ -5349,17 +5352,17 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         {
             foreach (VisualMarker m in visibleMarkers)
             {
-                if(m is CollapseFoldingMarker)
+                if(m is CollapseFoldingMarker collapseFoldingMarker)
                     using(var bk = new SolidBrush(ServiceColors.CollapseMarkerBackColor))
                     using(var fore = new Pen(ServiceColors.CollapseMarkerForeColor))
                     using(var border = new Pen(ServiceColors.CollapseMarkerBorderColor))
-                        (m as CollapseFoldingMarker).Draw(e.Graphics, border, bk, fore);
+                        collapseFoldingMarker.Draw(e.Graphics, border, bk, fore);
                 else
-                if (m is ExpandFoldingMarker)
+                if (m is ExpandFoldingMarker expandFoldingMarker)
                     using (var bk = new SolidBrush(ServiceColors.ExpandMarkerBackColor))
                     using (var fore = new Pen(ServiceColors.ExpandMarkerForeColor))
                     using (var border = new Pen(ServiceColors.ExpandMarkerBorderColor))
-                        (m as ExpandFoldingMarker).Draw(e.Graphics, border, bk, fore);
+                        expandFoldingMarker.Draw(e.Graphics, border, bk, fore);
                 else
                     m.Draw(e.Graphics, servicePen);
             }
@@ -5387,11 +5390,11 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
             graphics.Restore(state);
             using (var font = new Font(FontFamily.GenericSansSerif, 8f))
                 graphics.DrawString("Recording...", font, Brushes.Red, new PointF(rect.Left + h, rect.Top));
-            System.Threading.Timer tm = null;
+            System.Threading.Timer? tm = null;
             tm = new System.Threading.Timer(
                 (o) => {
                     Invalidate(rect);
-                    tm.Dispose();
+                    tm?.Dispose();
                 }, null, 200, System.Threading.Timeout.Infinite);
         }
 
@@ -5409,16 +5412,14 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
                 var rCorner = new Rectangle(rect.Right, rect.Bottom, shadowSize, shadowSize);
                 var rRight = new Rectangle(rect.Right, rect.Top + shadowSize, shadowSize, rect.Height - shadowSize);
 
-                using (var brush = new SolidBrush(Color.FromArgb(80, TextAreaBorderColor)))
-                {
-                    graphics.FillRectangle(brush, rBottom);
-                    graphics.FillRectangle(brush, rRight);
-                    graphics.FillRectangle(brush, rCorner);
-                }
+                using var brush = new SolidBrush(Color.FromArgb(80, TextAreaBorderColor));
+                graphics.FillRectangle(brush, rBottom);
+                graphics.FillRectangle(brush, rRight);
+                graphics.FillRectangle(brush, rCorner);
             }
 
-            using(Pen pen = new Pen(TextAreaBorderColor))
-                graphics.DrawRectangle(pen, rect);
+            using Pen pen = new(TextAreaBorderColor);
+            graphics.DrawRectangle(pen, rect);
         }
 
         private void PaintHintBrackets(Graphics gr)
@@ -5433,33 +5434,29 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
                     GetVisibleState(r.End.iLine) != VisibleState.Visible)
                     continue;
 
-                using (var pen = new Pen(hint.BorderColor))
+                using var pen = new Pen(hint.BorderColor);
+                pen.DashStyle = DashStyle.Dash;
+                if (r.IsEmpty)
                 {
-                    pen.DashStyle = DashStyle.Dash;
-                    if (r.IsEmpty)
-                    {
-                        p1.Offset(1, -1);
-                        gr.DrawLines(pen, new[] {p1, new Point(p1.X, p1.Y + charHeight + 2)});
-                    }
-                    else
-                    {
-                        p1.Offset(-1, -1);
-                        p2.Offset(1, -1);
-                        gr.DrawLines(pen,
-                                     new[]
-                                         {
+                    p1.Offset(1, -1);
+                    gr.DrawLines(pen, [p1, new Point(p1.X, p1.Y + charHeight + 2)]);
+                }
+                else
+                {
+                    p1.Offset(-1, -1);
+                    p2.Offset(1, -1);
+                    gr.DrawLines(pen,
+                                 [
                                              new Point(p1.X + CharWidth/2, p1.Y), p1,
                                              new Point(p1.X, p1.Y + charHeight + 2),
                                              new Point(p1.X + CharWidth/2, p1.Y + charHeight + 2)
-                                         });
-                        gr.DrawLines(pen,
-                                     new[]
-                                         {
+                                     ]);
+                    gr.DrawLines(pen,
+                                 [
                                              new Point(p2.X - CharWidth/2, p2.Y), p2,
                                              new Point(p2.X, p2.Y + charHeight + 2),
                                              new Point(p2.X - CharWidth/2, p2.Y + charHeight + 2)
-                                         });
-                    }
+                                     ]);
                 }
             }
         }
@@ -5467,43 +5464,43 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         protected virtual void DrawFoldingLines(PaintEventArgs e, int startLine, int endLine)
         {
             e.Graphics.SmoothingMode = SmoothingMode.None;
-            using (var pen = new Pen(Color.FromArgb(200, ServiceLinesColor)) {DashStyle = DashStyle.Dot})
-                foreach (var iLine in foldingPairs)
-                    if (iLine.Key < endLine && iLine.Value > startLine)
+            using var pen = new Pen(Color.FromArgb(200, ServiceLinesColor)) { DashStyle = DashStyle.Dot };
+            foreach (var iLine in foldingPairs)
+                if (iLine.Key < endLine && iLine.Value > startLine)
+                {
+                    Line? line = lines![iLine.Key];
+                    int y = LineInfos[iLine.Key].startY - VerticalScroll.Value + CharHeight;
+                    y += y % 2;
+
+                    int y2;
+
+                    if (iLine.Value >= LinesCount)
+                        y2 = LineInfos[LinesCount - 1].startY + CharHeight - VerticalScroll.Value;
+                    else if (LineInfos[iLine.Value].VisibleState == VisibleState.Visible)
                     {
-                        Line line = lines[iLine.Key];
-                        int y = LineInfos[iLine.Key].startY - VerticalScroll.Value + CharHeight;
-                        y += y%2;
-
-                        int y2;
-
-                        if (iLine.Value >= LinesCount)
-                            y2 = LineInfos[LinesCount - 1].startY + CharHeight - VerticalScroll.Value;
-                        else if (LineInfos[iLine.Value].VisibleState == VisibleState.Visible)
-                        {
-                            int d = 0;
-                            int spaceCount = line.StartSpacesCount;
-                            if (lines[iLine.Value].Count <= spaceCount || lines[iLine.Value][spaceCount].c == ' ')
-                                d = CharHeight;
-                            y2 = LineInfos[iLine.Value].startY - VerticalScroll.Value + d;
-                        }
-                        else
-                            continue;
-
-                        int x = LeftIndent + Paddings.Left + line.StartSpacesCount*CharWidth - HorizontalScroll.Value;
-                        if (x >= LeftIndent + Paddings.Left)
-                            e.Graphics.DrawLine(pen, x, y >= 0 ? y : 0, x,
-                                                y2 < ClientSize.Height ? y2 : ClientSize.Height);
+                        int d = 0;
+                        int spaceCount = line!.StartSpacesCount;
+                        if (lines![iLine.Value]!.Count <= spaceCount || lines![iLine.Value]![spaceCount].c == ' ')
+                            d = CharHeight;
+                        y2 = LineInfos[iLine.Value].startY - VerticalScroll.Value + d;
                     }
+                    else
+                        continue;
+
+                    int x = LeftIndent + Paddings.Left + line!.StartSpacesCount * CharWidth - HorizontalScroll.Value;
+                    if (x >= LeftIndent + Paddings.Left)
+                        e.Graphics.DrawLine(pen, x, y >= 0 ? y : 0, x,
+                                            y2 < ClientSize.Height ? y2 : ClientSize.Height);
+                }
         }
 
         private void DrawLineChars(Graphics gr, int firstChar, int lastChar, int iLine, int iWordWrapLine, int startX,
                                    int y)
         {
-            Line line = lines[iLine];
+            Line? line = lines![iLine];
             LineInfo lineInfo = LineInfos[iLine];
             int from = lineInfo.GetWordWrapStringStartPosition(iWordWrapLine);
-            int to = lineInfo.GetWordWrapStringFinishPosition(iWordWrapLine, line);
+            int to = lineInfo.GetWordWrapStringFinishPosition(iWordWrapLine, line!);
 
             lastChar = Math.Min(to - from, lastChar);
 
@@ -5524,7 +5521,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
 
                 for (int iChar = firstChar; iChar <= lastChar; iChar++)
                 {
-                    StyleIndex style = line[from + iChar].style;
+                    StyleIndex style = line![from + iChar].style;
                     if (currentStyleIndex != style)
                     {
                         FlushRendering(gr, currentStyleIndex,
@@ -5563,18 +5560,18 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
                 {
                     if (Styles[i] != null && ((int) styleIndex & mask) != 0)
                     {
-                        Style style = Styles[i];
+                        Style? style = Styles[i];
                         bool isTextStyle = style is TextStyle;
                         if (!hasTextStyle || !isTextStyle || AllowSeveralTextStyleDrawing)
                             //cancelling secondary rendering by TextStyle
-                            style.Draw(gr, pos, range); //rendering
+                            style?.Draw(gr, pos, range); //rendering
                         hasTextStyle |= isTextStyle;
                     }
-                    mask = mask << 1;
+                    mask <<= 1;
                 }
                 //draw by default renderer
                 if (!hasTextStyle)
-                    DefaultStyle.Draw(gr, pos, range);
+                    DefaultStyle?.Draw(gr, pos, range);
             }
         }
 
@@ -5618,7 +5615,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
 
             if (e.Button == MouseButtons.Left)
             {
-                VisualMarker marker = FindVisualMarkerForPoint(e.Location);
+                VisualMarker? marker = FindVisualMarkerForPoint(e.Location);
                 //click on marker
                 if (marker != null)
                 {
@@ -5648,7 +5645,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
                         return;
                     }
 
-                    if (Selection.IsEmpty || !Selection.Contains(p) || this[p.iLine].Count <= p.iChar || ReadOnly)
+                    if (Selection.IsEmpty || !Selection.Contains(p) || this[p.iLine]?.Count <= p.iChar || ReadOnly)
                         OnMouseClickText(e);
                     else
                     {
@@ -5786,10 +5783,8 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         {
             try
             {
-                using (RegistryKey key = Registry.CurrentUser.OpenSubKey(@"Control Panel\Desktop", false))
-                {
-                    return Convert.ToInt32(key.GetValue("WheelScrollLines"));
-                }
+                using RegistryKey? key = Registry.CurrentUser.OpenSubKey(@"Control Panel\Desktop", false);
+                return Convert.ToInt32(key?.GetValue("WheelScrollLines"));
             }
             catch
             {
@@ -5801,14 +5796,12 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         public void ChangeFontSize(int step)
         {
             var points = Font.SizeInPoints;
-            using (var gr = Graphics.FromHwnd(Handle))
-            {
-                var dpi = gr.DpiY;
-                var newPoints = points + step * 72f / dpi;
-                if(newPoints < 1f) return;
-                var k = newPoints / originalFont.SizeInPoints;
-                Zoom = (int)Math.Round(100 * k);
-            }
+            using var gr = Graphics.FromHwnd(Handle);
+            var dpi = gr.DpiY;
+            var newPoints = points + step * 72f / dpi;
+            if (newPoints < 1f) return;
+            var k = newPoints / originalFont!.SizeInPoints;
+            Zoom = (int)Math.Round(100 * k);
         }
 
         /// <summary>
@@ -5828,8 +5821,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
 
         protected virtual void OnZoomChanged()
         {
-            if (ZoomChanged != null)
-                ZoomChanged(this, EventArgs.Empty);
+            ZoomChanged?.Invoke(this, EventArgs.Empty);
         }
 
         private void DoZoom(float koeff)
@@ -5837,7 +5829,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
             //remember first displayed line
             var iLine = YtoLineIndex(VerticalScroll.Value);
             //
-            var points = originalFont.SizeInPoints;
+            var points = originalFont!.SizeInPoints;
             points *= koeff;
 
             if (points < 1f || points > 300f) return;
@@ -5864,7 +5856,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
             CancelToolTip();
         }
 
-        protected Range draggedRange;
+        protected Range? draggedRange;
 
         protected override void OnMouseMove(MouseEventArgs e)
         {
@@ -5884,7 +5876,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
             if (e.Button == MouseButtons.Left && mouseIsDragDrop)
             {
                 draggedRange = Selection.Clone();
-                DoDragDrop(SelectedText, DragDropEffects.Copy);
+                DoDragDrop(SelectedText!, DragDropEffects.Copy);
                 draggedRange = null;
                 return;
             }
@@ -5938,7 +5930,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
                 }
             }
 
-            VisualMarker marker = FindVisualMarkerForPoint(e.Location);
+            VisualMarker? marker = FindVisualMarkerForPoint(e.Location);
             if (marker != null)
                 base.Cursor = marker.Cursor;
             else
@@ -5974,9 +5966,9 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
             int fromX = p.iChar;
             int toX = p.iChar;
 
-            for (int i = p.iChar; i < lines[p.iLine].Count; i++)
+            for (int i = p.iChar; i < lines![p.iLine]!.Count; i++)
             {
-                char c = lines[p.iLine][i].c;
+                char c = lines![p.iLine]![i].c;
                 if (char.IsLetterOrDigit(c) || c == '_')
                     toX = i + 1;
                 else
@@ -5985,7 +5977,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
 
             for (int i = p.iChar - 1; i >= 0; i--)
             {
-                char c = lines[p.iLine][i].c;
+                char c = lines![p.iLine]![i].c;
                 if (char.IsLetterOrDigit(c) || c == '_')
                     fromX = i;
                 else
@@ -6000,7 +5992,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
             int i = LineInfos.BinarySearch(new LineInfo(-10), new LineYComparer(y));
             i = i < 0 ? -i - 2 : i;
             if (i < 0) return 0;
-            if (i > lines.Count - 1) return lines.Count - 1;
+            if (i > lines!.Count - 1) return lines!.Count - 1;
             return i;
         }
 
@@ -6022,14 +6014,14 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
 
             int y = 0;
 
-            for (; iLine < lines.Count; iLine++)
+            for (; iLine < lines!.Count; iLine++)
             {
                 y = LineInfos[iLine].startY + LineInfos[iLine].WordWrapStringsCount*CharHeight;
                 if (y > point.Y && LineInfos[iLine].VisibleState == VisibleState.Visible)
                     break;
             }
-            if (iLine >= lines.Count)
-                iLine = lines.Count - 1;
+            if (iLine >= lines!.Count)
+                iLine = lines!.Count - 1;
             if (LineInfos[iLine].VisibleState != VisibleState.Visible)
                 iLine = FindPrevVisibleLine(iLine);
             //
@@ -6051,7 +6043,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
             if (iWordWrapLine < 0) iWordWrapLine = 0;
             //
             int start = LineInfos[iLine].GetWordWrapStringStartPosition(iWordWrapLine);
-            int finish = LineInfos[iLine].GetWordWrapStringFinishPosition(iWordWrapLine, lines[iLine]);
+            int finish = LineInfos[iLine].GetWordWrapStringFinishPosition(iWordWrapLine, lines![iLine]!);
             var x = (int) Math.Round((float) point.X/CharWidth);
             if (iWordWrapLine > 0)
                 x -= LineInfos[iLine].wordWrapIndent;
@@ -6059,8 +6051,8 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
             x = x < 0 ? start : start + x;
             if (x > finish)
                 x = finish + 1;
-            if (x > lines[iLine].Count)
-                x = lines[iLine].Count;
+            if (x > lines![iLine]!.Count)
+                x = lines![iLine]!.Count;
 
 #if debug
             Console.WriteLine("PointToPlace: " + sw.ElapsedMilliseconds);
@@ -6092,7 +6084,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         /// <summary>
         /// Fires TextChanging event
         /// </summary>
-        public virtual void OnTextChanging(ref string text)
+        public virtual void OnTextChanging(ref string? text)
         {
             ClearBracketsPositions();
 
@@ -6108,7 +6100,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
 
         public virtual void OnTextChanging()
         {
-            string temp = null;
+            string? temp = null;
             OnTextChanging(ref temp);
         }
 
@@ -6127,9 +6119,11 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         /// </summary>
         public virtual void OnTextChanged(int fromLine, int toLine)
         {
-            var r = new Range(this);
-            r.Start = new Place(0, Math.Min(fromLine, toLine));
-            r.End = new Place(lines[Math.Max(fromLine, toLine)].Count, Math.Max(fromLine, toLine));
+            var r = new Range(this)
+            {
+                Start = new Place(0, Math.Min(fromLine, toLine)),
+                End = new Place(lines![Math.Max(fromLine, toLine)]!.Count, Math.Max(fromLine, toLine))
+            };
             OnTextChanged(new TextChangedEventArgs(r));
         }
 
@@ -6183,7 +6177,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
                     if (updatingRange.Start.iLine > args.ChangedRange.Start.iLine)
                         updatingRange.Start = new Place(0, args.ChangedRange.Start.iLine);
                     if (updatingRange.End.iLine < args.ChangedRange.End.iLine)
-                        updatingRange.End = new Place(lines[args.ChangedRange.End.iLine].Count,
+                        updatingRange.End = new Place(lines![args.ChangedRange.End.iLine]!.Count,
                                                       args.ChangedRange.End.iLine);
                     updatingRange = updatingRange.GetIntersectionWith(Range);
                 }
@@ -6216,11 +6210,9 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
             //
             OnSyntaxHighlight(args);
             //
-            if (TextChanged != null)
-                TextChanged(this, args);
+            TextChanged?.Invoke(this, args);
             //
-            if (BindingTextChanged != null)
-                BindingTextChanged(this, EventArgs.Empty);
+            BindingTextChanged?.Invoke(this, EventArgs.Empty);
             //
             base.OnTextChanged(EventArgs.Empty);
             //
@@ -6237,16 +6229,16 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         private void ClearFoldingState(Range range)
         {
             for (int iLine = range.Start.iLine; iLine <= range.End.iLine; iLine++)
-                if (iLine >= 0 && iLine < lines.Count)
-                    FoldedBlocks.Remove(this[iLine].UniqueId);
+                if (iLine >= 0 && iLine < lines!.Count)
+                    FoldedBlocks.Remove(this[iLine]!.UniqueId);
         }
 
 
         private void MarkLinesAsChanged(Range range)
         {
             for (int iLine = range.Start.iLine; iLine <= range.End.iLine; iLine++)
-                if (iLine >= 0 && iLine < lines.Count)
-                    lines[iLine].IsChanged = true;
+                if (iLine >= 0 && iLine < lines!.Count)
+                    lines![iLine]!.IsChanged = true;
         }
 
         /// <summary>
@@ -6264,8 +6256,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
             needRiseSelectionChangedDelayed = true;
             ResetTimer(timer);
 
-            if (SelectionChanged != null)
-                SelectionChanged(this, new EventArgs());
+            SelectionChanged?.Invoke(this, new EventArgs());
 
 #if debug
             Console.WriteLine("OnSelectionChanged: "+ sw.ElapsedMilliseconds);
@@ -6286,8 +6277,8 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
             int counter = 0;
             for (int i = Selection.Start.iLine; i >= Math.Max(Selection.Start.iLine - maxLinesForFolding, 0); i--)
             {
-                bool hasStartMarker = lines.LineHasFoldingStartMarker(i);
-                bool hasEndMarker = lines.LineHasFoldingEndMarker(i);
+                bool hasStartMarker = lines!.LineHasFoldingStartMarker(i);
+                bool hasEndMarker = lines!.LineHasFoldingEndMarker(i);
 
                 if (hasEndMarker && hasStartMarker)
                     continue;
@@ -6318,8 +6309,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
 
         protected virtual void OnFoldingHighlightChanged()
         {
-            if (FoldingHighlightChanged != null)
-                FoldingHighlightChanged(this, EventArgs.Empty);
+            FoldingHighlightChanged?.Invoke(this, EventArgs.Empty);
         }
 
         protected override void OnGotFocus(EventArgs e)
@@ -6344,13 +6334,13 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         /// <returns>Point of char</returns>
         public int PlaceToPosition(Place point)
         {
-            if (point.iLine < 0 || point.iLine >= lines.Count ||
-                point.iChar >= lines[point.iLine].Count + Environment.NewLine.Length)
+            if (point.iLine < 0 || point.iLine >= lines!.Count ||
+                point.iChar >= lines![point.iLine]!.Count + Environment.NewLine.Length)
                 return -1;
 
             int result = 0;
             for (int i = 0; i < point.iLine; i++)
-                result += lines[i].Count + Environment.NewLine.Length;
+                result += lines![i]!.Count + Environment.NewLine.Length;
             result += point.iChar;
 
             return result;
@@ -6364,19 +6354,19 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
             if (pos < 0)
                 return new Place(0, 0);
 
-            for (int i = 0; i < lines.Count; i++)
+            for (int i = 0; i < lines!.Count; i++)
             {
-                int lineLength = lines[i].Count + Environment.NewLine.Length;
-                if (pos < lines[i].Count)
+                int lineLength = lines![i]!.Count + Environment.NewLine.Length;
+                if (pos < lines![i]!.Count)
                     return new Place(pos, i);
                 if (pos < lineLength)
-                    return new Place(lines[i].Count, i);
+                    return new Place(lines![i]!.Count, i);
 
                 pos -= lineLength;
             }
 
-            if (lines.Count > 0)
-                return new Place(lines[lines.Count - 1].Count, lines.Count - 1);
+            if (lines!.Count > 0)
+                return new Place(lines![^1]!.Count, lines!.Count - 1);
             else
                 return new Place(0, 0);
             //throw new ArgumentOutOfRangeException("Position out of range");
@@ -6407,7 +6397,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
             if(iWordWrapIndex > 0 )
                 x += LineInfos[place.iLine].wordWrapIndent * CharWidth;
             //
-            y = y - VerticalScroll.Value;
+            y -= VerticalScroll.Value;
             x = LeftIndent + Paddings.Left + x - HorizontalScroll.Value;
 
             return new Point(x, y);
@@ -6421,9 +6411,11 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         /// <returns>Range</returns>
         public Range GetRange(int fromPos, int toPos)
         {
-            var sel = new Range(this);
-            sel.Start = PositionToPlace(fromPos);
-            sel.End = PositionToPlace(toPos);
+            var sel = new Range(this)
+            {
+                Start = PositionToPlace(fromPos),
+                End = PositionToPlace(toPos)
+            };
             return sel;
         }
 
@@ -6473,10 +6465,10 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         /// <returns>Text</returns>
         public string GetLineText(int iLine)
         {
-            if (iLine < 0 || iLine >= lines.Count)
-                throw new ArgumentOutOfRangeException("Line index out of range");
-            var sb = new StringBuilder(lines[iLine].Count);
-            foreach (Char c in lines[iLine])
+            if (iLine < 0 || iLine >= lines!.Count)
+                throw new ArgumentOutOfRangeException(nameof(iLine), "Line index out of range");
+            var sb = new StringBuilder(lines![iLine]!.Count);
+            foreach (Char c in lines![iLine]!)
                 sb.Append(c.c);
             return sb.ToString();
         }
@@ -6487,8 +6479,8 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         /// <param name="iLine">Start line</param>
         public virtual void ExpandFoldedBlock(int iLine)
         {
-            if (iLine < 0 || iLine >= lines.Count)
-                throw new ArgumentOutOfRangeException("Line index out of range");
+            if (iLine < 0 || iLine >= lines!.Count)
+                throw new ArgumentOutOfRangeException(nameof(iLine), "Line index out of range");
             //find all hidden lines afetr iLine
             int end = iLine;
             for (; end < LinesCount - 1; end++)
@@ -6499,7 +6491,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
 
             ExpandBlock(iLine, end);
 
-            FoldedBlocks.Remove(this[iLine].UniqueId);//remove folded state for this line
+            FoldedBlocks.Remove(this[iLine]!.UniqueId);//remove folded state for this line
             AdjustFolding();
         }
 
@@ -6511,7 +6503,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
             //collapse folded blocks
             for (int iLine = 0; iLine < LinesCount; iLine++)
                 if (LineInfos[iLine].VisibleState == VisibleState.Visible)
-                    if (FoldedBlocks.ContainsKey(this[iLine].UniqueId))
+                    if (FoldedBlocks.ContainsKey(this[iLine]!.UniqueId))
                         CollapseFoldingBlock(iLine);
         }
 
@@ -6568,7 +6560,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         public virtual void CollapseAllFoldingBlocks()
         {
             for (int i = 0; i < LinesCount; i++)
-                if (lines.LineHasFoldingStartMarker(i))
+                if (lines!.LineHasFoldingStartMarker(i))
                 {
                     int iFinish = FindEndOfFoldingBlock(i);
                     if (iFinish >= 0)
@@ -6604,17 +6596,17 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         /// <param name="iLine">Start folding line</param>
         public virtual void CollapseFoldingBlock(int iLine)
         {
-            if (iLine < 0 || iLine >= lines.Count)
-                throw new ArgumentOutOfRangeException("Line index out of range");
-            if (string.IsNullOrEmpty(lines[iLine].FoldingStartMarker))
-                throw new ArgumentOutOfRangeException("This line is not folding start line");
+            if (iLine < 0 || iLine >= lines!.Count)
+                throw new ArgumentOutOfRangeException(nameof(iLine), "Line index out of range");
+            if (string.IsNullOrEmpty(lines![iLine]?.FoldingStartMarker))
+                throw new ArgumentOutOfRangeException(nameof(iLine), "This line is not folding start line");
             //find end of block
             int i = FindEndOfFoldingBlock(iLine);
             //collapse
             if (i >= 0)
             {
                 CollapseBlock(iLine, i);
-                var id = this[iLine].UniqueId;
+                var id = this[iLine]!.UniqueId;
                 FoldedBlocks[id] = id; //add folded state for line
             }
         }
@@ -6628,7 +6620,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         {
             //find end of block
             int i;
-            string marker = lines[iStartLine].FoldingStartMarker;
+            //string? marker = lines![iStartLine]?.FoldingStartMarker;
             var stack = new Stack<string>();
 
             switch (FindEndOfFoldingBlockStrategy)
@@ -6636,12 +6628,12 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
                 case FindEndOfFoldingBlockStrategy.Strategy1:
                     for (i = iStartLine /*+1*/; i < LinesCount; i++)
                     {
-                        if (lines.LineHasFoldingStartMarker(i))
-                            stack.Push(lines[i].FoldingStartMarker);
+                        if (lines!.LineHasFoldingStartMarker(i))
+                            stack.Push(lines![i]?.FoldingStartMarker!);
 
-                        if (lines.LineHasFoldingEndMarker(i))
+                        if (lines!.LineHasFoldingEndMarker(i))
                         {
-                            string m = lines[i].FoldingEndMarker;
+                            string m = lines![i]?.FoldingEndMarker!;
                             while (stack.Count > 0 && stack.Pop() != m) ;
                             if (stack.Count == 0)
                                 return i;
@@ -6656,16 +6648,16 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
                 case FindEndOfFoldingBlockStrategy.Strategy2:
                     for (i = iStartLine /*+1*/; i < LinesCount; i++)
                     {
-                        if (lines.LineHasFoldingEndMarker(i))
+                        if (lines!.LineHasFoldingEndMarker(i))
                         {
-                            string m = lines[i].FoldingEndMarker;
+                            string m = lines![i]?.FoldingEndMarker!;
                             while (stack.Count > 0 && stack.Pop() != m) ;
                             if (stack.Count == 0)
                                 return i;
                         }
 
-                        if (lines.LineHasFoldingStartMarker(i))
-                            stack.Push(lines[i].FoldingStartMarker);
+                        if (lines!.LineHasFoldingStartMarker(i))
+                            stack.Push(lines![i]?.FoldingStartMarker!);
 
                         maxLines--;
                         if (maxLines < 0)
@@ -6681,20 +6673,20 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         /// <summary>
         /// Start foilding marker for the line
         /// </summary>
-        public string GetLineFoldingStartMarker(int iLine)
+        public string? GetLineFoldingStartMarker(int iLine)
         {
-            if (lines.LineHasFoldingStartMarker(iLine))
-                return lines[iLine].FoldingStartMarker;
+            if (lines!.LineHasFoldingStartMarker(iLine))
+                return lines![iLine]?.FoldingStartMarker;
             return null;
         }
 
         /// <summary>
         /// End foilding marker for the line
         /// </summary>
-        public string GetLineFoldingEndMarker(int iLine)
+        public string? GetLineFoldingEndMarker(int iLine)
         {
-            if (lines.LineHasFoldingEndMarker(iLine))
-                return lines[iLine].FoldingEndMarker;
+            if (lines!.LineHasFoldingEndMarker(iLine))
+                return lines![iLine]?.FoldingEndMarker;
             return null;
         }
 
@@ -6714,8 +6706,8 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
             var stack = new Stack<int>();
             for (int i = startLine; i <= endLine; i++)
             {
-                bool hasStartMarker = lines.LineHasFoldingStartMarker(i);
-                bool hasEndMarker = lines.LineHasFoldingEndMarker(i);
+                bool hasStartMarker = lines!.LineHasFoldingStartMarker(i);
+                bool hasEndMarker = lines!.LineHasFoldingEndMarker(i);
 
                 if (hasEndMarker && hasStartMarker)
                     continue;
@@ -6726,12 +6718,12 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
                 }
                 if (hasEndMarker)
                 {
-                    string m = lines[i].FoldingEndMarker;
+                    string? m = lines![i]?.FoldingEndMarker;
                     while (stack.Count > 0)
                     {
                         int iStartLine = stack.Pop();
                         foldingPairs[iStartLine] = i;
-                        if (m == lines[iStartLine].FoldingStartMarker)
+                        if (m == lines![iStartLine]?.FoldingStartMarker)
                             break;
                     }
                 }
@@ -6773,10 +6765,10 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
 
         internal int FindNextVisibleLine(int iLine)
         {
-            if (iLine >= lines.Count - 1) return iLine;
+            if (iLine >= lines!.Count - 1) return iLine;
             int old = iLine;
             do
-                iLine++; while (iLine < lines.Count - 1 && LineInfos[iLine].VisibleState != VisibleState.Visible);
+                iLine++; while (iLine < lines!.Count - 1 && LineInfos[iLine].VisibleState != VisibleState.Visible);
 
             if (LineInfos[iLine].VisibleState != VisibleState.Visible)
                 return old;
@@ -6807,7 +6799,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         }
 
         /// <summary>
-        /// Insert TAB into front of seletcted lines.
+        /// Insert TAB into front of seletcted lines!.
         /// </summary>
         public virtual void IncreaseIndent()
         {
@@ -6815,7 +6807,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
             {
                 if (!Selection.ReadOnly)
                 {
-                    Selection.Start = new Place(this[Selection.Start.iLine].StartSpacesCount, Selection.Start.iLine);
+                    Selection.Start = new Place(this[Selection.Start.iLine]!.StartSpacesCount, Selection.Start.iLine);
                     //insert tab as spaces
                     int spaces = TabLength - (Selection.Start.iChar % TabLength);
                     //replace mode? select forward chars
@@ -6839,10 +6831,10 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
 
             BeginUpdate();
             Selection.BeginUpdate();
-            lines.Manager.BeginAutoUndoCommands();
+            lines!.Manager.BeginAutoUndoCommands();
 
             var old = Selection.Clone();
-            lines.Manager.ExecuteCommand(new SelectCommand(TextSource));//remember selection
+            lines!.Manager.ExecuteCommand(new SelectCommand(TextSource));//remember selection
 
             //
             Selection.Normalize();
@@ -6855,9 +6847,9 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
 
             for (int i = from; i <= to; i++)
             {
-                if (lines[i].Count == 0) continue;
+                if (lines![i]?.Count == 0) continue;
                 Selection.Start = new Place(startChar, i);
-                lines.Manager.ExecuteCommand(new InsertTextCommand(TextSource, new String(' ', TabLength)));
+                lines!.Manager.ExecuteCommand(new InsertTextCommand(TextSource, new String(' ', TabLength)));
             }
 
             // Restore selection
@@ -6872,7 +6864,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
             {
                 Selection = old;
             }
-            lines.Manager.EndAutoUndoCommands();
+            lines!.Manager.EndAutoUndoCommands();
 
             if (carretAtEnd)
                 Selection.Inverse();
@@ -6884,7 +6876,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         }
 
         /// <summary>
-        /// Remove TAB from front of seletcted lines.
+        /// Remove TAB from front of seletcted lines!.
         /// </summary>
         public virtual void DecreaseIndent()
         {
@@ -6900,9 +6892,9 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
 
             BeginUpdate();
             Selection.BeginUpdate();
-            lines.Manager.BeginAutoUndoCommands();
+            lines!.Manager.BeginAutoUndoCommands();
             var old = Selection.Clone();
-            lines.Manager.ExecuteCommand(new SelectCommand(TextSource));//remember selection
+            lines!.Manager.ExecuteCommand(new SelectCommand(TextSource));//remember selection
 
             // Remember current selection infos
             Range currentSelection = this.Selection.Clone();
@@ -6918,11 +6910,11 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
 
             for (int i = from; i <= to; i++)
             {
-                if (startCharIndex > lines[i].Count)
+                if (startCharIndex > lines![i]!.Count)
                     continue;
                 // Select first characters from the line
-                int endIndex = Math.Min(this.lines[i].Count, startCharIndex + this.TabLength);
-                string wasteText = this.lines[i].Text.Substring(startCharIndex, endIndex-startCharIndex);
+                int endIndex = Math.Min(this.lines![i]!.Count, startCharIndex + this.TabLength);
+                string wasteText = this.lines![i]!.Text[startCharIndex..endIndex];
 
                 // Only select the first whitespace characters
                 endIndex = Math.Min(endIndex, startCharIndex + wasteText.Length - wasteText.TrimStart().Length);
@@ -6958,7 +6950,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
             {
                 Selection = old;
             }
-            lines.Manager.EndAutoUndoCommands();
+            lines!.Manager.EndAutoUndoCommands();
 
             needRecalc = true;
             Selection.EndUpdate();
@@ -6980,8 +6972,8 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
             int currentLeftSelectionStartIndex = Math.Min(this.Selection.Start.iChar, this.Selection.End.iChar);
 
             // Determine number of whitespaces to remove
-            string lineText = this.lines[currentLineIndex].Text;
-            Match whitespacesLeftOfSelectionStartMatch = new Regex(@"\s*", RegexOptions.RightToLeft).Match(lineText, currentLeftSelectionStartIndex);
+            string lineText = this.lines![currentLineIndex]!.Text;
+            Match whitespacesLeftOfSelectionStartMatch = WhitespacesLeftOfSelectionStartMatchRegex().Match(lineText, currentLeftSelectionStartIndex);
             int leftOffset = whitespacesLeftOfSelectionStartMatch.Index;
             int countOfWhitespaces = whitespacesLeftOfSelectionStartMatch.Length;
             int numberOfCharactersToRemove = 0;
@@ -7001,8 +6993,8 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
                 // Start selection update
                 this.BeginUpdate();
                 this.Selection.BeginUpdate();
-                lines.Manager.BeginAutoUndoCommands();
-                lines.Manager.ExecuteCommand(new SelectCommand(TextSource));//remember selection
+                lines!.Manager.BeginAutoUndoCommands();
+                lines!.Manager.ExecuteCommand(new SelectCommand(TextSource));//remember selection
 
                 // Remove whitespaces
                 this.Selection.Start = new Place(leftOffset, currentLineIndex);
@@ -7015,9 +7007,9 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
                 this.Selection.Start = new Place(newSelectionStartCharacterIndex, currentLineIndex);
                 this.Selection.End = new Place(newSelectionEndCharacterIndex, currentLineIndex);
 
-                lines.Manager.ExecuteCommand(new SelectCommand(TextSource));//remember selection
+                lines!.Manager.ExecuteCommand(new SelectCommand(TextSource));//remember selection
                 // End selection update
-                lines.Manager.EndAutoUndoCommands();
+                lines!.Manager.EndAutoUndoCommands();
                 this.Selection.EndUpdate();
                 this.EndUpdate();
             }
@@ -7038,12 +7030,12 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
             //
             BeginUpdate();
             Selection.BeginUpdate();
-            lines.Manager.BeginAutoUndoCommands();
+            lines!.Manager.BeginAutoUndoCommands();
             //
             for (int i = r.Start.iLine; i <= r.End.iLine; i++)
                 DoAutoIndent(i);
             //
-            lines.Manager.EndAutoUndoCommands();
+            lines!.Manager.EndAutoUndoCommands();
             Selection.Start = r.Start;
             Selection.End = r.End;
             Selection.Expand();
@@ -7057,23 +7049,23 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         /// </summary>
         public virtual void InsertLinePrefix(string prefix)
         {
-            Range old = Selection.Clone();
+            //Range old = Selection.Clone();
             int from = Math.Min(Selection.Start.iLine, Selection.End.iLine);
             int to = Math.Max(Selection.Start.iLine, Selection.End.iLine);
             BeginUpdate();
             Selection.BeginUpdate();
-            lines.Manager.BeginAutoUndoCommands();
-            lines.Manager.ExecuteCommand(new SelectCommand(TextSource));
+            lines!.Manager.BeginAutoUndoCommands();
+            lines!.Manager.ExecuteCommand(new SelectCommand(TextSource));
             int spaces = GetMinStartSpacesCount(from, to);
             for (int i = from; i <= to; i++)
             {
                 Selection.Start = new Place(spaces, i);
-                lines.Manager.ExecuteCommand(new InsertTextCommand(TextSource, prefix));
+                lines!.Manager.ExecuteCommand(new InsertTextCommand(TextSource, prefix));
             }
             Selection.Start = new Place(0, from);
-            Selection.End = new Place(lines[to].Count, to);
+            Selection.End = new Place(lines![to]!.Count, to);
             needRecalc = true;
-            lines.Manager.EndAutoUndoCommands();
+            lines!.Manager.EndAutoUndoCommands();
             Selection.EndUpdate();
             EndUpdate();
             Invalidate();
@@ -7085,16 +7077,16 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         /// </summary>
         public virtual void RemoveLinePrefix(string prefix)
         {
-            Range old = Selection.Clone();
+            //Range old = Selection.Clone();
             int from = Math.Min(Selection.Start.iLine, Selection.End.iLine);
             int to = Math.Max(Selection.Start.iLine, Selection.End.iLine);
             BeginUpdate();
             Selection.BeginUpdate();
-            lines.Manager.BeginAutoUndoCommands();
-            lines.Manager.ExecuteCommand(new SelectCommand(TextSource));
+            lines!.Manager.BeginAutoUndoCommands();
+            lines!.Manager.ExecuteCommand(new SelectCommand(TextSource));
             for (int i = from; i <= to; i++)
             {
-                string text = lines[i].Text;
+                string text = lines![i]!.Text;
                 string trimmedText = text.TrimStart();
                 if (trimmedText.StartsWith(prefix))
                 {
@@ -7105,9 +7097,9 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
                 }
             }
             Selection.Start = new Place(0, from);
-            Selection.End = new Place(lines[to].Count, to);
+            Selection.End = new Place(lines![to]!.Count, to);
             needRecalc = true;
-            lines.Manager.EndAutoUndoCommands();
+            lines!.Manager.EndAutoUndoCommands();
             Selection.EndUpdate();
             EndUpdate();
         }
@@ -7118,7 +7110,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         /// </summary>
         public void BeginAutoUndo()
         {
-            lines.Manager.BeginAutoUndoCommands();
+            lines!.Manager.BeginAutoUndoCommands();
         }
 
         /// <summary>
@@ -7127,45 +7119,44 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         /// </summary>
         public void EndAutoUndo()
         {
-            lines.Manager.EndAutoUndoCommands();
+            lines!.Manager.EndAutoUndoCommands();
         }
 
         public virtual void OnVisualMarkerClick(MouseEventArgs args, StyleVisualMarker marker)
         {
-            if (VisualMarkerClick != null)
-                VisualMarkerClick(this, new VisualMarkerEventArgs(marker.Style, marker, args));
+            VisualMarkerClick?.Invoke(this, new VisualMarkerEventArgs(marker.Style, marker, args));
             marker.Style.OnVisualMarkerClick(this, new VisualMarkerEventArgs(marker.Style, marker, args));
         }
 
         protected virtual void OnMarkerClick(MouseEventArgs args, VisualMarker marker)
         {
-            if (marker is StyleVisualMarker)
+            if (marker is StyleVisualMarker styleVisualMarker)
             {
-                OnVisualMarkerClick(args, marker as StyleVisualMarker);
+                OnVisualMarkerClick(args, styleVisualMarker);
                 return;
             }
-            if (marker is CollapseFoldingMarker)
+            if (marker is CollapseFoldingMarker collapseFoldingMarker)
             {
-                CollapseFoldingBlock((marker as CollapseFoldingMarker).iLine);
-                return;
-            }
-
-            if (marker is ExpandFoldingMarker)
-            {
-                ExpandFoldedBlock((marker as ExpandFoldingMarker).iLine);
+                CollapseFoldingBlock(collapseFoldingMarker.iLine);
                 return;
             }
 
-            if (marker is FoldedAreaMarker)
+            if (marker is ExpandFoldingMarker expandFoldingMarker)
+            {
+                ExpandFoldedBlock(expandFoldingMarker.iLine);
+                return;
+            }
+
+            if (marker is FoldedAreaMarker foldedAreaMarker)
             {
                 //select folded block
-                int iStart = (marker as FoldedAreaMarker).iLine;
+                int iStart = foldedAreaMarker.iLine;
                 int iEnd = FindEndOfFoldingBlock(iStart);
                 if (iEnd < 0)
                     return;
                 Selection.BeginUpdate();
                 Selection.Start = new Place(0, iStart);
-                Selection.End = new Place(lines[iEnd].Count, iEnd);
+                Selection.End = new Place(lines![iEnd]!.Count, iEnd);
                 Selection.EndUpdate();
                 Invalidate();
                 return;
@@ -7174,9 +7165,9 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
 
         protected virtual void OnMarkerDoubleClick(VisualMarker marker)
         {
-            if (marker is FoldedAreaMarker)
+            if (marker is FoldedAreaMarker foldedAreaMarker)
             {
-                ExpandFoldedBlock((marker as FoldedAreaMarker).iLine);
+                ExpandFoldedBlock(foldedAreaMarker.iLine);
                 Invalidate();
                 return;
             }
@@ -7193,7 +7184,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         /// <summary>
         /// Highlights brackets around caret
         /// </summary>
-        private void HighlightBrackets(char LeftBracket, char RightBracket, ref Range leftBracketPosition, ref Range rightBracketPosition)
+        private void HighlightBrackets(char LeftBracket, char RightBracket, ref Range? leftBracketPosition, ref Range? rightBracketPosition)
         {
             switch(BracketsHighlightStrategy)
             {
@@ -7202,15 +7193,15 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
             }
         }
 
-        private void HighlightBrackets1(char LeftBracket, char RightBracket, ref Range leftBracketPosition, ref Range rightBracketPosition)
+        private void HighlightBrackets1(char LeftBracket, char RightBracket, ref Range? leftBracketPosition, ref Range? rightBracketPosition)
         {
             if (!Selection.IsEmpty)
                 return;
             if (LinesCount == 0)
                 return;
             //
-            Range oldLeftBracketPosition = leftBracketPosition;
-            Range oldRightBracketPosition = rightBracketPosition;
+            Range? oldLeftBracketPosition = leftBracketPosition;
+            Range? oldRightBracketPosition = rightBracketPosition;
             var range = GetBracketsRange(Selection.Start, LeftBracket, RightBracket, true);
 
             if(range != null)
@@ -7276,15 +7267,15 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
                 return null;
         }
 
-        private void HighlightBrackets2(char LeftBracket, char RightBracket, ref Range leftBracketPosition, ref Range rightBracketPosition)
+        private void HighlightBrackets2(char LeftBracket, char RightBracket, ref Range? leftBracketPosition, ref Range? rightBracketPosition)
         {
             if (!Selection.IsEmpty)
                 return;
             if (LinesCount == 0)
                 return;
             //
-            Range oldLeftBracketPosition = leftBracketPosition;
-            Range oldRightBracketPosition = rightBracketPosition;
+            Range? oldLeftBracketPosition = leftBracketPosition;
+            Range? oldRightBracketPosition = rightBracketPosition;
             Range range = Selection.Clone(); //need clone because we will move caret
 
             bool found = false;
@@ -7327,8 +7318,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
                         //highlighting
                         range.End = new Place(range.Start.iChar + 1, range.Start.iLine);
                         rightBracketPosition = range;
-                        found = true;
-                        break;
+                            break;
                     }
                     //
                     maxIterations--;
@@ -7349,7 +7339,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
             sel.Normalize();
             var range1 = backward ? new Range(this, Range.Start, sel.Start) : new Range(this, sel.End, Range.End);
 
-            Range res = null;
+            Range? res = null;
             foreach(var r in range1.GetRanges(regexPattern, options))
             {
                 res = r;
@@ -7364,25 +7354,16 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
 
         public virtual void OnSyntaxHighlight(TextChangedEventArgs args)
         {
-            #if debug
+#if debug
             Stopwatch sw = Stopwatch.StartNew();
-            #endif
+#endif
 
-            Range range;
-
-            switch (HighlightingRangeType)
+            Range range = HighlightingRangeType switch
             {
-                case HighlightingRangeType.VisibleRange:
-                    range = VisibleRange.GetUnionWith(args.ChangedRange);
-                    break;
-                case HighlightingRangeType.AllTextRange:
-                    range = Range;
-                    break;
-                default:
-                    range = args.ChangedRange;
-                    break;
-            }
-
+                HighlightingRangeType.VisibleRange => VisibleRange.GetUnionWith(args.ChangedRange),
+                HighlightingRangeType.AllTextRange => Range,
+                _ => args.ChangedRange,
+            };
             if (SyntaxHighlighter != null)
             {
                 if (Language == Language.Custom && !string.IsNullOrEmpty(DescriptionFile))
@@ -7412,15 +7393,16 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         public virtual void Print(Range range, PrintDialogSettings settings)
         {
             //prepare export with wordwrapping
-            var exporter = new ExportToHTML();
-            exporter.UseBr = true;
-            exporter.UseForwardNbsp = true;
-            exporter.UseNbsp = true;
-            exporter.UseStyleTag = false;
-            exporter.IncludeLineNumbers = settings.IncludeLineNumbers;
+            var exporter = new ExportToHTML
+            {
+                UseBr = true,
+                UseForwardNbsp = true,
+                UseNbsp = true,
+                UseStyleTag = false,
+                IncludeLineNumbers = settings.IncludeLineNumbers
+            };
 
-            if (range == null)
-                range = Range;
+            range ??= Range;
 
             if (range.Text == string.Empty)
                 return;
@@ -7430,10 +7412,8 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
             try
             {
                 //call handlers for VisibleRange
-                if (VisibleRangeChanged != null)
-                    VisibleRangeChanged(this, new EventArgs());
-                if (VisibleRangeChangedDelayed != null)
-                    VisibleRangeChangedDelayed(this, new EventArgs());
+                VisibleRangeChanged?.Invoke(this, new EventArgs());
+                VisibleRangeChangedDelayed?.Invoke(this, new EventArgs());
             }
             finally
             {
@@ -7452,12 +7432,14 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
             SetPageSetupSettings(settings);
 
             //create wb
-            var wb = new WebBrowser();
-            wb.Tag = settings;
-            wb.Visible = false;
-            wb.Location = new Point(-1000, -1000);
-            wb.Parent = this;
-            wb.StatusTextChanged += wb_StatusTextChanged;
+            var wb = new WebBrowser
+            {
+                Tag = settings,
+                Visible = false,
+                Location = new Point(-1000, -1000),
+                Parent = this
+            };
+            wb.StatusTextChanged += Wb_StatusTextChanged;
             wb.Navigate(tempFile);
         }
 
@@ -7466,33 +7448,35 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
             return s.Replace("<", "&lt;").Replace(">", "&gt;").Replace("&", "&amp;");
         }
 
-        private void wb_StatusTextChanged(object sender, EventArgs e)
+        private void Wb_StatusTextChanged(object? sender, EventArgs e)
         {
-            var wb = sender as WebBrowser;
-            if (wb.StatusText.Contains("#print"))
-            {
-                var settings = wb.Tag as PrintDialogSettings;
-                try
-                {
-                    //show print dialog
-                    if (settings.ShowPrintPreviewDialog)
-                        wb.ShowPrintPreviewDialog();
-                    else
-                    {
-                        if (settings.ShowPageSetupDialog)
-                            wb.ShowPageSetupDialog();
 
-                        if (settings.ShowPrintDialog)
-                            wb.ShowPrintDialog();
-                        else
-                            wb.Print();
-                    }
-                }
-                finally
+            if (sender is WebBrowser wb && wb.StatusText.Contains("#print"))
+            {
+                if (wb.Tag is PrintDialogSettings settings)
                 {
-                    //destroy webbrowser
-                    wb.Parent = null;
-                    wb.Dispose();
+                    try
+                    {
+                        //show print dialog
+                        if (settings.ShowPrintPreviewDialog)
+                            wb.ShowPrintPreviewDialog();
+                        else
+                        {
+                            if (settings.ShowPageSetupDialog)
+                                wb.ShowPageSetupDialog();
+
+                            if (settings.ShowPrintDialog)
+                                wb.ShowPrintDialog();
+                            else
+                                wb.Print();
+                        }
+                    }
+                    finally
+                    {
+                        //destroy webbrowser
+                        wb.Parent = null;
+                        wb.Dispose();
+                    }
                 }
             }
         }
@@ -7520,7 +7504,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
             Range sel = Selection.Clone();
             sel.Normalize();
             int start = PlaceToPosition(sel.Start) - sel.Start.iLine;
-            int len = sel.Text.Length - (sel.End.iLine - sel.Start.iLine);
+            int len = (sel.Text?.Length ?? 0) - (sel.End.iLine - sel.Start.iLine);
             return string.Format(
                 @"<script type=""text/javascript"">
 try{{
@@ -7537,7 +7521,7 @@ window.status = ""#print"";
 
         private static void SetPageSetupSettings(PrintDialogSettings settings)
         {
-            RegistryKey key = Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\Internet Explorer\PageSetup", true);
+            RegistryKey? key = Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\Internet Explorer\PageSetup", true);
             if (key != null)
             {
                 key.SetValue("footer", settings.Footer);
@@ -7550,17 +7534,14 @@ window.status = ""#print"";
             base.Dispose(disposing);
             if (disposing)
             {
-                if (SyntaxHighlighter != null)
-                    SyntaxHighlighter.Dispose();
+                SyntaxHighlighter?.Dispose();
                 timer.Dispose();
                 timer2.Dispose();
                 middleClickScrollingTimer.Dispose();
 
-                if (findForm != null)
-                    findForm.Dispose();
+                FindForm?.Dispose();
 
-                if (replaceForm != null)
-                    replaceForm.Dispose();
+                ReplaceForm?.Dispose();
                 /*
                 if (Font != null)
                     Font.Dispose();
@@ -7568,18 +7549,15 @@ window.status = ""#print"";
                 if (originalFont != null)
                     originalFont.Dispose();*/
 
-                if (TextSource != null)
-                    TextSource.Dispose();
+                TextSource?.Dispose();
 
-                if (ToolTip != null)
-                    ToolTip.Dispose();
+                ToolTip?.Dispose();
             }
         }
 
         protected virtual void OnPaintLine(PaintLineEventArgs e)
         {
-            if (PaintLine != null)
-                PaintLine(this, e);
+            PaintLine?.Invoke(this, e);
         }
 
         internal void OnLineInserted(int index)
@@ -7589,15 +7567,13 @@ window.status = ""#print"";
 
         internal void OnLineInserted(int index, int count)
         {
-            if (LineInserted != null)
-                LineInserted(this, new LineInsertedEventArgs(index, count));
+            LineInserted?.Invoke(this, new LineInsertedEventArgs(index, count));
         }
 
         internal void OnLineRemoved(int index, int count, List<int> removedLineIds)
         {
             if (count > 0)
-                if (LineRemoved != null)
-                    LineRemoved(this, new LineRemovedEventArgs(index, count, removedLineIds));
+                LineRemoved?.Invoke(this, new LineRemovedEventArgs(index, count, removedLineIds));
         }
 
         /// <summary>
@@ -7617,7 +7593,7 @@ window.status = ""#print"";
             catch
             {
                 InitTextSource(CreateTextSource());
-                lines.InsertLine(0, TextSource.CreateLine());
+                lines!.InsertLine(0, TextSource.CreateLine());
                 IsChanged = false;
                 throw;
             }
@@ -7641,7 +7617,7 @@ window.status = ""#print"";
             catch
             {
                 InitTextSource(CreateTextSource());
-                lines.InsertLine(0, TextSource.CreateLine());
+                lines!.InsertLine(0, TextSource.CreateLine());
                 IsChanged = false;
                 throw;
             }
@@ -7666,7 +7642,7 @@ window.status = ""#print"";
             {
                 fts.CloseFile();
                 InitTextSource(CreateTextSource());
-                lines.InsertLine(0, TextSource.CreateLine());
+                lines!.InsertLine(0, TextSource.CreateLine());
                 IsChanged = false;
                 throw;
             }
@@ -7678,13 +7654,12 @@ window.status = ""#print"";
         /// </summary>
         public void CloseBindingFile()
         {
-            if (lines is FileTextSource)
+            if (lines is FileTextSource fts)
             {
-                var fts = lines as FileTextSource;
                 fts.CloseFile();
 
                 InitTextSource(CreateTextSource());
-                lines.InsertLine(0, TextSource.CreateLine());
+                lines!.InsertLine(0, TextSource.CreateLine());
                 IsChanged = false;
                 Invalidate();
             }
@@ -7697,7 +7672,7 @@ window.status = ""#print"";
         /// <param name="enc"></param>
         public void SaveToFile(string fileName, Encoding enc)
         {
-            lines.SaveToFile(fileName, enc);
+            lines?.SaveToFile(fileName, enc);
             IsChanged = false;
             OnVisibleRangeChanged();
             UpdateScrollbars();
@@ -7727,9 +7702,11 @@ window.status = ""#print"";
         /// </summary>
         public void ShowGoToDialog()
         {
-            var form = new GoToForm();
-            form.TotalLineCount = LinesCount;
-            form.SelectedLineNumber = Selection.Start.iLine + 1;
+            var form = new GoToForm
+            {
+                TotalLineCount = LinesCount,
+                SelectedLineNumber = Selection.Start.iLine + 1
+            };
 
             if (form.ShowDialog() == DialogResult.OK)
             {
@@ -7753,8 +7730,7 @@ window.status = ""#print"";
         /// </summary>
         public void OnUndoRedoStateChanged()
         {
-            if (UndoRedoStateChanged != null)
-                UndoRedoStateChanged(this, EventArgs.Empty);
+            UndoRedoStateChanged?.Invoke(this, EventArgs.Empty);
         }
 
         /// <summary>
@@ -7804,7 +7780,7 @@ window.status = ""#print"";
 
         protected override void OnDragEnter(DragEventArgs e)
         {
-            if (e.Data.GetDataPresent(DataFormats.Text) && AllowDrop)
+            if ((e.Data?.GetDataPresent(DataFormats.Text) ?? false) && AllowDrop)
             {
                 e.Effect = DragDropEffects.Copy;
                 IsDragDrop = true;
@@ -7822,8 +7798,7 @@ window.status = ""#print"";
 
             if (e.Data?.GetDataPresent(DataFormats.Text) ?? false)
             {
-                if (ParentForm != null)
-                    ParentForm.Activate();
+                ParentForm?.Activate();
                 Focus();
                 Point p = PointToClient(new Point(e.X, e.Y));
                 var text = e.Data?.GetData(DataFormats.Text)?.ToString();
@@ -7834,117 +7809,9 @@ window.status = ""#print"";
             base.OnDragDrop(e);
         }
 
-        private void DoDragDrop_old(Place place, string text)
-        {
-            Range insertRange = new Range(this, place, place);
-
-            // Abort, if insertRange is read only
-            if (insertRange.ReadOnly)
-                return;
-
-            // Abort, if dragged range contains target place
-            if ((draggedRange != null) && (draggedRange.Contains(place) == true))
-                return;
-
-            // Determine, if the dragged string should be copied or moved
-            bool copyMode =
-                (draggedRange == null) ||       // drag from outside
-                (draggedRange.ReadOnly) ||      // dragged range is read only
-                ((ModifierKeys & Keys.Control) != Keys.None);
-
-            //drag from outside?
-            if (draggedRange == null)
-            {
-                Selection.BeginUpdate();
-                // Insert text
-                Selection.Start = place;
-                InsertText(text);
-                // Select inserted text
-                Selection = new Range(this, place, Selection.Start);
-                Selection.EndUpdate();
-                return;
-            }
-
-            //drag from me
-            Place caretPositionAfterInserting;
-            BeginAutoUndo();
-            Selection.BeginUpdate();
-
-            //remember dragged selection for undo/redo
-            Selection = draggedRange;
-            lines.Manager.ExecuteCommand(new SelectCommand(lines));
-            //
-            if (draggedRange.ColumnSelectionMode)
-            {
-                draggedRange.Normalize();
-                insertRange = new Range(this, place, new Place(place.iChar, place.iLine + draggedRange.End.iLine - draggedRange.Start.iLine)) { ColumnSelectionMode = true };
-                for (int i = LinesCount; i <= insertRange.End.iLine; i++)
-                {
-                    Selection.GoLast(false);
-                    InsertChar('\n');
-                }
-            }
-
-            if (!insertRange.ReadOnly)
-            {
-                if (place < draggedRange.Start)
-                {
-                    // Delete dragged range if not in copy mode
-                    if (copyMode == false)
-                    {
-                        Selection = draggedRange;
-                        ClearSelected();
-                    }
-
-                    // Insert text
-                    Selection = insertRange;
-                    Selection.ColumnSelectionMode = insertRange.ColumnSelectionMode;
-                    InsertText(text);
-                    caretPositionAfterInserting = Selection.Start;
-                }
-                else
-                {
-                    // Insert text
-                    Selection = insertRange;
-                    Selection.ColumnSelectionMode = insertRange.ColumnSelectionMode;
-                    InsertText(text);
-                    caretPositionAfterInserting = Selection.Start;
-                    var lineLength = this[caretPositionAfterInserting.iLine].Count;
-
-                    // Delete dragged range if not in copy mode
-                    if (copyMode == false)
-                    {
-                        Selection = draggedRange;
-                        ClearSelected();
-                    }
-
-                    var shift = lineLength - this[caretPositionAfterInserting.iLine].Count;
-                    caretPositionAfterInserting.iChar = caretPositionAfterInserting.iChar - shift;
-                    place.iChar = place.iChar - shift;
-                }
-
-                // Select inserted text
-                if (!draggedRange.ColumnSelectionMode)
-                {
-                    Selection = new Range(this, place, caretPositionAfterInserting);
-                }
-                else
-                {
-                    draggedRange.Normalize();
-                    Selection = new Range(this, place,
-                                            new Place(place.iChar + draggedRange.End.iChar - draggedRange.Start.iChar,
-                                                    place.iLine + draggedRange.End.iLine - draggedRange.Start.iLine)) { ColumnSelectionMode = true };
-                }
-            }
-
-            Selection.EndUpdate();
-            EndAutoUndo();
-            draggedRange = null;
-        }
-
         protected virtual void DoDragDrop(Place place, string? text)
         {
-            Range insertRange = new Range(this, place, place);
+            Range insertRange = new(this, place, place);
 
             // Abort, if insertRange is read only
             if (insertRange.ReadOnly)
@@ -7978,7 +7845,7 @@ window.status = ""#print"";
 
                     //remember dragged selection for undo/redo
                     Selection = draggedRange;
-                    lines.Manager.ExecuteCommand(new SelectCommand(lines));
+                    lines?.Manager.ExecuteCommand(new SelectCommand(lines));
                     //
                     if (draggedRange.ColumnSelectionMode)
                     {
@@ -8054,13 +7921,13 @@ window.status = ""#print"";
                             {
                                 if (dR.End.iLine == tP.iLine)
                                 {
-                                    tS_S_Char = tP.iChar - dR.Text.Length;
+                                    tS_S_Char = tP.iChar - dR.Text!.Length;
                                     tS_E_Char = tP.iChar;
                                 }
                                 else
                                 {
                                     tS_S_Char = tP.iChar;
-                                    tS_E_Char = tP.iChar + dR.Text.Length;
+                                    tS_E_Char = tP.iChar + dR.Text!.Length;
                                 }
                             }
 
@@ -8121,7 +7988,7 @@ window.status = ""#print"";
 
         protected override void OnDragOver(DragEventArgs e)
         {
-            if (e.Data.GetDataPresent(DataFormats.Text))
+            if (e.Data?.GetDataPresent(DataFormats.Text) ?? false)
             {
                 Point p = PointToClient(new Point(e.X, e.Y));
                 Selection.Start = PointToPlace(p);
@@ -8147,7 +8014,7 @@ window.status = ""#print"";
         private bool middleClickScrollingActivated;
         private Point middleClickScrollingOriginPoint;
         private Point middleClickScrollingOriginScroll;
-        private readonly Timer middleClickScrollingTimer = new Timer();
+        private readonly Timer middleClickScrollingTimer = new();
         private ScrollDirection middleClickScollDirection = ScrollDirection.None;
 
         /// <summary>
@@ -8170,7 +8037,7 @@ window.status = ""#print"";
                 // Refresh the control 
                 Refresh();
                 // Disable drawing
-                SendMessage(Handle, WM_SETREDRAW, 0, 0);
+                _ = SendMessage(Handle, WM_SETREDRAW, 0, 0);
             }
         }
 
@@ -8186,7 +8053,7 @@ window.status = ""#print"";
                 Capture = false;
                 base.Cursor = defaultCursor;
                 // Enable drawing
-                SendMessage(Handle, WM_SETREDRAW, 1, 0);
+                _ = SendMessage(Handle, WM_SETREDRAW, 1, 0);
                 Invalidate();
             }
         }
@@ -8209,11 +8076,11 @@ window.status = ""#print"";
             OnScroll(yea);
         }
 
-        [DllImport("user32.dll")]
-        private static extern int SendMessage(IntPtr hwnd, int wMsg, int wParam, int lParam);
+        [LibraryImport("user32.dll")]
+        private static partial int SendMessage(IntPtr hwnd, int wMsg, int wParam, int lParam);
         private const int WM_SETREDRAW = 0xB;
 
-        void middleClickScrollingTimer_Tick(object? sender, EventArgs e)
+        void MiddleClickScrollingTimer_Tick(object? sender, EventArgs e)
         {
             if (IsDisposed)
                 return;
@@ -8295,11 +8162,11 @@ window.status = ""#print"";
                 OnScroll(xea);
 
             // Enable drawing
-            SendMessage(Handle, WM_SETREDRAW, 1, 0);
+            _ = SendMessage(Handle, WM_SETREDRAW, 1, 0);
             // Refresh the control 
             Refresh();
             // Disable drawing
-            SendMessage(Handle, WM_SETREDRAW, 0, 0);
+            _ = SendMessage(Handle, WM_SETREDRAW, 0, 0);
         }
 
         private void DrawMiddleClickScrolling(Graphics gr)
@@ -8310,32 +8177,30 @@ window.status = ""#print"";
 
             // Calculate inverse color
             Color inverseColor = Color.FromArgb(100, (byte)~this.BackColor.R, (byte)~this.BackColor.G, (byte)~this.BackColor.B);
-            using (SolidBrush inverseColorBrush = new SolidBrush(inverseColor))
-            {
-                var p = middleClickScrollingOriginPoint;
+            using SolidBrush inverseColorBrush = new(inverseColor);
+            var p = middleClickScrollingOriginPoint;
 
-                var state = gr.Save();
+            var state = gr.Save();
 
-                gr.SmoothingMode = SmoothingMode.HighQuality;
-                gr.TranslateTransform(p.X, p.Y);
-                gr.FillEllipse(inverseColorBrush, -2, -2, 4, 4);
+            gr.SmoothingMode = SmoothingMode.HighQuality;
+            gr.TranslateTransform(p.X, p.Y);
+            gr.FillEllipse(inverseColorBrush, -2, -2, 4, 4);
 
-                if (ableToScrollVertically) DrawTriangle(gr, inverseColorBrush);
-                gr.RotateTransform(90);
-                if (ableToScrollHorizontally) DrawTriangle(gr, inverseColorBrush);
-                gr.RotateTransform(90);
-                if (ableToScrollVertically) DrawTriangle(gr, inverseColorBrush);
-                gr.RotateTransform(90);
-                if (ableToScrollHorizontally) DrawTriangle(gr, inverseColorBrush);
+            if (ableToScrollVertically) DrawTriangle(gr, inverseColorBrush);
+            gr.RotateTransform(90);
+            if (ableToScrollHorizontally) DrawTriangle(gr, inverseColorBrush);
+            gr.RotateTransform(90);
+            if (ableToScrollVertically) DrawTriangle(gr, inverseColorBrush);
+            gr.RotateTransform(90);
+            if (ableToScrollHorizontally) DrawTriangle(gr, inverseColorBrush);
 
-                gr.Restore(state);
-            }
+            gr.Restore(state);
         }
 
-        private void DrawTriangle(Graphics g, Brush brush)
+        private static void DrawTriangle(Graphics g, Brush brush)
         {
             const int size = 5;
-            var points = new Point[] { new Point(size, 2 * size), new Point(0, 3 * size), new Point(-size, 2 * size) };
+            var points = new Point[] { new(size, 2 * size), new(0, 3 * size), new(-size, 2 * size) };
             g.FillPolygon(brush, points);
         }
 
@@ -8344,14 +8209,9 @@ window.status = ""#print"";
 
         #region Nested type: LineYComparer
 
-        private class LineYComparer : IComparer<LineInfo>
+        private class LineYComparer(int Y) : IComparer<LineInfo>
         {
-            private readonly int Y;
-
-            public LineYComparer(int Y)
-            {
-                this.Y = Y;
-            }
+            private readonly int Y = Y;
 
             #region IComparer<LineInfo> Members
 
@@ -8366,82 +8226,66 @@ window.status = ""#print"";
             #endregion
         }
 
+        [GeneratedRegex(@"(^\S)|[\.\?!:]\s+(\S)", RegexOptions.ExplicitCapture)]
+        private static partial Regex SentenceCaseRegex();
+        [GeneratedRegex(@"\s*", RegexOptions.RightToLeft)]
+        private static partial Regex WhitespacesLeftOfSelectionStartMatchRegex();
+
         #endregion
     }
 
-    public class PaintLineEventArgs : PaintEventArgs
+    public class PaintLineEventArgs(int iLine, Rectangle rect, Graphics gr, Rectangle clipRect) : PaintEventArgs(gr, clipRect)
     {
-        public PaintLineEventArgs(int iLine, Rectangle rect, Graphics gr, Rectangle clipRect) : base(gr, clipRect)
-        {
-            LineIndex = iLine;
-            LineRect = rect;
-        }
-
-        public int LineIndex { get; private set; }
-        public Rectangle LineRect { get; private set; }
+        public int LineIndex { get; private set; } = iLine;
+        public Rectangle LineRect { get; private set; } = rect;
     }
 
-    public class LineInsertedEventArgs : EventArgs
+    public class LineInsertedEventArgs(int index, int count) : EventArgs
     {
-        public LineInsertedEventArgs(int index, int count)
-        {
-            Index = index;
-            Count = count;
-        }
 
         /// <summary>
         /// Inserted line index
         /// </summary>
-        public int Index { get; private set; }
+        public int Index { get; private set; } = index;
 
         /// <summary>
         /// Count of inserted lines
         /// </summary>
-        public int Count { get; private set; }
+        public int Count { get; private set; } = count;
     }
 
-    public class LineRemovedEventArgs : EventArgs
+    public class LineRemovedEventArgs(int index, int count, List<int> removedLineIds) : EventArgs
     {
-        public LineRemovedEventArgs(int index, int count, List<int> removedLineIds)
-        {
-            Index = index;
-            Count = count;
-            RemovedLineUniqueIds = removedLineIds;
-        }
 
         /// <summary>
         /// Removed line index
         /// </summary>
-        public int Index { get; private set; }
+        public int Index { get; private set; } = index;
 
         /// <summary>
         /// Count of removed lines
         /// </summary>
-        public int Count { get; private set; }
+        public int Count { get; private set; } = count;
 
         /// <summary>
         /// UniqueIds of removed lines
         /// </summary>
-        public List<int> RemovedLineUniqueIds { get; private set; }
+        public List<int> RemovedLineUniqueIds { get; private set; } = removedLineIds;
     }
 
     /// <summary>
     /// TextChanged event argument
     /// </summary>
-    public class TextChangedEventArgs : EventArgs
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    public class TextChangedEventArgs(Range changedRange) : EventArgs
     {
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        public TextChangedEventArgs(Range changedRange)
-        {
-            ChangedRange = changedRange;
-        }
 
         /// <summary>
         /// This range contains changed area of text
         /// </summary>
-        public Range ChangedRange { get; set; }
+        public Range ChangedRange { get; set; } = changedRange;
     }
 
     public class TextChangingEventArgs : EventArgs
@@ -8454,18 +8298,11 @@ window.status = ""#print"";
         public bool Cancel { get; set; }
     }
 
-    public class WordWrapNeededEventArgs : EventArgs
+    public class WordWrapNeededEventArgs(List<int> cutOffPositions, bool imeAllowed, Line line) : EventArgs
     {
-        public List<int> CutOffPositions { get; private set;}
-        public bool ImeAllowed { get; private set;}
-        public Line Line { get; private set; }
-
-        public WordWrapNeededEventArgs(List<int> cutOffPositions, bool imeAllowed, Line line)
-        {
-            this.CutOffPositions = cutOffPositions;
-            this.ImeAllowed = imeAllowed;
-            this.Line = line;
-        }
+        public List<int> CutOffPositions { get; private set; } = cutOffPositions;
+        public bool ImeAllowed { get; private set; } = imeAllowed;
+        public Line Line { get; private set; } = line;
     }
 
     public enum WordWrapMode
@@ -8535,21 +8372,12 @@ window.status = ""#print"";
         public bool IncludeLineNumbers { get; set; }
     }
 
-    public class AutoIndentEventArgs : EventArgs
+    public class AutoIndentEventArgs(int iLine, string lineText, string prevLineText, int tabLength, int currentIndentation) : EventArgs
     {
-        public AutoIndentEventArgs(int iLine, string lineText, string prevLineText, int tabLength, int currentIndentation)
-        {
-            this.iLine = iLine;
-            LineText = lineText;
-            PrevLineText = prevLineText;
-            TabLength = tabLength;
-            AbsoluteIndentation = currentIndentation;
-        }
-
-        public int iLine { get; internal set; }
-        public int TabLength { get; internal set; }
-        public string LineText { get; internal set; }
-        public string PrevLineText { get; internal set; }
+        public int ILine { get; internal set; } = iLine;
+        public int TabLength { get; internal set; } = tabLength;
+        public string LineText { get; internal set; } = lineText;
+        public string PrevLineText { get; internal set; } = prevLineText;
 
         /// <summary>
         /// Additional spaces count for this line, relative to previous line
@@ -8564,7 +8392,7 @@ window.status = ""#print"";
         /// <summary>
         /// Absolute indentation of current line. You can change this property if you want to set absolute indentation.
         /// </summary>
-        public int AbsoluteIndentation { get; set; }
+        public int AbsoluteIndentation { get; set; } = currentIndentation;
     }
 
     /// <summary>
@@ -8609,45 +8437,29 @@ window.status = ""#print"";
     /// <summary>
     /// ToolTipNeeded event args
     /// </summary>
-    public class ToolTipNeededEventArgs : EventArgs
+    public class ToolTipNeededEventArgs(Place place, string? hoveredWord) : EventArgs
     {
-        public ToolTipNeededEventArgs(Place place, string hoveredWord)
-        {
-            HoveredWord = hoveredWord;
-            Place = place;
-        }
-
-        public Place Place { get; private set; }
-        public string HoveredWord { get; private set; }
-        public string ToolTipTitle { get; set; }
-        public string ToolTipText { get; set; }
+        public Place Place { get; private set; } = place;
+        public string? HoveredWord { get; private set; } = hoveredWord;
+        public string? ToolTipTitle { get; set; }
+        public string? ToolTipText { get; set; }
         public ToolTipIcon ToolTipIcon { get; set; }
     }
 
     /// <summary>
     /// HintClick event args
     /// </summary>
-    public class HintClickEventArgs : EventArgs
+    public class HintClickEventArgs(Hint hint) : EventArgs
     {
-        public HintClickEventArgs(Hint hint)
-        {
-            Hint = hint;
-        }
-
-        public Hint Hint { get; private set; }
+        public Hint Hint { get; private set; } = hint;
     }
 
     /// <summary>
     /// CustomAction event args
     /// </summary>
-    public class CustomActionEventArgs : EventArgs
+    public class CustomActionEventArgs(FCTBAction action) : EventArgs
     {
-        public FCTBAction Action { get; private set; }
-
-        public CustomActionEventArgs(FCTBAction action)
-        {
-            Action = action;
-        }
+        public FCTBAction Action { get; private set; } = action;
     }
 
     public enum TextAreaBorderType

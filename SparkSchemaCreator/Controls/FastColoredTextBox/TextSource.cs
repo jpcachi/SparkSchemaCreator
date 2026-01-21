@@ -13,7 +13,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
     /// </summary>
     public class TextSource: IList<Line?>, IDisposable
     {
-        readonly protected List<Line?> lines = new List<Line?>();
+        readonly protected List<Line?> lines = [];
         protected LinesAccessor linesAccessor;
         int lastLineUniqueId;
         public CommandManager Manager { get; set; }
@@ -21,35 +21,35 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         /// <summary>
         /// Styles
         /// </summary>
-        public readonly Style[] Styles;
+        public readonly Style?[] Styles;
         /// <summary>
         /// Occurs when line was inserted/added
         /// </summary>
-        public event EventHandler<LineInsertedEventArgs> LineInserted;
+        public event EventHandler<LineInsertedEventArgs>? LineInserted;
         /// <summary>
         /// Occurs when line was removed
         /// </summary>
-        public event EventHandler<LineRemovedEventArgs> LineRemoved;
+        public event EventHandler<LineRemovedEventArgs>? LineRemoved;
         /// <summary>
         /// Occurs when text was changed
         /// </summary>
-        public event EventHandler<TextChangedEventArgs> TextChanged;
+        public event EventHandler<TextChangedEventArgs>? TextChanged;
         /// <summary>
         /// Occurs when recalc is needed
         /// </summary>
-        public event EventHandler<TextChangedEventArgs> RecalcNeeded;
+        public event EventHandler<TextChangedEventArgs>? RecalcNeeded;
         /// <summary>
         /// Occurs when recalc wordwrap is needed
         /// </summary>
-        public event EventHandler<TextChangedEventArgs> RecalcWordWrap;
+        public event EventHandler<TextChangedEventArgs>? RecalcWordWrap;
         /// <summary>
         /// Occurs before text changing
         /// </summary>
-        public event EventHandler<TextChangingEventArgs> TextChanging;
+        public event EventHandler<TextChangingEventArgs>? TextChanging;
         /// <summary>
         /// Occurs after CurrentTB was changed
         /// </summary>
-        public event EventHandler CurrentTBChanged;
+        public event EventHandler? CurrentTBChanged;
         /// <summary>
         /// Current focused FastColoredTextBox
         /// </summary>
@@ -76,15 +76,14 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
 
         private void OnCurrentTBChanged()
         {
-            if (CurrentTBChanged != null)
-                CurrentTBChanged(this, EventArgs.Empty);
+            CurrentTBChanged?.Invoke(this, EventArgs.Empty);
         }
 
         /// <summary>
         /// Default text style
         /// This style is using when no one other TextStyle is not defined in Char.style
         /// </summary>
-        public TextStyle DefaultStyle { get; set; }
+        public TextStyle? DefaultStyle { get; set; }
 
         public TextSource(FastColoredTextBox currentTB)
         {
@@ -159,8 +158,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
 
         public virtual void OnLineInserted(int index, int count)
         {
-            if (LineInserted != null)
-                LineInserted(this, new LineInsertedEventArgs(index, count));
+            LineInserted?.Invoke(this, new LineInsertedEventArgs(index, count));
         }
 
         public virtual void RemoveLine(int index)
@@ -175,7 +173,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
 
         public virtual void RemoveLine(int index, int count)
         {
-            List<int> removedLineIds = new List<int>();
+            List<int> removedLineIds = [];
             //
             if (count > 0)
                 if (IsNeedBuildRemovedLineIds)
@@ -191,26 +189,18 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         public virtual void OnLineRemoved(int index, int count, List<int> removedLineIds)
         {
             if (count > 0)
-                if (LineRemoved != null)
-                    LineRemoved(this, new LineRemovedEventArgs(index, count, removedLineIds));
+                LineRemoved?.Invoke(this, new LineRemovedEventArgs(index, count, removedLineIds));
         }
 
         public virtual void OnTextChanged(int fromLine, int toLine)
         {
-            if (TextChanged != null)
-                TextChanged(this, new TextChangedEventArgs(Math.Min(fromLine, toLine), Math.Max(fromLine, toLine) ));
+            TextChanged?.Invoke(this, new TextChangedEventArgs(Math.Min(fromLine, toLine), Math.Max(fromLine, toLine)));
         }
 
-        public class TextChangedEventArgs : EventArgs
+        public class TextChangedEventArgs(int iFromLine, int iToLine) : EventArgs
         {
-            public int iFromLine;
-            public int iToLine;
-
-            public TextChangedEventArgs(int iFromLine, int iToLine)
-            {
-                this.iFromLine = iFromLine;
-                this.iToLine = iToLine;
-            }
+            public int iFromLine = iFromLine;
+            public int iToLine = iToLine;
         }
 
         public virtual int IndexOf(Line? item)
@@ -275,14 +265,12 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
 
         public virtual void NeedRecalc(TextChangedEventArgs args)
         {
-            if (RecalcNeeded != null)
-                RecalcNeeded(this, args);
+            RecalcNeeded?.Invoke(this, args);
         }
 
         public virtual void OnRecalcWordWrap(TextChangedEventArgs args)
         {
-            if (RecalcWordWrap != null)
-                RecalcWordWrap(this, args);
+            RecalcWordWrap?.Invoke(this, args);
         }
 
         public virtual void OnTextChanging()
@@ -320,18 +308,16 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
 
         public virtual void Dispose()
         {
-            ;
+            GC.SuppressFinalize(this);
         }
 
         public virtual void SaveToFile(string fileName, Encoding enc)
         {
-            using (StreamWriter sw = new StreamWriter(fileName, false, enc))
-            {
-                for (int i = 0; i < Count - 1;i++ )
-                    sw.WriteLine(lines[i]?.Text);
+            using StreamWriter sw = new(fileName, false, enc);
+            for (int i = 0; i < Count - 1; i++)
+                sw.WriteLine(lines[i]?.Text);
 
-                sw.Write(lines[Count-1]?.Text);
-            }
+            sw.Write(lines[Count - 1]?.Text);
         }
     }
 }

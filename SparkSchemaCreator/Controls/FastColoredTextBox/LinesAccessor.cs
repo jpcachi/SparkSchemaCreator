@@ -4,14 +4,9 @@ using System.Text;
 
 namespace SparkSchemaCreator.Controls.FastColoredTextBox
 {
-    public class LinesAccessor : IList<string>
+    public class LinesAccessor(IList<Line?> ts) : IList<string>
     {
-        IList<Line> ts;
-
-        public LinesAccessor(IList<Line?> ts)
-        {
-            this.ts = ts;
-        }
+        readonly IList<Line> ts = ts!;
 
         public int IndexOf(string item)
         {

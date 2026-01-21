@@ -17,7 +17,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         readonly AutocompleteListView listView;
         public ToolStripControlHost host;
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public Range Fragment { get; internal set; }
+        public Range? Fragment { get; internal set; }
 
         /// <summary>
         /// Regex pattern for serach fragment around caret
@@ -32,15 +32,15 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         /// <summary>
         /// User selects item
         /// </summary>
-        public event EventHandler<SelectingEventArgs> Selecting;
+        public event EventHandler<SelectingEventArgs>? Selecting;
         /// <summary>
         /// It fires after item inserting
         /// </summary>
-        public event EventHandler<SelectedEventArgs> Selected;
+        public event EventHandler<SelectedEventArgs>? Selected;
         /// <summary>
         /// Occurs when popup menu is opening
         /// </summary>
-        public new event EventHandler<CancelEventArgs> Opening;
+        public new event EventHandler<CancelEventArgs>? Opening;
         /// <summary>
         /// Allow TAB for select menu item
         /// </summary>
@@ -178,7 +178,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         /// Image list of menu
         /// </summary>
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public new ImageList ImageList
+        public new ImageList? ImageList
         {
             get { return Items.ImageList; }
             set { Items.ImageList = value; }
@@ -215,7 +215,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
     [System.ComponentModel.ToolboxItem(false)]
     public class AutocompleteListView : UserControl, IDisposable
     {
-        public event EventHandler FocussedItemIndexChanged;
+        public event EventHandler? FocussedItemIndexChanged;
 
         internal List<AutocompleteItem?> visibleItems;
         IEnumerable<AutocompleteItem> sourceItems = [];
@@ -236,7 +236,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         internal bool AllowTabKey { get; set; }
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public ImageList ImageList { get; set; }
+        public ImageList? ImageList { get; set; }
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         internal int AppearInterval { get { return timer.Interval; } set { timer.Interval = value; } }
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
@@ -408,7 +408,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
             AutoScrollMinSize += new Size(1, 0);
             //get fragment around caret
             Range fragment = tb.Selection.GetFragment(Menu.SearchPattern);
-            string text = fragment.Text;
+            string text = fragment.Text!;
             //calc screen point for popup menu
             Point point = tb.PlaceToPoint(fragment.End);
             point.Offset(2, tb.CharHeight);
@@ -468,7 +468,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
                 if (!tb.Selection.IsEmpty)
                     needClose = true;
                 else
-                    if (!Menu.Fragment.Contains(tb.Selection.Start))
+                    if (!Menu.Fragment!.Contains(tb.Selection.Start))
                     {
                         if (tb.Selection.Start.iLine == Menu.Fragment.End.iLine && tb.Selection.Start.iChar == Menu.Fragment.End.iChar + 1)
                         {
@@ -617,7 +617,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
                 if (!args.Handled)
                 {
                     var fragment = Menu.Fragment;
-                    DoAutocomplete(item, fragment);
+                    DoAutocomplete(item, fragment!);
                 }
 
                 Menu.Close();
@@ -625,7 +625,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
                 SelectedEventArgs args2 = new()
                 {
                     Item = item,
-                    Tb = Menu.Fragment.tb
+                    Tb = Menu.Fragment!.tb
                 };
                 item?.OnSelected(Menu, args2);
                 Menu.OnSelected(args2);

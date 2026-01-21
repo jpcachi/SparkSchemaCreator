@@ -5,11 +5,15 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
     /// <summary>
     /// Limited stack
     /// </summary>
-    public class LimitedStack<T>
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    /// <param name="maxItemCount">Maximum length of stack</param>
+    public class LimitedStack<T>(int maxItemCount)
     {
-        T[] items;
-        int count;
-        int start;
+        T?[] items = new T[maxItemCount];
+        int count = 0;
+        int start = 0;
 
         /// <summary>
         /// Max stack length
@@ -28,27 +32,16 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         }
 
         /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="maxItemCount">Maximum length of stack</param>
-        public LimitedStack(int maxItemCount)
-        {
-            items = new T[maxItemCount];
-            count = 0;
-            start = 0;
-        }
-
-        /// <summary>
         /// Pop item
         /// </summary>
-        public T Pop()
+        public T? Pop()
         {
             if (count == 0)
                 throw new Exception("Stack is empty");
 
             int i = LastIndex;
-            T item = items[i];
-            items[i] = default(T);
+            T? item = items[i];
+            items[i] = default;
 
             count--;
 
@@ -63,10 +56,10 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         /// <summary>
         /// Peek item
         /// </summary>
-        public T Peek()
+        public T? Peek()
         {
             if (count == 0)
-                return default(T);
+                return default;
 
             return items[LastIndex];
         }
@@ -94,9 +87,9 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
             start = 0;
         }
 
-        public T[] ToArray()
+        public T?[] ToArray()
         {
-            T[] result = new T[count];
+            T?[] result = new T[count];
             for (int i = 0; i < count; i++)
                 result[i] = items[(start + i) % items.Length];
             return result;

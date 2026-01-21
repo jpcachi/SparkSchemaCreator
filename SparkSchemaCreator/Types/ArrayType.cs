@@ -61,7 +61,7 @@ namespace SparkSchemaCreator.Types
 
         public override int GetHashCode()
         {
-            return (ElementType?.GetHashCode() ?? "<empty>".GetHashCode()) ^ ContainsNull.GetHashCode();  
+            return HashCode.Combine(ElementType ?? new VoidType(), ContainsNull);  
         }
 
         public override void UpdateFrom(JsonSparkElement newValue)

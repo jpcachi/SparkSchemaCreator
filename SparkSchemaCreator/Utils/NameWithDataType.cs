@@ -22,7 +22,7 @@ namespace SparkSchemaCreator.Utils
 
         public override int GetHashCode()
         {
-            return Name.GetHashCode() ^ DataType.GetHashCode();
+            return HashCode.Combine(Name, DataType);
         }
 
         public ComplexType? GetParent()

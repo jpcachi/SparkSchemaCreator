@@ -7,20 +7,15 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
     /// Insert single char
     /// </summary>
     /// <remarks>This operation includes also insertion of new line and removing char by backspace</remarks>
-    public class InsertCharCommand : UndoableCommand
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    /// <param name="tb">Underlaying textbox</param>
+    /// <param name="c">Inserting char</param>
+    public class InsertCharCommand(TextSource ts, char c) : UndoableCommand(ts)
     {
-        public char c;
+        public char c = c;
         char deletedChar = '\x0';
-
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="tb">Underlaying textbox</param>
-        /// <param name="c">Inserting char</param>
-        public InsertCharCommand(TextSource ts, char c): base(ts)
-        {
-            this.c = c;
-        }
 
         /// <summary>
         /// Undo operation
@@ -33,7 +28,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
                 case '\n': MergeLines(sel.Start.iLine, ts); break;
                 case '\r': break;
                 case '\b':
-                    ts.CurrentTB.Selection.Start = lastSel.Start;
+                    ts.CurrentTB.Selection.Start = lastSel!.Start;
                     char cc = '\x0';
                     if (deletedChar != '\x0')
                     {
@@ -43,13 +38,13 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
                     break;
                 case '\t':
                     ts.CurrentTB.ExpandBlock(sel.Start.iLine);
-                    for (int i = sel.FromX; i < lastSel.FromX; i++)
-                        ts[sel.Start.iLine].RemoveAt(sel.Start.iChar);
+                    for (int i = sel.FromX; i < lastSel!.FromX; i++)
+                        ts[sel.Start.iLine]!.RemoveAt(sel.Start.iChar);
                     ts.CurrentTB.Selection.Start = sel.Start;
                     break;
                 default:
                     ts.CurrentTB.ExpandBlock(sel.Start.iLine);
-                    ts[sel.Start.iLine].RemoveAt(sel.Start.iChar);
+                    ts[sel.Start.iLine]!.RemoveAt(sel.Start.iChar);
                     ts.CurrentTB.Selection.Start = sel.Start;
                     break;
             }
@@ -66,11 +61,11 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         {
             ts.CurrentTB.ExpandBlock(ts.CurrentTB.Selection.Start.iLine);
             string s = c.ToString();
-            ts.OnTextChanging(ref s);
+            ts.OnTextChanging(ref s!);
             if (s.Length == 1)
                 c = s[0];
 
-            if (String.IsNullOrEmpty(s))
+            if (string.IsNullOrEmpty(s))
                 throw new ArgumentOutOfRangeException();
 
 
@@ -90,7 +85,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
             {
                 case '\n':
                     if (!ts.CurrentTB.AllowInsertRemoveLines)
-                        throw new ArgumentOutOfRangeException("Cant insert this char in ColumnRange mode");
+                        throw new ArgumentOutOfRangeException(nameof(ts), "Cant insert this char in ColumnRange mode");
                     if (ts.Count == 0)
                         InsertLine(ts);
                     InsertLine(ts);
@@ -102,7 +97,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
                     if (tb.Selection.Start.iChar == 0)
                     {
                         if (!ts.CurrentTB.AllowInsertRemoveLines)
-                            throw new ArgumentOutOfRangeException("Cant insert this char in ColumnRange mode");
+                            throw new ArgumentOutOfRangeException(nameof(ts), "Cant insert this char in ColumnRange mode");
                         if (tb.LineInfos[tb.Selection.Start.iLine - 1].VisibleState != VisibleState.Visible)
                             tb.ExpandBlock(tb.Selection.Start.iLine - 1);
                         deletedChar = '\n';
@@ -110,8 +105,8 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
                     }
                     else
                     {
-                        deletedChar = ts[tb.Selection.Start.iLine][tb.Selection.Start.iChar - 1].c;
-                        ts[tb.Selection.Start.iLine].RemoveAt(tb.Selection.Start.iChar - 1);
+                        deletedChar = ts[tb.Selection.Start.iLine]![tb.Selection.Start.iChar - 1].c;
+                        ts[tb.Selection.Start.iLine]!.RemoveAt(tb.Selection.Start.iChar - 1);
                         tb.Selection.Start = new Place(tb.Selection.Start.iChar - 1, tb.Selection.Start.iLine);
                     }
                     break;
@@ -121,12 +116,12 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
                         spaceCountNextTabStop = tb.TabLength;
 
                     for (int i = 0; i < spaceCountNextTabStop; i++)
-                        ts[tb.Selection.Start.iLine].Insert(tb.Selection.Start.iChar, new Char(' '));
+                        ts[tb.Selection.Start.iLine]!.Insert(tb.Selection.Start.iChar, new Char(' '));
 
                     tb.Selection.Start = new Place(tb.Selection.Start.iChar + spaceCountNextTabStop, tb.Selection.Start.iLine);
                     break;
                 default:
-                    ts[tb.Selection.Start.iLine].Insert(tb.Selection.Start.iChar, new Char(c));
+                    ts[tb.Selection.Start.iLine]!.Insert(tb.Selection.Start.iChar, new Char(c));
                     tb.Selection.Start = new Place(tb.Selection.Start.iChar + 1, tb.Selection.Start.iLine);
                     break;
             }
@@ -159,17 +154,17 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
                 return;
             tb.ExpandBlock(i);
             tb.ExpandBlock(i + 1);
-            int pos = ts[i].Count;
+            int pos = ts[i]!.Count;
             //
             /*
             if(ts[i].Count == 0)
                 ts.RemoveLine(i);
             else*/
-            if (ts[i + 1].Count == 0)
+            if (ts[i + 1]!.Count == 0)
                 ts.RemoveLine(i + 1);
             else
             {
-                ts[i].AddRange(ts[i + 1]);
+                ts[i]!.AddRange(ts[i + 1]!);
                 ts.RemoveLine(i + 1);
             }
             tb.Selection.Start = new Place(pos, i);
@@ -179,9 +174,9 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         internal static void BreakLines(int iLine, int pos, TextSource ts)
         {
             Line newLine = ts.CreateLine();
-            for(int i=pos;i<ts[iLine].Count;i++)
-                newLine.Add(ts[iLine][i]);
-            ts[iLine].RemoveRange(pos, ts[iLine].Count - pos);
+            for(int i=pos;i<ts[iLine]!.Count;i++)
+                newLine.Add(ts[iLine]![i]);
+            ts[iLine]!.RemoveRange(pos, ts[iLine]!.Count - pos);
             //
             ts.InsertLine(iLine+1, newLine);
         }
@@ -195,19 +190,14 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
     /// <summary>
     /// Insert text
     /// </summary>
-    public class InsertTextCommand : UndoableCommand
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    /// <param name="tb">Underlaying textbox</param>
+    /// <param name="insertedText">Text for inserting</param>
+    public class InsertTextCommand(TextSource ts, string insertedText) : UndoableCommand(ts)
     {
-        public string InsertedText;
-
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="tb">Underlaying textbox</param>
-        /// <param name="insertedText">Text for inserting</param>
-        public InsertTextCommand(TextSource ts, string insertedText): base(ts)
-        {
-            this.InsertedText = insertedText;
-        }
+        public string InsertedText = insertedText;
 
         /// <summary>
         /// Undo operation
@@ -215,7 +205,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         public override void Undo()
         {
             ts.CurrentTB.Selection.Start = sel.Start;
-            ts.CurrentTB.Selection.End = lastSel.Start;
+            ts.CurrentTB.Selection.End = lastSel!.Start;
             ts.OnTextChanging();
             ClearSelectedCommand.ClearSelected(ts);
             base.Undo();
@@ -226,7 +216,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         /// </summary>
         public override void Execute()
         {
-            ts.OnTextChanging(ref InsertedText);
+            ts.OnTextChanging(ref InsertedText!);
             InsertText(InsertedText, ts);
             base.Execute();
         }
@@ -273,8 +263,8 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
     public class ReplaceTextCommand : UndoableCommand
     {
         string insertedText;
-        List<Range> ranges;
-        List<string> prevText = new List<string>();
+        readonly List<Range> ranges;
+        readonly List<string> prevText = [];
 
         /// <summary>
         /// Constructor
@@ -321,7 +311,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
             tb.EndUpdate();
 
             if (ranges.Count > 0)
-                ts.OnTextChanged(ranges[0].Start.iLine, ranges[ranges.Count - 1].End.iLine);
+                ts.OnTextChanged(ranges[0].Start.iLine, ranges[^1].End.iLine);
 
             ts.NeedRecalc(new TextSource.TextChangedEventArgs(0, 1));
         }
@@ -334,7 +324,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
             var tb = ts.CurrentTB;
             prevText.Clear();
 
-            ts.OnTextChanging(ref insertedText);
+            ts.OnTextChanging(ref insertedText!);
 
             tb.Selection.BeginUpdate();
             tb.BeginUpdate();
@@ -342,13 +332,13 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
             {
                 tb.Selection.Start = ranges[i].Start;
                 tb.Selection.End = ranges[i].End;
-                prevText.Add(tb.Selection.Text);
+                prevText.Add(tb.Selection.Text!);
                 ClearSelected(ts);
-                if (insertedText  != "")
+                if (!string.IsNullOrEmpty(insertedText))
                     InsertTextCommand.InsertText(insertedText, ts);
             }
             if(ranges.Count > 0)
-                ts.OnTextChanged(ranges[0].Start.iLine, ranges[ranges.Count - 1].End.iLine);
+                ts.OnTextChanged(ranges[0].Start.iLine, ranges[^1].End.iLine);
             tb.EndUpdate();
             tb.Selection.EndUpdate();
             ts.NeedRecalc(new TextSource.TextChangedEventArgs(0, 1));
@@ -358,7 +348,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
 
         public override UndoableCommand Clone()
         {
-            return new ReplaceTextCommand(ts, new List<Range>(ranges), insertedText);
+            return new ReplaceTextCommand(ts, [.. ranges], insertedText);
         }
 
         internal static void ClearSelected(TextSource ts)
@@ -376,11 +366,11 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
             if (fromLine < 0) return;
             //
             if (fromLine == toLine)
-                ts[fromLine].RemoveRange(fromChar, toChar - fromChar);
+                ts[fromLine]!.RemoveRange(fromChar, toChar - fromChar);
             else
             {
-                ts[fromLine].RemoveRange(fromChar, ts[fromLine].Count - fromChar);
-                ts[toLine].RemoveRange(0, toChar);
+                ts[fromLine]!.RemoveRange(fromChar, ts[fromLine]!.Count - fromChar);
+                ts[toLine]!.RemoveRange(0, toChar);
                 ts.RemoveLine(fromLine + 1, toLine - fromLine - 1);
                 InsertCharCommand.MergeLines(fromLine, ts);
             }
@@ -390,17 +380,13 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
     /// <summary>
     /// Clear selected text
     /// </summary>
-    public class ClearSelectedCommand : UndoableCommand
+    /// <remarks>
+    /// Construstor
+    /// </remarks>
+    /// <param name="tb">Underlaying textbox</param>
+    public class ClearSelectedCommand(TextSource ts) : UndoableCommand(ts)
     {
-        string deletedText;
-
-        /// <summary>
-        /// Construstor
-        /// </summary>
-        /// <param name="tb">Underlaying textbox</param>
-        public ClearSelectedCommand(TextSource ts): base(ts)
-        {
-        }
+        string? deletedText;
 
         /// <summary>
         /// Undo operation
@@ -409,7 +395,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         {
             ts.CurrentTB.Selection.Start = new Place(sel.FromX, Math.Min(sel.Start.iLine, sel.End.iLine));
             ts.OnTextChanging();
-            InsertTextCommand.InsertText(deletedText, ts);
+            InsertTextCommand.InsertText(deletedText!, ts);
             ts.OnTextChanged(sel.Start.iLine, sel.End.iLine);
             ts.CurrentTB.Selection.Start = sel.Start;
             ts.CurrentTB.Selection.End = sel.End;
@@ -422,7 +408,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         {
             var tb = ts.CurrentTB;
 
-            string temp = null;
+            string? temp = null;
             ts.OnTextChanging(ref temp);
             if (temp == "")
                 throw new ArgumentOutOfRangeException();
@@ -446,11 +432,11 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
             if (fromLine < 0) return;
             //
             if (fromLine == toLine)
-                ts[fromLine].RemoveRange(fromChar, toChar - fromChar);
+                ts[fromLine]!.RemoveRange(fromChar, toChar - fromChar);
             else
             {
-                ts[fromLine].RemoveRange(fromChar, ts[fromLine].Count - fromChar);
-                ts[toLine].RemoveRange(0, toChar);
+                ts[fromLine]!.RemoveRange(fromChar, ts[fromLine]!.Count - fromChar);
+                ts[toLine]!.RemoveRange(0, toChar);
                 ts.RemoveLine(fromLine + 1, toLine - fromLine - 1);
                 InsertCharCommand.MergeLines(fromLine, ts);
             }
@@ -471,13 +457,13 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
     /// </summary>
     public class ReplaceMultipleTextCommand : UndoableCommand
     {
-        List<ReplaceRange> ranges;
-        List<string> prevText = new List<string>();
+        readonly List<ReplaceRange> ranges;
+        readonly List<string> prevText = [];
 
-        public class ReplaceRange
+        public class ReplaceRange(Range ReplacedRange, string ReplaceText)
         {
-            public Range ReplacedRange { get; set; }
-            public String ReplaceText { get; set; }
+            public Range ReplacedRange { get; set; } = ReplacedRange;
+            public string ReplaceText { get; set; } = ReplaceText;
         }
 
         /// <summary>
@@ -540,7 +526,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
             {
                 tb.Selection.Start = ranges[i].ReplacedRange.Start;
                 tb.Selection.End = ranges[i].ReplacedRange.End;
-                prevText.Add(tb.Selection.Text);
+                prevText.Add(tb.Selection.Text!);
                 ClearSelectedCommand.ClearSelected(ts);
                 InsertTextCommand.InsertText(ranges[i].ReplaceText, ts);
                 ts.OnTextChanged(ranges[i].ReplacedRange.Start.iLine, ranges[i].ReplacedRange.End.iLine);
@@ -553,7 +539,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
 
         public override UndoableCommand Clone()
         {
-            return new ReplaceMultipleTextCommand(ts, new List<ReplaceRange>(ranges));
+            return new ReplaceMultipleTextCommand(ts, [.. ranges]);
         }
     }
 
@@ -562,8 +548,8 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
     /// </summary>
     public class RemoveLinesCommand : UndoableCommand
     {
-        List<int> iLines;
-        List<string> prevText = new List<string>();
+        readonly List<int> iLines;
+        readonly List<string> prevText = [];
 
         /// <summary>
         /// Constructor
@@ -599,17 +585,17 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
                 if(iLine < ts.Count)
                     tb.Selection.Start = new Place(0, iLine);
                 else
-                    tb.Selection.Start = new Place(ts[ts.Count - 1].Count, ts.Count - 1);
+                    tb.Selection.Start = new Place(ts[^1]!.Count, ts.Count - 1);
 
                 InsertCharCommand.InsertLine(ts);
                 tb.Selection.Start = new Place(0, iLine);
                 var text = prevText[prevText.Count - i - 1];
                 InsertTextCommand.InsertText(text, ts);
-                ts[iLine].IsChanged = true;
+                ts[iLine]!.IsChanged = true;
                 if (iLine < ts.Count - 1)
-                    ts[iLine + 1].IsChanged = true;
+                    ts[iLine + 1]!.IsChanged = true;
                 else
-                    ts[iLine - 1].IsChanged = true;
+                    ts[iLine - 1]!.IsChanged = true;
                 if(text.Trim() != string.Empty)
                     ts.OnTextChanged(iLine, iLine);
             }
@@ -634,7 +620,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
             {
                 var iLine = iLines[i];
                 
-                prevText.Add(ts[iLine].Text);//backward
+                prevText.Add(ts[iLine]!.Text);//backward
                 ts.RemoveLine(iLine);
                 //ts.OnTextChanged(ranges[i].Start.iLine, ranges[i].End.iLine);
             }
@@ -647,7 +633,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
 
         public override UndoableCommand Clone()
         {
-            return new RemoveLinesCommand(ts, new List<int>(iLines));
+            return new RemoveLinesCommand(ts, [.. iLines]);
         }
     }
 
@@ -656,9 +642,9 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
     /// </summary>
     public class MultiRangeCommand : UndoableCommand
     {
-        private UndoableCommand cmd;
-        private Range range;
-        private List<UndoableCommand> commandsByRanges = new List<UndoableCommand>();
+        private readonly UndoableCommand cmd;
+        private readonly Range range;
+        private readonly List<UndoableCommand> commandsByRanges = [];
 
         public MultiRangeCommand(UndoableCommand command):base(command.ts)
         {
@@ -679,11 +665,11 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
             ts.CurrentTB.AllowInsertRemoveLines = false;
             try
             {
-                if (cmd is InsertTextCommand)
-                    ExecuteInsertTextCommand(ref iChar, (cmd as InsertTextCommand).InsertedText);
+                if (cmd is InsertTextCommand insertTextCommand)
+                    ExecuteInsertTextCommand(ref iChar, insertTextCommand.InsertedText);
                 else
-                if (cmd is InsertCharCommand && (cmd as InsertCharCommand).c != '\x0' && (cmd as InsertCharCommand).c != '\b')//if not DEL or BACKSPACE
-                    ExecuteInsertTextCommand(ref iChar, (cmd as InsertCharCommand).c.ToString());
+                if (cmd is InsertCharCommand insertCharCommand && insertCharCommand.c != '\x0' && insertCharCommand.c != '\b')
+                    ExecuteInsertTextCommand(ref iChar, insertCharCommand.c.ToString());
                 else
                     ExecuteCommand(ref iChar);
             }
@@ -776,12 +762,8 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
     /// <summary>
     /// Remembers current selection and restore it after Undo
     /// </summary>
-    public class SelectCommand : UndoableCommand
+    public class SelectCommand(TextSource ts) : UndoableCommand(ts)
     {
-        public SelectCommand(TextSource ts):base(ts)
-        {
-        }
-
         public override void Execute()
         {
             //remember selection
@@ -795,7 +777,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         public override void Undo()
         {
             //restore selection
-            ts.CurrentTB.Selection = new Range(ts.CurrentTB, lastSel.Start, lastSel.End);
+            ts.CurrentTB.Selection = new Range(ts.CurrentTB, lastSel!.Start, lastSel.End);
         }
 
         public override UndoableCommand Clone()

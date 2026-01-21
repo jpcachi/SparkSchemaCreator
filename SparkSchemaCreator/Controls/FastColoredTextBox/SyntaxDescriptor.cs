@@ -11,32 +11,31 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         public char leftBracket2 = '{';
         public char rightBracket2 = '}';
         public BracketsHighlightStrategy bracketsHighlightStrategy = BracketsHighlightStrategy.Strategy2;
-        public readonly List<Style> styles = new List<Style>();
-        public readonly List<RuleDesc> rules = new List<RuleDesc>();
-        public readonly List<FoldingDesc> foldings = new List<FoldingDesc>();
+        public readonly List<Style> styles = [];
+        public readonly List<RuleDesc> rules = [];
+        public readonly List<FoldingDesc> foldings = [];
 
         public void Dispose()
         {
             foreach (var style in styles)
                 style.Dispose();
+
+            GC.SuppressFinalize(this);
         }
     }
 
-    public class RuleDesc
+    public class RuleDesc(string _pattern)
     {
-        Regex regex;
-        public string pattern;
+        Regex? regex;
+        public string pattern = _pattern;
         public RegexOptions options = RegexOptions.None;
-        public Style style;
+        public Style? style;
 
         public Regex Regex
         {
             get
             {
-                if (regex == null)
-                {
-                    regex = new Regex(pattern, SyntaxHighlighter.RegexCompiledOption | options);
-                }
+                regex ??= new Regex(pattern!, SyntaxHighlighter.RegexCompiledOption | options);
                 return regex;
             }
         }
@@ -44,8 +43,8 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
 
     public class FoldingDesc
     {
-        public string startMarkerRegex;
-        public string finishMarkerRegex;
+        public string? startMarkerRegex;
+        public string? finishMarkerRegex;
         public RegexOptions options = RegexOptions.None;
     }
 }

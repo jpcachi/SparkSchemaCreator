@@ -37,7 +37,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         /// </summary>
         public bool IncludeLineNumbers { get; set; }
 
-        FastColoredTextBox tb;
+        FastColoredTextBox? tb;
 
         public ExportToHTML()
         {
@@ -50,7 +50,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         public string GetHtml(FastColoredTextBox tb)
         {
             this.tb = tb;
-            Range sel = new Range(tb);
+            Range sel = new(tb);
             sel.SelectAll();
             return GetHtml(sel);
         }
@@ -58,9 +58,9 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
         public string GetHtml(Range r)
         {
             this.tb = r.tb;
-            Dictionary<StyleIndex, object> styles = new Dictionary<StyleIndex, object>();
-            StringBuilder sb = new StringBuilder();
-            StringBuilder tempSB = new StringBuilder();
+            Dictionary<StyleIndex, object?> styles = [];
+            StringBuilder sb = new();
+            StringBuilder tempSB = new();
             StyleIndex currentStyleId = StyleIndex.None;
             r.Normalize();
             int currentLine = r.Start.iLine;
@@ -144,12 +144,12 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
 
         private string GetCss(StyleIndex styleIndex)
         {
-            List<Style> styles = new List<Style>();
+            List<Style> styles = [];
             //find text renderer
-            TextStyle textStyle = null;
+            TextStyle? textStyle = null;
             int mask = 1;
             bool hasTextStyle = false;
-            for (int i = 0; i < tb.Styles.Length; i++)
+            for (int i = 0; i < tb?.Styles.Length; i++)
             {
                 if (tb.Styles[i] != null && ((int)styleIndex & mask) != 0)
                 if (tb.Styles[i].IsExportable)
@@ -165,24 +165,23 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
                             textStyle = style as TextStyle;
                         }
                 }
-                mask = mask << 1;
+                mask <<= 1;
             }
             //add TextStyle css
-            string result = "";
-            
+            string result;
             if (!hasTextStyle)
             {
                 //draw by default renderer
-                result = tb.DefaultStyle.GetCSS();
+                result = tb!.DefaultStyle.GetCSS();
             }
             else
             {
-                result = textStyle.GetCSS();
+                result = textStyle!.GetCSS();
             }
             //add no TextStyle css
             foreach(var style in styles)
 //            if (style != textStyle)
-            if(!(style is TextStyle))
+            if(style is not TextStyle)
                 result += style.GetCSS();
 
             return result;
@@ -195,7 +194,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
             return string.Format("#{0:x2}{1:x2}{2:x2}", color.R, color.G, color.B);
         }
 
-        string GetStyleName(StyleIndex styleIndex)
+        static string GetStyleName(StyleIndex styleIndex)
         {
             return styleIndex.ToString().Replace(" ", "").Replace(",", "");
         }
@@ -212,7 +211,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
                 string css = GetCss(currentStyle);
                 if(css!="")
                     sb.AppendFormat("<font style=\"{0}\">", css);
-                sb.Append(tempSB.ToString());
+                sb.Append(tempSB);
                 if (css != "")
                     sb.Append("</font>");
             }

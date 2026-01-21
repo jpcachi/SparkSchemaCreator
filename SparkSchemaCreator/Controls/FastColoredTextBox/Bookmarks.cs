@@ -49,17 +49,17 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
     public class Bookmarks : BaseBookmarks
     {
         protected FastColoredTextBox tb;
-        protected List<Bookmark> items = new List<Bookmark>();
+        protected List<Bookmark> items = [];
         protected int counter;
 
         public Bookmarks(FastColoredTextBox tb)
         {
             this.tb = tb;
-            tb.LineInserted += tb_LineInserted;
-            tb.LineRemoved += tb_LineRemoved;
+            tb.LineInserted += Tb_LineInserted;
+            tb.LineRemoved += Tb_LineRemoved;
         }
 
-        protected virtual void tb_LineRemoved(object sender, LineRemovedEventArgs e)
+        protected virtual void Tb_LineRemoved(object? sender, LineRemovedEventArgs e)
         {
             for(int i=0; i<Count; i++)
             if (items[i].LineIndex >= e.Index)
@@ -81,19 +81,10 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
                     i--;
                 }else
                     items[i].LineIndex = e.Index - 1;
-
-                //if (items[i].LineIndex == e.Index + e.Count - 1)
-                //{
-                //    items[i].LineIndex = items[i].LineIndex - e.Count;
-                //    continue;
-                //}
-                //
-                //items.RemoveAt(i);
-                //i--;
             }
         }
 
-        protected virtual void tb_LineInserted(object sender, LineInsertedEventArgs e)
+        protected virtual void Tb_LineInserted(object? sender, LineInsertedEventArgs e)
         {
             for (int i = 0; i < Count; i++)
                 if (items[i].LineIndex >= e.Index)
@@ -109,8 +100,10 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
     
         public override void Dispose()
         {
-            tb.LineInserted -= tb_LineInserted;
-            tb.LineRemoved -= tb_LineRemoved;
+            tb.LineInserted -= Tb_LineInserted;
+            tb.LineRemoved -= Tb_LineRemoved;
+
+            GC.SuppressFinalize(this);
         }
 
         public override IEnumerator<Bookmark> GetEnumerator()
@@ -210,21 +203,21 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
     /// <summary>
     /// Bookmark of FastColoredTextbox
     /// </summary>
-    public class Bookmark
+    public class Bookmark(FastColoredTextBox tb, string name, int lineIndex)
     {
-        public FastColoredTextBox TB { get; private set; }
+        public FastColoredTextBox TB { get; private set; } = tb;
         /// <summary>
         /// Name of bookmark
         /// </summary>
-        public string Name { get; set; }
+        public string Name { get; set; } = name;
         /// <summary>
         /// Line index
         /// </summary>
-        public int LineIndex {get; set; }
+        public int LineIndex { get; set; } = lineIndex;
         /// <summary>
         /// Color of bookmark sign
         /// </summary>
-        public Color Color { get; set; }
+        public Color Color { get; set; } = tb.BookmarkColor;
 
         /// <summary>
         /// Scroll textbox to the bookmark
@@ -236,21 +229,13 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
             TB.Invalidate();
         }
 
-        public Bookmark(FastColoredTextBox tb, string name, int lineIndex)
-        {
-            this.TB = tb;
-            this.Name = name;
-            this.LineIndex = lineIndex;
-            Color = tb.BookmarkColor;
-        }
-
         public virtual void Paint(Graphics gr, Rectangle lineRect)
         {
             var size = TB.CharHeight - 1;
             using (var brush = new LinearGradientBrush(new Rectangle(0, lineRect.Top, size, size), Color.White, Color, 45))
                 gr.FillEllipse(brush, 0, lineRect.Top, size, size);
-            using (var pen = new Pen(Color))
-                gr.DrawEllipse(pen, 0, lineRect.Top, size, size);
+            using var pen = new Pen(Color);
+            gr.DrawEllipse(pen, 0, lineRect.Top, size, size);
         }
     }
 }
