@@ -8,6 +8,7 @@ using System.Drawing.Design;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using SparkSchemaCreator.Utils;
 
 namespace SparkSchemaCreator.Types
 {
@@ -70,6 +71,21 @@ namespace SparkSchemaCreator.Types
             };
 
             return result;
+        }
+
+        public static StructType FromJsonObject(JObject jsonObject, bool integersAsLongs = false, bool sortFields = false, bool checkValidName = true)
+        {
+            JArray fields = jsonObject["fields"]?.Value<JArray>() ?? throw new ArgumentException("StructType must define a valid fields array");
+
+            if (fields.Children<JToken>().Any(x => x is not JObject))
+                throw new ArgumentException("StructType fields element only admits StructField objects");
+
+            StructType structType = new();
+            IEnumerable<StructField> rawFields = fields.Children<JObject>().Select(x => StructField.FromJsonObject(x, integersAsLongs, sortFields, checkValidName));
+            IEnumerable<StructField> fieldsToAdd = sortFields ? rawFields.OrderBy(x => x.Name) : rawFields;
+            structType.AddFields(fieldsToAdd);
+
+            return structType;
         }
 
         public void AddField(StructField field)

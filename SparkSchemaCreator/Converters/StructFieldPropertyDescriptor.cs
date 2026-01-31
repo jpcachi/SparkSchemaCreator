@@ -1,4 +1,5 @@
 ﻿using SparkSchemaCreator.Types;
+using SparkSchemaCreator.Utils;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -36,7 +37,7 @@ namespace SparkSchemaCreator.Converters
         {
             if (component is StructField structField && value is string valstr)
             {
-                if (SchemaSettings.Instance.CheckIllegalCharactersInNames && " ,;{}()\n\t=".Intersect(valstr).Any())
+                if (SchemaSettings.Instance.CheckIllegalCharactersInNames && StructFieldUtils.INVALID_CHARS.Intersect(valstr).Any())
                     return;
 
                 structField.Name = valstr;

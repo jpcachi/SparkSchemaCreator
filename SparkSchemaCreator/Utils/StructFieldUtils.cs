@@ -11,6 +11,9 @@ namespace SparkSchemaCreator.Utils
 {
     internal static class StructFieldUtils
     {
+
+        internal static string INVALID_CHARS = " ,;{}()\n\t=";
+
         internal static StructType? ParseStringToSchema(string text, bool isSample)
         {
             try
@@ -19,8 +22,8 @@ namespace SparkSchemaCreator.Utils
                 bool checkIllegalCharacters = SchemaSettings.Instance.CheckIllegalCharactersInNames;
 
                 return isSample ?
-                    SampleMessageToSchema.Instance.ParseToStructType(text, integersAsLongs, false, checkIllegalCharacters) :
-                    JsonSchemaToSchema.Instance.ParseSchemaJson(text, integersAsLongs, false, checkIllegalCharacters);
+                    SampleMessageToSchema.ParseToStructType(text, integersAsLongs, false, checkIllegalCharacters) :
+                    JsonSchemaToSchema.ParseSchemaJson(text, integersAsLongs, false, checkIllegalCharacters);
             }
             catch (Exception ex)
             {

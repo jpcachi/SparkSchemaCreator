@@ -1,6 +1,6 @@
-﻿using SparkSchemaCreator.Converters;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using SparkSchemaCreator.Converters;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -8,6 +8,7 @@ using System.ComponentModel;
 using System.ComponentModel.Design;
 using System.Drawing.Design;
 using System.Text;
+using System.Text.Json.Nodes;
 using System.Windows.Forms;
 
 namespace SparkSchemaCreator.Types
@@ -82,6 +83,55 @@ namespace SparkSchemaCreator.Types
             }
 
             return jsonMap;
+        }
+
+        public static Metadata FromJsonObject(JObject? jObject)
+        {
+            if (jObject == null)
+                return Empty;
+
+            Builder metadataBuilder = new();
+
+            foreach (KeyValuePair<string, JToken?> objValue in jObject)
+            {
+                if (objValue.Value is JValue jValue)
+                    metadataBuilder.Put(objValue.Key, jValue.Value);
+
+                if (objValue.Value is JObject childJObject)
+                    metadataBuilder.Put(objValue.Key, FromJsonObject(childJObject));
+
+                if (objValue.Value is JArray jArray)
+                {
+
+                    if (!jArray.HasValues)
+                        metadataBuilder.Put(objValue.Key, jArray.ToObject<string[]>());
+
+                    else
+                    {
+                        JToken head = jArray[0];
+
+                        if (head is JValue arrayValue)
+                        {
+                            switch (arrayValue.Type)
+                            {
+                                case JTokenType.Integer:
+                                    metadataBuilder.Put(objValue.Key, jArray.ToObject<long[]>());
+                                    break;
+                                case JTokenType.Float:
+                                    metadataBuilder.Put(objValue.Key, jArray.ToObject<double[]>());
+                                    break;
+                                default:
+                                    metadataBuilder.Put(objValue.Key, jArray.ToObject<string[]>());
+                                    break;
+                            }
+                        }
+                        else if (head is JObject objectValue)
+                            metadataBuilder.Put(objValue.Key, jArray.Select(elem => FromJsonObject(elem as JObject)).ToArray());
+                    }
+                }
+            }
+
+            return metadataBuilder.Build();
         }
 
         public override string GetJsonPath()

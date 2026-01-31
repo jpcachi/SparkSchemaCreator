@@ -1,4 +1,5 @@
-﻿using SparkSchemaCreator.Converters;
+﻿using Newtonsoft.Json.Linq;
+using SparkSchemaCreator.Converters;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -6,6 +7,8 @@ using System.Drawing.Design;
 using System.IO;
 using System.Reflection.Metadata;
 using System.Text;
+using System.Text.Json.Nodes;
+using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 using System.Windows.Forms.VisualStyles;
 
@@ -203,6 +206,23 @@ namespace SparkSchemaCreator.Types
                 }
             }
             throw new Exception("Invalid data type encountered: " + dataType);
+        }
+
+        public static DataType FromJsonToken(JToken jsonToken, bool integersAsLongs = false, bool sortFields = false, bool checkValidName = true)
+        {
+            if (jsonToken is JObject jsonObject)
+            {
+                string? type = jsonObject["type"]?.Value<string>();
+
+                return type switch
+                {
+                    "struct" => StructType.FromJsonObject(jsonObject, integersAsLongs, sortFields, checkValidName),
+                    "array" => ArrayType.FromJsonObject(jsonObject, integersAsLongs, sortFields, checkValidName),
+                    "map" => MapType.FromJsonObject(jsonObject, integersAsLongs, sortFields, checkValidName),
+                    _ => throw new ArgumentException($"Invalid Type '{type}'")
+                };
+            }
+            else return FromString(jsonToken.Value<string>());
         }
 
         internal static void BuildFormattedString(DataType dataType, string prefix, StringConcat stringConcat, int maxDepth)

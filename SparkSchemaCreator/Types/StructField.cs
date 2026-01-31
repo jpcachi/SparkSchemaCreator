@@ -1,6 +1,7 @@
-﻿using SparkSchemaCreator.Controls;
+﻿using Newtonsoft.Json.Linq;
+using SparkSchemaCreator.Controls;
 using SparkSchemaCreator.Converters;
-using Newtonsoft.Json.Linq;
+using SparkSchemaCreator.Utils;
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Drawing.Design;
@@ -201,6 +202,24 @@ namespace SparkSchemaCreator.Types
         public override bool Equals(object? other)
         {
             return other is StructField field && field.Name == Name && field.DataType == DataType && field.IsNullable == IsNullable && field.Metadata == Metadata;
+        }
+
+        public static StructField FromJsonObject(JObject jsonObject, bool integersAsLongs = false, bool sortFields = false, bool checkValidName = true)
+        {
+            string? name = (jsonObject["name"]?.Value<string>()) ?? throw new ArgumentException("StructField name cannot be null");
+
+            if (checkValidName && StructFieldUtils.INVALID_CHARS.Intersect(name).Any())
+                throw new ArgumentException($"Attribute name \"{name}\" contains invalid character(s) among \"{StructFieldUtils.INVALID_CHARS}\".");
+
+            bool nullable = jsonObject["nullable"]?.Value<bool>() ?? true;
+
+            JToken typeJsonObject = jsonObject["type"] ?? throw new ArgumentException("StructField must define a non null type");
+            JObject? metadataJsonObject = jsonObject["metadata"]?.Value<JObject>();
+
+            DataType type = DataType.FromJsonToken(typeJsonObject, integersAsLongs, sortFields, checkValidName);
+            Metadata metadata = Metadata.FromJsonObject(metadataJsonObject);
+
+            return new StructField(name, type, nullable, metadata);
         }
     }
 }

@@ -39,6 +39,14 @@ namespace SparkSchemaCreator.Types
             return result;
         }
 
+        public static ArrayType FromJsonObject(JObject jsonObject, bool integersAsLongs = false, bool sortFields = false, bool checkValidName = true)
+        {
+            bool containsNull = jsonObject["containsNull"]?.Value<bool>() ?? true;
+            DataType elementType = FromJsonToken(jsonObject["elementType"] ?? throw new ArgumentException($"ArrayType must define a non null elementType"), integersAsLongs, sortFields, checkValidName);
+
+            return new ArrayType(elementType, containsNull);
+        }
+
         public override string ToScalaObjectString(bool sortFields = false, bool includeEmpty = true, string wrap = "Array")
         {
             return $"{TypeNameApi}({ElementType.ToScalaObjectString(sortFields, includeEmpty, wrap)}, {ContainsNull.ToString().ToLower()})";

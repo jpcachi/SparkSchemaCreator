@@ -1,20 +1,18 @@
-﻿using SparkSchemaCreator.Types;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using SparkSchemaCreator.Types;
+using SparkSchemaCreator.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace SparkSchemaCreator.Json
 {
-    public class SampleMessageToSchema
+    public static class SampleMessageToSchema
     {
-        private static SampleMessageToSchema? instance;
-        public static SampleMessageToSchema Instance => instance ??= new SampleMessageToSchema();
-
-        internal IEnumerable<StructField> ParseToStructFieldSequence(string json, bool integersAsLongs = false, bool checkValidName = true) => ParseSimpleJsonObject(JObject.Parse(json), integersAsLongs, checkValidName);
-        internal StructType ParseToStructType(string json, bool integersAsLongs = false, bool sortFields = false, bool checkValidName = true) => new([.. ParseSimpleJsonObject(JObject.Parse(json), integersAsLongs, sortFields, checkValidName)]);
-        public string ParseToJsonSchema(string json, Formatting? format, bool integersAsLongs = false, bool checkValidName = true) =>
+        internal static IEnumerable<StructField> ParseToStructFieldSequence(string json, bool integersAsLongs = false, bool checkValidName = true) => ParseSimpleJsonObject(JObject.Parse(json), integersAsLongs, checkValidName);
+        internal static StructType ParseToStructType(string json, bool integersAsLongs = false, bool sortFields = false, bool checkValidName = true) => new([.. ParseSimpleJsonObject(JObject.Parse(json), integersAsLongs, sortFields, checkValidName)]);
+        public static string ParseToJsonSchema(string json, Formatting? format, bool integersAsLongs = false, bool checkValidName = true) =>
           JsonConvert.SerializeObject(JsonConvert.DeserializeObject(ParseToStructType(json, integersAsLongs, checkValidName).ToJsonString()), format ?? Formatting.None);
 
         private static DataType ParseSimpleType(JValue jvalue, bool integersAsLongs = false, bool forceString = false)
@@ -47,7 +45,7 @@ namespace SparkSchemaCreator.Json
 
         }
 
-        private StructType ParseStructType(JObject obj, bool integersAsLongs = false, bool sortFields = false, bool checkValidName = true)
+        private static StructType ParseStructType(JObject obj, bool integersAsLongs = false, bool sortFields = false, bool checkValidName = true)
         {
             StructType structType = new();
             IEnumerable<StructField> rawFields = ParseSimpleJsonObject(obj, integersAsLongs, sortFields, checkValidName);
@@ -71,7 +69,7 @@ namespace SparkSchemaCreator.Json
 
         }
 
-        private ArrayType ParseArrayType(JArray obj, bool integersAsLongs = false, bool sortFields = false, bool checkValidName = true)
+        private static ArrayType ParseArrayType(JArray obj, bool integersAsLongs = false, bool sortFields = false, bool checkValidName = true)
         {
             IEnumerable<JToken> arrayTokens = obj.Children();
 
@@ -101,14 +99,14 @@ namespace SparkSchemaCreator.Json
             return new ArrayType(new StructType());
         }
 
-        private IEnumerable<StructField> ParseSimpleJsonObject(JToken currentNode, bool integersAsLongs = false, bool sortFields = false, bool checkValidName = true)
+        private static IEnumerable<StructField> ParseSimpleJsonObject(JToken currentNode, bool integersAsLongs = false, bool sortFields = false, bool checkValidName = true)
         {
             if (currentNode is JObject jObject)
             {
                 foreach (KeyValuePair<string, JToken?> objValue in jObject)
                 {
-                    if (checkValidName && " ,;{}()\n\t=".Intersect(objValue.Key).Any())
-                        throw new ArgumentException($"Attribute name \"{objValue.Key}\" contains invalid character(s) among \" ,;{{}}()\\n\\t=\".");
+                    if (checkValidName && StructFieldUtils.INVALID_CHARS.Intersect(objValue.Key).Any())
+                        throw new ArgumentException($"Attribute name \"{objValue.Key}\" contains invalid character(s) among \"{StructFieldUtils.INVALID_CHARS}\".");
 
                     if (objValue.Value is JValue jValue)
                     {

@@ -58,6 +58,16 @@ namespace SparkSchemaCreator.Types
             return result;
         }
 
+        public static MapType FromJsonObject(JObject jsonObject, bool integersAsLongs = false, bool sortFields = false, bool checkValidName = true)
+        {
+            bool valueContainsNull = jsonObject["valueContainsNull"]?.Value<bool>() ?? true;
+
+            DataType keyType = FromJsonToken(jsonObject["keyType"] ?? throw new ArgumentException("MapType must defined a non null keyType"), integersAsLongs, sortFields, checkValidName);
+            DataType valueType = FromJsonToken(jsonObject["valueType"] ?? throw new ArgumentException("MapType must defined a non null valueType"), integersAsLongs, sortFields, checkValidName);
+
+            return new MapType(keyType, valueType, valueContainsNull);
+        }
+
         public override string ToScalaObjectString(bool sortFields = false, bool includeEmpty = true, string wrap = "Array")
         {
             return $"{TypeNameApi}({KeyType.ToScalaObjectString(sortFields, includeEmpty, wrap)}, {ValueType.ToScalaObjectString(sortFields, includeEmpty, wrap)}, {ValueContainsNull.ToString().ToLower()})";

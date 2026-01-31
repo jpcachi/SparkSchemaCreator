@@ -1,6 +1,7 @@
 ﻿using SparkSchemaCreator.Json;
 using SparkSchemaCreator.Properties;
 using SparkSchemaCreator.Types;
+using SparkSchemaCreator.Utils;
 using System.Data;
 
 namespace SparkSchemaCreator
@@ -115,8 +116,7 @@ namespace SparkSchemaCreator
 
         private void ActivateButtonOK()
         {
-            string invalidCharacters = " ,;{}()\n\t=";
-            bool nameContainsInvalid = SchemaSettings.Instance.CheckIllegalCharactersInNames && invalidCharacters.Intersect(textBox1.Text).Any();
+            bool nameContainsInvalid = SchemaSettings.Instance.CheckIllegalCharactersInNames && StructFieldUtils.INVALID_CHARS.Intersect(textBox1.Text).Any();
             button2.Enabled = !string.IsNullOrEmpty(textBox1.Text) && !nameContainsInvalid
                 && (comboBox1.SelectedIndex != -1);
 
@@ -302,7 +302,7 @@ namespace SparkSchemaCreator
             {
                 if (radioButton1.Checked)
                 {
-                    return JsonSchemaToSchema.Instance.ParseSchemaJson(richTextBox1.Text);
+                    return JsonSchemaToSchema.ParseSchemaJson(richTextBox1.Text);
                 }
 
                 StructType structType = new();

@@ -39,11 +39,11 @@ namespace SparkSchemaCreator.Views
         {
             if (Value is StructType root)
             {
-                root.UpdateFrom(JsonSchemaToSchema.Instance.ParseSchemaJson(value));
+                root.UpdateFrom(JsonSchemaToSchema.ParseSchemaJson(value));
             }
             else if (Value is StructField field)
             {
-                field.UpdateFrom(JsonSchemaToSchema.Instance.ParseSchemaField(value));
+                field.UpdateFrom(JsonSchemaToSchema.ParseSchemaField(value));
                 field.DataType.DefaultType = DefaultDataType;
             }
         }
