@@ -239,6 +239,7 @@ namespace SparkSchemaCreator
             panelWithHeader1.Margin = new Padding(2);
             panelWithHeader1.MaximizeBox = true;
             panelWithHeader1.Name = "panelWithHeader1";
+            panelWithHeader1.PreferredWindowSize = new Size(347, 785);
             panelWithHeader1.Size = new Size(347, 773);
             panelWithHeader1.TabIndex = 0;
             panelWithHeader1.Title = "Schema View";
@@ -333,6 +334,7 @@ namespace SparkSchemaCreator
             panelWithHeader2.Margin = new Padding(2);
             panelWithHeader2.MaximizeBox = true;
             panelWithHeader2.Name = "panelWithHeader2";
+            panelWithHeader2.PreferredWindowSize = new Size(673, 366);
             panelWithHeader2.Size = new Size(673, 354);
             panelWithHeader2.TabIndex = 0;
             panelWithHeader2.Title = "Field information";
@@ -380,6 +382,7 @@ namespace SparkSchemaCreator
             panelWithHeader4.Margin = new Padding(2);
             panelWithHeader4.MaximizeBox = true;
             panelWithHeader4.Name = "panelWithHeader4";
+            panelWithHeader4.PreferredWindowSize = new Size(444, 366);
             panelWithHeader4.Size = new Size(444, 354);
             panelWithHeader4.TabIndex = 0;
             panelWithHeader4.Title = "Metadata";
@@ -463,6 +466,7 @@ namespace SparkSchemaCreator
             panelWithHeader3.Margin = new Padding(2);
             panelWithHeader3.MaximizeBox = true;
             panelWithHeader3.Name = "panelWithHeader3";
+            panelWithHeader3.PreferredWindowSize = new Size(1121, 427);
             panelWithHeader3.Size = new Size(1121, 415);
             panelWithHeader3.TabIndex = 0;
             panelWithHeader3.Title = "Output";
@@ -835,7 +839,7 @@ namespace SparkSchemaCreator
             toolStrip1.Items.AddRange(new ToolStripItem[] { nuevoToolStripButton, abrirToolStripButton, editorToolStripButton, toolStripSeparator6, undoToolStripButton, redoToolStripButton, toolStripSeparator7, addToolStripButton, editToolStripButton, deleteToolStripButton, advanceEditToolStripButton, toolStripSeparator15, moveUpToolStripButton, moveDownToolStripButton, toolStripSeparator16, generateSchemaToolStripButton, SchemaDiffToolStripButton, toolStripSeparator18, toolStripButton1, aboutToolStripButton });
             toolStrip1.Location = new Point(3, 24);
             toolStrip1.Name = "toolStrip1";
-            toolStrip1.Size = new Size(418, 25);
+            toolStrip1.Size = new Size(387, 25);
             toolStrip1.TabIndex = 1;
             // 
             // nuevoToolStripButton

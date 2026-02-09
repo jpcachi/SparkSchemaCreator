@@ -321,6 +321,7 @@ namespace SparkSchemaCreator
 
         private void PanelWithHeader2_EnabledChanged(object sender, EventArgs e)
         {
+            splitContainer3.Panel2Collapsed = !panelWithHeader4.Enabled;
             splitContainer3.Panel1Collapsed = !panelWithHeader2.Enabled;
             splitContainer2.Panel1Collapsed = !panelWithHeader2.Enabled && !panelWithHeader4.Enabled;
         }
@@ -332,6 +333,7 @@ namespace SparkSchemaCreator
 
         private void PanelWithHeader4_EnabledChanged(object sender, EventArgs e)
         {
+            splitContainer3.Panel1Collapsed = !panelWithHeader2.Enabled;
             splitContainer3.Panel2Collapsed = !panelWithHeader4.Enabled;
             splitContainer2.Panel1Collapsed = !panelWithHeader2.Enabled && !panelWithHeader4.Enabled;
         }

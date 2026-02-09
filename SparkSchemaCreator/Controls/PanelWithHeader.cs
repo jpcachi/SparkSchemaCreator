@@ -8,7 +8,6 @@ namespace SparkSchemaCreator.Controls
     public partial class PanelWithHeader : UserControl
     {
         
-
         public PanelWithHeader()
         {
             InitializeComponent();
@@ -91,6 +90,9 @@ namespace SparkSchemaCreator.Controls
             get { return titlePanel; }
         }
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
+        public Size PreferredWindowSize { get; set; } = new Size(500, 500);
+
         private void MyUserControl_Paint(object sender, PaintEventArgs e)
         {
             Rectangle rectangle = new(DisplayRectangle.Location, new Size(DisplayRectangle.Width - 1, DisplayRectangle.Height - 1));
@@ -127,7 +129,7 @@ namespace SparkSchemaCreator.Controls
             maximizeForm = new Maximize()
             {
                 Text = Title,
-                ClientSize = Size + new Size(0, 12),
+                ClientSize = PreferredWindowSize,
                 BackColor = WindowBackColor
 
             };
