@@ -672,6 +672,7 @@ namespace SparkSchemaCreator
             editFieldToolStripMenuItem.Enabled = enable;
             editToolStripButton.Enabled = enable;
             editFieldToolStripMenuItem1.Enabled = enable;
+            structFieldInfo1.EditButtonEnabled = enable;
         }
 
         private void EnableDeleteNode(bool enable)

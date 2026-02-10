@@ -70,6 +70,13 @@ namespace SparkSchemaCreator.Controls
             }
         }
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
+        public bool EditButtonEnabled
+        {
+            get { return editButton.Enabled; } 
+            set { editButton.Enabled = value; }
+        }
+
         public event EventHandler? EditButtonClick
         {
             add

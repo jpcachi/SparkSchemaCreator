@@ -238,7 +238,7 @@ namespace SparkSchemaCreator
         {
             textBox1.Text = Value.Name;
             checkBox1.Checked = Value.IsNullable;
-            comboBox1.SelectedIndex = comboBox1.Items.IndexOf(Value.DataType.TypeName);
+            comboBox1.SelectedIndex = comboBox1.Items.IndexOf(Value.DataType.TypeNameSimple);
 
             if (Value.DataType is DecimalType decimalType)
             {

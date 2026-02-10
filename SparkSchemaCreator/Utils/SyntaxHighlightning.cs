@@ -10,7 +10,7 @@ namespace SparkSchemaCreator.Utils
     internal class SyntaxHighlightning
     {
 
-        private readonly string scalaObjectsRegexp = $"\\s*({DataType.TypeNamesApi}|MetadataBuilder)|(\\s+Array)|(\\s+Seq)|(\\s+List)|(\\s+Nil)|(org.apache.spark.sql.types._)";
+        private readonly string scalaObjectsRegexp = $"\\s*({DataTypes.TypeNamesApi}|MetadataBuilder)|(\\s+Array)|(\\s+Seq)|(\\s+List)|(\\s+Nil)|(org.apache.spark.sql.types._)";
         
         private readonly TextStyle scalaKeyword = new(new SolidBrush(Color.FromArgb(208, 37, 45)), null, FontStyle.Regular);
         private readonly TextStyle scalaIdentifierObject = new(new SolidBrush(Color.FromArgb(131, 85, 218)), null, FontStyle.Regular);
@@ -59,7 +59,7 @@ namespace SparkSchemaCreator.Utils
             e.ChangedRange.ClearStyle(scalaLangObject);
 
             e.ChangedRange.SetStyle(scalaKeyword, " \\||-- ");
-            e.ChangedRange.SetStyle(scalaLangObject, DataType.TypeNamesWithSpaces);
+            e.ChangedRange.SetStyle(scalaLangObject, DataTypes.TypeNamesWithSpaces);
             e.ChangedRange.SetStyle(scalaLiteral, "\\(nullable = (True|False)\\)|\\(containsNull = (True|False)\\)|\\(valueContainsNull = (True|False)\\)");
         }
     }

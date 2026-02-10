@@ -53,7 +53,7 @@ namespace SparkSchemaCreator.Converters
 
         public override StandardValuesCollection GetStandardValues(ITypeDescriptorContext? context)
         {
-            return new StandardValuesCollection(DataType.DataTypes);
+            return new StandardValuesCollection(DataTypes.All);
         }
 
         public override bool CanConvertFrom(ITypeDescriptorContext? context, Type sourceType)
@@ -79,7 +79,7 @@ namespace SparkSchemaCreator.Converters
 
                 try
                 {
-                    return DataType.FromStringApi(str);
+                    return DataType.FromApiString(str);
                 }
                 catch (Exception ex)
                 {

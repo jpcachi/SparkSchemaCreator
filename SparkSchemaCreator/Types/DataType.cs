@@ -40,37 +40,6 @@ namespace SparkSchemaCreator.Types
             DefaultType = this;
         }
 
-        public static string TypeNamesApi => "(ArrayType|StructType|MapType|StringType|BooleanType|ShortType|LongType|FloatType|DoubleType|BinaryType|ByteType|CharType|VarcharType|DecimalType|DateType|TimestampNTZType|TimestampType|" +
-                "TimestampNTZType|YearMonthIntervalType|DayTimeIntervalType|CalendarIntervalType|IntegerType|VoidType)";
-
-        public static string TypeNames => "(struct|array|map|string|boolean|short|long|float|double|binary|byte|char|varchar|decimal|date|timestamp_ntz|timestamp|" +
-                "interval year to month|interval month to month|interval month|interval year to year|interval year|interval day to day|" +
-                "interval day to hour|interval day to minute|interval day to second|interval day|interval hour to hour|interval hour to minute|" +
-                "interval hour to second|interval hour|interval minute to minute|interval minute to second|interval minute|" +
-                "interval second to second|interval second|interval|integer|int|void)";
-
-        private static Regex GetDataTypeRegex(string typeNames, bool spaces = false) => 
-            new((spaces ? @"\s" : string.Empty) + typeNames + @"(\s*\(\s*(\d+)\s*(,\s*(\-?\d+)\s*)?\))?" + (spaces ? @"(\s|\r\n)" : string.Empty));
-
-        public static Regex TypeNamesRegex => GetDataTypeRegex(TypeNames);
-        public static Regex TypeNamesWithSpaces => GetDataTypeRegex(TypeNames, true);
-        public static Regex TypeNamesApiRegex => GetDataTypeRegex(TypeNamesApi);
-
-        private static Match CheckDataType(string dataType)
-        {
-            return TypeNamesRegex.Match(dataType);
-        }
-
-        private static Match CheckDataTypeApi(string dataType)
-        {
-            return TypeNamesApiRegex.Match(dataType);
-        }
-
-        public static bool IsValidDataType(string dataType)
-        {
-            return CheckDataType(dataType).Success;
-        }
-
         public static DataType Copy(DataType dataType)
         {
             if (dataType is ArrayType array)
@@ -88,124 +57,29 @@ namespace SparkSchemaCreator.Types
 
         }
 
-        public static DataType[] DataTypes =>
-        [
-            new StringType(),
-            new BooleanType(),
-            new IntegerType(),
-            new ShortType(),
-            new LongType(),
-            new FloatType(),
-            new DoubleType(),
-            new BinaryType(),
-            new ByteType(),
-            new CharType(10),
-            new VarcharType(10),
-            new DecimalType(10, 0),
-            new DateType(),
-            new TimestampType(),
-            new TimestampNTZType(),
-            new CalendarIntervalType(),
-            new YearMonthIntervalType(0, 0),
-            new DayTimeIntervalType(0, 0),
-            new StructType(),
-            new ArrayType(new StringType()),
-            new MapType(new StringType(), new StringType()),
-            new VoidType()
-        ];
-
-        public static DataType FromString(string? dataType)
+        private static DataType FromApiOrNotApiString(string? dataType, Func<string, Match> matchFunction, Func<string, string?, string?, DataType> getDataTypeFunction)
         {
-
             if (dataType == null)
                 throw new Exception("Invalid Data Type null");
 
-            Match match = CheckDataType(dataType);
+            Match match = matchFunction(dataType);
 
             if (match.Success)
             {
                 string type = match.Groups[1].Value;
-                switch (type)
-                {
-                    case "string": return new StringType();
-                    case "boolean": return new BooleanType();
-                    case "int":
-                    case "integer": return new IntegerType();
-                    case "short": return new ShortType();
-                    case "long": return new LongType();
-                    case "float": return new FloatType();
-                    case "double": return new DoubleType();
-                    case "binary": return new BinaryType();
-                    case "byte": return new ByteType();
-                    case "char": return new CharType(int.Parse(match.Groups[3].Value));
-                    case "varchar": return new VarcharType(int.Parse(match.Groups[3].Value));
-                    case "decimal": return new DecimalType(int.Parse(match.Groups[3].Value), int.Parse(match.Groups[5].Value));
-                    case "date": return new DateType();
-                    case "timestamp": return new TimestampType();
-                    case "timestamp_ntz": return new TimestampNTZType();
-                    case "interval": return new CalendarIntervalType();
-                    case "interval year to month": return new YearMonthIntervalType(0, 1);
-                    case "interval month to month":
-                    case "interval month": return new YearMonthIntervalType(1, 1);
-                    case "interval year to year":
-                    case "interval year": return new YearMonthIntervalType(0, 0);
-                    case "interval day to day":
-                    case "interval day": return new DayTimeIntervalType(0, 0);
-                    case "interval day to hour": return new DayTimeIntervalType(0, 1);
-                    case "interval day to minute": return new DayTimeIntervalType(0, 2);
-                    case "interval day to second": return new DayTimeIntervalType(0, 3);
-                    case "interval hour to hour":
-                    case "interval hour": return new DayTimeIntervalType(1, 1);
-                    case "interval hour to minute": return new DayTimeIntervalType(1, 2);
-                    case "interval hour to second": return new DayTimeIntervalType(1, 3);
-                    case "interval minute to minute":
-                    case "interval minute": return new DayTimeIntervalType(2, 2);
-                    case "interval minute to second": return new DayTimeIntervalType(2, 3);
-                    case "interval second to second":
-                    case "interval second": return new DayTimeIntervalType(3, 3);
-                    case "void": return new VoidType();
-
-                }
+                return getDataTypeFunction(type,  match.Groups[3].Value, match.Groups[5].Value);
             }
             throw new Exception("Invalid data type encountered: " + dataType);
         }
 
-        public static DataType FromStringApi(string? dataType)
+        public static DataType FromString(string? dataType)
         {
+            return FromApiOrNotApiString(dataType, DataTypes.CheckDataType, DataTypes.FromString);
+        }
 
-            if (dataType == null)
-                throw new Exception("Invalid Data Type null");
-
-            Match match = CheckDataTypeApi(dataType);
-
-            if (match.Success)
-            {
-                string type = match.Groups[1].Value;
-                switch (type)
-                {
-                    case "StringType": return new StringType();
-                    case "BooleanType": return new BooleanType();
-                    case "IntegerType": return new IntegerType();
-                    case "ShortType": return new ShortType();
-                    case "LongType": return new LongType();
-                    case "FloatType": return new FloatType();
-                    case "DoubleType": return new DoubleType();
-                    case "BinaryType": return new BinaryType();
-                    case "ByteType": return new ByteType();
-                    case "CharType": return new CharType(int.Parse(match.Groups[3].Value));
-                    case "VarcharType": return new VarcharType(int.Parse(match.Groups[3].Value));
-                    case "DecimalType": return new DecimalType(int.Parse(match.Groups[3].Value), int.Parse(match.Groups[5].Value));
-                    case "DateType": return new DateType();
-                    case "TimestampType": return new TimestampType();
-                    case "TimestampNTZType": return new TimestampNTZType();
-                    case "YearMonthIntervalType": return new YearMonthIntervalType(byte.Parse(match.Groups[3].Value), byte.Parse(match.Groups[5].Value));
-                    case "DayTimeIntervalType": return new DayTimeIntervalType(byte.Parse(match.Groups[3].Value), byte.Parse(match.Groups[5].Value));
-                    case "CalendarIntervalType": return new CalendarIntervalType();
-                    case "VoidType": return new VoidType();
-
-                }
-            }
-            throw new Exception("Invalid data type encountered: " + dataType);
+        public static DataType FromApiString(string? dataType)
+        {
+            return FromApiOrNotApiString(dataType, DataTypes.CheckDataTypeApi, DataTypes.FromApiString);
         }
 
         public static DataType FromJsonToken(JToken jsonToken, bool integersAsLongs = false, bool sortFields = false, bool checkValidName = true)
