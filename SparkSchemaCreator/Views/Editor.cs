@@ -42,13 +42,22 @@ namespace SparkSchemaCreator
                 return;
 
             DialogResult = DialogResult.OK;
+            ReleaseEditor();
             Close();
         }
 
         private void Button2_Click(object sender, EventArgs e)
         {
             DialogResult = DialogResult.Cancel;
+            ReleaseEditor();
             Close();
+        }
+
+        private void ReleaseEditor()
+        {
+            fastColoredTextBox1.Clear();
+            fastColoredTextBox1.Dispose();
+            GC.Collect();
         }
 
         private static string StripWhiteSpacesAndQuotes(string text)
@@ -154,5 +163,19 @@ namespace SparkSchemaCreator
             button1.Enabled = !string.IsNullOrWhiteSpace(fastColoredTextBox1.Text);
         }
 
+        private void Editor_DragEnter(object sender, DragEventArgs e)
+        {
+            if (e.Data != null && e.Data.GetDataPresent(DataFormats.FileDrop, false))
+                e.Effect = DragDropEffects.All;
+        }
+
+        private void Editor_DragDrop(object sender, DragEventArgs e)
+        {
+            if (e.Data != null && e.Data.GetData(DataFormats.FileDrop) is string[] files && files.Length > 0)
+            {
+                fastColoredTextBox1.Clear();
+                fastColoredTextBox1.Text = File.ReadAllText(files[0]);
+            }
+        }
     }
 }

@@ -14,7 +14,7 @@ namespace SparkSchemaCreator.Comparer
 
         public bool IsReadOnly => true;
         public ComparisonNode this[int i] => _children[i];
-        public ComparisonNode this[string name] => _children.Find(x => x.Name == name) ?? throw new KeyNotFoundException(nameof(name));
+        public ComparisonNode this[string name] => _children.Find(x => x.Name == name) ?? throw new KeyNotFoundException(name);
 
         public bool Equal => _children.TrueForAll(x => x.ComparisonResult == ComparisonResult.Equal);
 

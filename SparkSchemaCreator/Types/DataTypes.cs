@@ -81,7 +81,7 @@ namespace SparkSchemaCreator.Types
             "date",
             "timestamp",
             "timestamp_ntz",
-            "inteval",
+            "interval",
             "interval year",
             "interval day",
             "struct",
@@ -164,7 +164,7 @@ namespace SparkSchemaCreator.Types
         internal static Dictionary<string, DataType> AllDataTypesApi => 
             DataTypesApiNames.Zip(All).ToDictionary();
 
-        private static DataType FromApiOrNotApiString(Dictionary<string, DataType> types, string str, string? arg1, string? arg2)
+        private static DataType FromApiOrNotApiString(Dictionary<string, DataType> types, string str, string? arg1, string? arg2, bool checkInterval = false)
         {
             DataType result = types[str];
 
@@ -182,7 +182,7 @@ namespace SparkSchemaCreator.Types
                 decimalType.Precission = precission;
                 decimalType.Scale = scale;
             }
-            else if (result is IntervalType intervalType)
+            else if (checkInterval && result is IntervalType intervalType)
             {
                 intervalType.StartField = byte.Parse(arg1 ?? throw new ArgumentNullException(nameof(arg1)));
                 intervalType.EndField = byte.Parse(arg2 ?? throw new ArgumentNullException(nameof(arg2)));
@@ -198,7 +198,7 @@ namespace SparkSchemaCreator.Types
 
         internal static DataType FromApiString(string str, string? arg1 = null, string? arg2 = null)
         {
-            return FromApiOrNotApiString(AllDataTypesApi, str, arg1, arg2);
+            return FromApiOrNotApiString(AllDataTypesApi, str, arg1, arg2, true);
         }
     }
 }

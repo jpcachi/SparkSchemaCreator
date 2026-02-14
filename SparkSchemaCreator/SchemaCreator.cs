@@ -81,14 +81,16 @@ namespace SparkSchemaCreator
 
         private void AddNodeButtonClick(object sender, EventArgs e)
         {
-            using AddOrEditField addForm = new(null);
+            //using AddOrEditField addForm = new(null);
+            using AddOrEditField addForm = new();
             if (addForm.ShowDialog() == DialogResult.OK)
             {
                 StructType? parent = GetParentOfSelectedField();
 
                 if (parent != null)
                 {
-                    AddField addAction = new(parent, addForm.Value);
+                    //AddField addAction = new(parent, addForm.Value);
+                    AddField addAction = new(parent, (addForm.Value as StructField)!);
                     DoActionAndAddItToStack(addAction);
                 }
             }
@@ -98,10 +100,12 @@ namespace SparkSchemaCreator
         {
             if (SelectedField is StructField structField)
             {
+                //using AddOrEditField addForm = new(structField);
                 using AddOrEditField addForm = new(structField);
                 if (addForm.ShowDialog() == DialogResult.OK)
                 {
-                    EditField editField = new(structField, addForm.Value);
+                    //EditField editField = new(structField, addForm.Value);
+                    EditField editField = new(structField, (addForm.Value as StructField)!);
                     DoActionAndAddItToStack(editField);
                 }
             }

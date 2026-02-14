@@ -699,7 +699,7 @@ namespace SparkSchemaCreator.Controls.FastColoredTextBox
             foreach (var r in range.GetSubRanges(true))
             {
                 var line = ts.CurrentTB[r.Start.iLine];
-                var lineIsEmpty = r.End < r.Start && line.StartSpacesCount == line.Count;
+                var lineIsEmpty = r.End < r.Start && line?.StartSpacesCount == line?.Count;
                 if (!lineIsEmpty)
                 {
                     var insertedText = lines[iLine%lines.Length];

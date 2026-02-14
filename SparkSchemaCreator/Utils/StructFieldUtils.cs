@@ -14,6 +14,12 @@ namespace SparkSchemaCreator.Utils
 
         internal static string INVALID_CHARS = " ,;{}()\n\t=";
 
+        internal static void CheckIfStructFieldHasValidName(string name)
+        {
+            if(INVALID_CHARS.Intersect(name).Any())
+                throw new ArgumentException($"Attribute name \"{name}\" contains invalid character(s) among \"{INVALID_CHARS}\".");
+        }
+
         internal static StructType? ParseStringToSchema(string text, bool isSample)
         {
             try

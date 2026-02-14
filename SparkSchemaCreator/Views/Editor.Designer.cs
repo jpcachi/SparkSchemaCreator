@@ -98,11 +98,13 @@
             fastColoredTextBox1.RightBracket = ']';
             fastColoredTextBox1.RightBracket2 = '}';
             fastColoredTextBox1.SelectionColor = Color.FromArgb(60, 30, 144, 255);
-            //fastColoredTextBox1.ServiceColors = (SparkSchemaCreator.Controls.FastColoredTextBox.ServiceColors)resources.GetObject("fastColoredTextBox1.ServiceColors");
+            fastColoredTextBox1.ServiceColors = (Controls.FastColoredTextBox.ServiceColors)resources.GetObject("fastColoredTextBox1.ServiceColors");
             fastColoredTextBox1.ShowLineNumbers = false;
             fastColoredTextBox1.Size = new Size(558, 271);
             fastColoredTextBox1.TabIndex = 0;
             fastColoredTextBox1.TextChanged += FastColoredTextBox1_TextChanged;
+            fastColoredTextBox1.DragDrop += Editor_DragDrop;
+            fastColoredTextBox1.DragEnter += Editor_DragEnter;
             // 
             // groupBox1
             // 

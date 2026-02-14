@@ -29,7 +29,7 @@ namespace SparkSchemaCreator.Json
                     return new DoubleType();
 
                 //check if value is long
-                if (long.TryParse(value, out _))
+                if (long.TryParse(value, out _) && !int.TryParse(value, out _))
                     return new LongType();
 
                 //check if value is integer
@@ -105,21 +105,18 @@ namespace SparkSchemaCreator.Json
             {
                 foreach (KeyValuePair<string, JToken?> objValue in jObject)
                 {
-                    if (checkValidName && StructFieldUtils.INVALID_CHARS.Intersect(objValue.Key).Any())
-                        throw new ArgumentException($"Attribute name \"{objValue.Key}\" contains invalid character(s) among \"{StructFieldUtils.INVALID_CHARS}\".");
+                    if (checkValidName)
+                        StructFieldUtils.CheckIfStructFieldHasValidName(objValue.Key);
 
                     if (objValue.Value is JValue jValue)
-                    {
                         yield return new StructField(objValue.Key, ParseSimpleType(jValue, integersAsLongs));
-                    }
+                    
                     else if (objValue.Value is JObject jObject2)
-                    {
                         yield return new StructField(objValue.Key, ParseStructType(jObject2, integersAsLongs, sortFields, checkValidName));
-                    }
+                    
                     else if (objValue.Value is JArray jArray)
-                    {
                         yield return new StructField(objValue.Key, ParseArrayType(jArray, integersAsLongs, sortFields, checkValidName));
-                    }
+                    
                 }
             }
         }

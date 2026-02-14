@@ -290,6 +290,7 @@ namespace SparkSchemaCreator.Controls
             if (SelectedTab != -1)
             {
                 fastColoredTextBox1.Language = TabLanguages[SelectedTab];
+                fastColoredTextBox1.Clear();
                 fastColoredTextBox1.Text = TabTexts[SelectedTab];
             }
         }
@@ -349,6 +350,7 @@ namespace SparkSchemaCreator.Controls
             }
             set
             {
+                fastColoredTextBox1.Clear();
                 fastColoredTextBox1.Text = value;
             }
         }
@@ -362,6 +364,7 @@ namespace SparkSchemaCreator.Controls
             }
             set
             {
+                fastColoredTextBox1.Clear();
                 fastColoredTextBox1.Language = value;
             }
         }

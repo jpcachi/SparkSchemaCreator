@@ -208,8 +208,8 @@ namespace SparkSchemaCreator.Types
         {
             string? name = (jsonObject["name"]?.Value<string>()) ?? throw new ArgumentException("StructField name cannot be null");
 
-            if (checkValidName && StructFieldUtils.INVALID_CHARS.Intersect(name).Any())
-                throw new ArgumentException($"Attribute name \"{name}\" contains invalid character(s) among \"{StructFieldUtils.INVALID_CHARS}\".");
+            if (checkValidName)
+                StructFieldUtils.CheckIfStructFieldHasValidName(name);
 
             bool nullable = jsonObject["nullable"]?.Value<bool>() ?? true;
 
