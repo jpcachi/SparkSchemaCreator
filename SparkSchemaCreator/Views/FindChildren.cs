@@ -7,7 +7,7 @@ namespace SparkSchemaCreator.Views
     public partial class FindChildren : Form
     {
         private List<string> Children { get; }
-        internal FindChildren(JsonSparkElement node)
+        internal FindChildren(StructType structNode)
         {
             InitializeComponent();
 
@@ -19,10 +19,7 @@ namespace SparkSchemaCreator.Views
 
             Children = [];
 
-            StructType? structNode = node is StructType structType1 ? structType1 : (node as StructField)?.DataType as StructType;
-
-            if (structNode != null)
-                Children.AddRange(structNode.Fields.Select(f => f.Name));
+            Children.AddRange(structNode.Fields.Select(f => f.Name));
         }
 
         private void Button1_Click(object sender, EventArgs e)

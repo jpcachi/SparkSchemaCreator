@@ -147,7 +147,7 @@ namespace SparkSchemaCreator.Views
                 {
                     listViewItems.Add(item);
 
-                    if(item.ComparisonResult < ComparisonResult.MissingField)
+                    if (item.ComparisonResult < ComparisonResult.MissingField)
                         listViewItemsFiltered.Add(item);
                 }
                 if (item.ComparisonResult.HasFlag(ComparisonResult.ChildDifference) || item.ComparisonResult.HasFlag(ComparisonResult.ChildMetadataDifference) || item.ComparisonResult.HasFlag(ComparisonResult.ChildMissingFieldDifference))
@@ -164,7 +164,7 @@ namespace SparkSchemaCreator.Views
                 e.Result = node.Name;
             else
                 SchemaJsonTree.NodeTextNeeded(e);
-            
+
         }
 
         private void FastTreeSchema_NodeChildrenNeeded(object sender, NodeChildrenNeededEventArgs e)
@@ -173,7 +173,7 @@ namespace SparkSchemaCreator.Views
                 e.Children = comparisonRoot;
             else if (e.Node is ComparisonNode node)
                 e.Children = node.Children;
-            else 
+            else
                 SchemaJsonTree.NodeChildrenNeeded(e);
         }
 
@@ -256,7 +256,7 @@ namespace SparkSchemaCreator.Views
 
         private void FastTreeSchema_NodeForeColorNeeded(object sender, ColorNodeEventArgs e)
         {
-            if(e.Node is ComparisonNode node)
+            if (e.Node is ComparisonNode node)
             {
                 if (node.ComparisonResult == ComparisonResult.MissingField)
                 {
@@ -280,7 +280,7 @@ namespace SparkSchemaCreator.Views
                 {
                     e.Result = node.ComparisonResult != ComparisonResult.Equal;
 
-                    if(checkBox2.Checked)
+                    if (checkBox2.Checked)
                         e.Result &= !node.ComparisonResult.HasFlag(ComparisonResult.ChildMissingFieldDifference);
 
                 }
@@ -289,7 +289,7 @@ namespace SparkSchemaCreator.Views
 
                 if (checkBox2.Checked)
                     e.Result &= !node.ComparisonResult.HasFlag(ComparisonResult.MissingField);
-                
+
             }
         }
 
@@ -300,7 +300,7 @@ namespace SparkSchemaCreator.Views
             fastTreeSchema1.ExpandAll();
             fastTreeSchema2.ExpandAll();
 
-            if(ReferenceEquals(sender, checkBox2))
+            if (ReferenceEquals(sender, checkBox2))
             {
                 UpdateListViewResults(checkBox2.Checked);
             }
@@ -402,9 +402,9 @@ namespace SparkSchemaCreator.Views
             JToken? leftToken = comparisonNode.Left?.ToJsonObject();
             JToken? rightToken = comparisonNode.Right?.ToJsonObject();
 
-            
 
-            if(leftToken is JObject leftObject)
+
+            if (leftToken is JObject leftObject)
             {
                 if (comparisonNode.Left is StructField)
                     ProcessComparisonNodeStructField(leftObject);
@@ -527,7 +527,7 @@ namespace SparkSchemaCreator.Views
 
         private void SelectNode(object sender, ComparisonNode node)
         {
-            
+
             if (ReferenceEquals(sender, fastTreeSchema1))
                 fastTreeSchema2.SelectNode(node);
             else
@@ -559,13 +559,13 @@ namespace SparkSchemaCreator.Views
             if (comparisonResult.HasFlag(ComparisonResult.MetadataDifference))
                 foreColor = MetadataDifferenceColor;
 
-            if(comparisonResult >= ComparisonResult.MissingField)
+            if (comparisonResult >= ComparisonResult.MissingField)
             {
                 backColor = e.Item?.SubItems[0].Text == "MissingField" ? MissingFieldBackColor : AddedFieldBackColor;
                 foreColor = e.Item?.SubItems[0].Text == "MissingField" ? MissingFieldForeColor : AddedFieldForeColor;
             }
 
-            else if(comparisonResult >= ComparisonResult.TypeDifference)
+            else if (comparisonResult >= ComparisonResult.TypeDifference)
                 backColor = DifferenceBackColor;
 
             if (e.ColumnIndex == 0 && (listView1.SelectedIndices.Count == 0 || e.ItemIndex != listView1.SelectedIndices[0]))
@@ -589,6 +589,11 @@ namespace SparkSchemaCreator.Views
             e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.Default;
             e.Graphics.DrawLine(p, 5, 5, 14, 14);
             e.Graphics.DrawLine(p, 14, 5, 5, 14);
+        }
+
+        private void CopyToClipboard_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+
         }
     }
 }

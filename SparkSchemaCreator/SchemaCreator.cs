@@ -5,7 +5,7 @@ using SparkSchemaCreator.Json;
 using SparkSchemaCreator.Types;
 using SparkSchemaCreator.Utils;
 using SparkSchemaCreator.Views;
-using System.Reflection.Metadata.Ecma335;
+using System.CodeDom;
 
 namespace SparkSchemaCreator
 {
@@ -16,19 +16,7 @@ namespace SparkSchemaCreator
         private readonly Stack<IAction> undo;
         private readonly Stack<IAction> redo;
 
-        private JsonSparkElement? SelectedElement
-        {
-            get
-            {
-                if(fastTree1.SelectedNode is JsonSparkElement fieldOrRoot)
-                    return fieldOrRoot;
-
-                if (fastTree1.SelectedNode is NameWithDataType pairNode)
-                    return pairNode.DataType;
-
-                return null;
-            }
-        }
+        private ITreeElement? SelectedElement => fastTree1.SelectedNode as ITreeElement;
 
         private StructField? SelectedField => SelectedElement as StructField;
 
@@ -70,26 +58,27 @@ namespace SparkSchemaCreator
 
         private StructType? GetParentOfSelectedField()
         {
-            if (SelectedElement is StructType root)
+            if (fastTree1.SelectedNode is StructType root)
                 return root;
 
             if(SelectedElement is StructField field)
                 return field.StructParent;
+
+            if(SelectedElement is NameWithDataType pairNode && pairNode.DataType is StructType structParent)
+                return structParent;
 
             return null;
         }
 
         private void AddNodeButtonClick(object sender, EventArgs e)
         {
-            //using AddOrEditField addForm = new(null);
-            using AddOrEditField addForm = new();
+            using AddOrEditField addForm = new(null);
             if (addForm.ShowDialog() == DialogResult.OK)
             {
                 StructType? parent = GetParentOfSelectedField();
 
                 if (parent != null)
                 {
-                    //AddField addAction = new(parent, addForm.Value);
                     AddField addAction = new(parent, (addForm.Value as StructField)!);
                     DoActionAndAddItToStack(addAction);
                 }
@@ -98,15 +87,21 @@ namespace SparkSchemaCreator
 
         private void EditNodeButtonClick(object sender, EventArgs e)
         {
-            if (SelectedField is StructField structField)
+            if(SelectedElement != null)
             {
-                //using AddOrEditField addForm = new(structField);
-                using AddOrEditField addForm = new(structField);
-                if (addForm.ShowDialog() == DialogResult.OK)
+                using AddOrEditField editForm = new(SelectedElement);
+                if (editForm.ShowDialog() == DialogResult.OK)
                 {
-                    //EditField editField = new(structField, addForm.Value);
-                    EditField editField = new(structField, (addForm.Value as StructField)!);
-                    DoActionAndAddItToStack(editField);
+                    IAction? editAction = null;
+
+                    if (SelectedElement is StructField field)
+                        editAction = new EditField(field, (editForm.Value as StructField)!);
+
+                    else if (SelectedElement is NameWithDataType pairNode)
+                        editAction = new EditElement(pairNode, (editForm.Value as DataType)!);
+
+                    if(editAction != null)
+                        DoActionAndAddItToStack(editAction);
                 }
             }
         }
@@ -408,17 +403,19 @@ namespace SparkSchemaCreator
 
         private void CheckActionButtonsEnabling()
         {
-            bool isSelectedNodeStruct  = SelectedElement is StructField field1 && field1.DataType is StructType || SelectedElement is StructType;
-            bool isSelectedNodeComplex = SelectedElement is StructField field2 && field2.DataType is ComplexType || SelectedElement is ComplexType;
+            bool isSelectedNodeStruct  = SelectedElement?.DataType is StructType || fastTree1.SelectedNode is StructType;
+            bool isSelectedNodeComplex = SelectedElement?.DataType is ComplexType || fastTree1.SelectedNode is ComplexType;
 
             EnableAddNode(isSelectedNodeStruct);
             VisibleExpandChildren(isSelectedNodeComplex);
 
-            EnableEditNode(SelectedField != null);
+            EnableEditNode(SelectedElement != null);
             EnableDeleteNode(SelectedField != null);
             EnableMoveFieldUp(SelectedField?.Index > 0);
             EnableMoveFieldDown(SelectedField?.Index < SelectedField?.StructParent?.Fields.Count - 1);
             EnableMetadataEdit(SelectedField != null);
+
+            findChildrenToolStripMenuItem.Visible = isSelectedNodeStruct;
 
             copyNameFullPathToolStripMenuItem.Enabled = SelectedElement != null;
             copyNameToolStripMenuItem.Enabled = SelectedElement != null;
@@ -717,7 +714,6 @@ namespace SparkSchemaCreator
             expandAllSelectedNodeChildrenToolStripMenuItem.Visible = visible;
             collapseAllSelectedNodeChildrenToolStripMenuItem.Visible = visible;
             toolStripSeparator12.Visible = visible;
-            findChildrenToolStripMenuItem.Visible = visible;
         }
 
         private void ExpandAllNodesButtonClick(object sender, EventArgs args)
@@ -844,8 +840,17 @@ namespace SparkSchemaCreator
 
         private void FindChildrenButtonClick(object sender, EventArgs e)
         {
-            if(SelectedElement != null)
-                new FindChildren(SelectedElement).ShowDialog(this);
+
+            StructType? structType = SelectedElement switch
+            {
+                { DataType: StructType nestedStruct } => nestedStruct,
+                null => model.Root,
+                _ => null
+            };
+
+            if(structType != null)
+                new FindChildren(structType).ShowDialog(this);
+
         }
 
         private void ChangeArrayToStructClick(object sender, EventArgs e)

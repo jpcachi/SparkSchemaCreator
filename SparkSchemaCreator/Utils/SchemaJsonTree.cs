@@ -14,27 +14,15 @@ namespace SparkSchemaCreator.Utils
             if (e.Node is StructType root)
                 e.Children = root.Fields;
 
-            else if (e.Node is StructField field)
+            else if (e.Node is ITreeElement element)
             {
-                if (field.DataType is StructType structType)
+                if (element.DataType is StructType structType)
                     e.Children = structType.Fields;
 
-                else if (field.DataType is ArrayType arrayType)
+                else if (element.DataType is ArrayType arrayType)
                     e.Children = new NameWithDataType[] { new("<element>", arrayType.ElementType) };
 
-                else if (field.DataType is MapType mapType)
-                    e.Children = new NameWithDataType[] { new("<key>", mapType.KeyType), new("<value>", mapType.ValueType) };
-            }
-
-            else if (e.Node is NameWithDataType pairNode)
-            {
-                if (pairNode.DataType is StructType structType)
-                    e.Children = structType.Fields;
-
-                else if (pairNode.DataType is ArrayType arrayType)
-                    e.Children = new NameWithDataType[] { new("<element>", arrayType.ElementType) };
-
-                else if (pairNode.DataType is MapType mapType)
+                else if (element.DataType is MapType mapType)
                     e.Children = new NameWithDataType[] { new("<key>", mapType.KeyType), new("<value>", mapType.ValueType) };
             }
         }
@@ -43,10 +31,12 @@ namespace SparkSchemaCreator.Utils
         {
             if (e.Node is StructType)
                 e.Result = "<Root>";
-            else if (e.Node is StructField field)
+            else if (e.Node is ITreeElement element)
+                e.Result = element.Name;
+            /*else if (e.Node is StructField field)
                 e.Result = field.Name;
             else if (e.Node is NameWithDataType pairNode)
-                e.Result = pairNode.Name;
+                e.Result = pairNode.Name;*/
         }
 
         public static void NodeIconNeeded(ImageNodeEventArgs e, ImageList imageList)
@@ -57,11 +47,8 @@ namespace SparkSchemaCreator.Utils
             if (e.Node is StructType structType)
                 dataType = structType;
 
-            else if (e.Node is StructField field)
-                dataType = field.DataType;
-
-            else if (e.Node is NameWithDataType pairNode)
-                dataType = pairNode.DataType;
+            else if (e.Node is ITreeElement element)
+                dataType = element.DataType;
 
 
             if (dataType is StructType)

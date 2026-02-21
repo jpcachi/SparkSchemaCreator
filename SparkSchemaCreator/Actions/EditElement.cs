@@ -39,8 +39,6 @@ namespace SparkSchemaCreator.Actions
                 else
                     map.ValueType = dataValue;
             }
-
-            _currentNode.DataType = dataValue;
         }
 
         public void Do()

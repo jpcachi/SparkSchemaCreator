@@ -61,7 +61,7 @@ namespace SparkSchemaCreator.Types
             new StructType(),
             new ArrayType(new StringType()),
             new MapType(new StringType(), new StringType()),
-            new VoidType()
+            new NullType()
         ];
 
         internal static string[] DataTypesNames =>
@@ -113,7 +113,7 @@ namespace SparkSchemaCreator.Types
             "StructType",
             "ArrayType",
             "MapType",
-            "VoidType"
+            "NullType"
         ];
 
         private static string[] IntervalNames =>

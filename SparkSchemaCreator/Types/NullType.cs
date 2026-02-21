@@ -7,10 +7,10 @@ using System.Threading.Tasks;
 namespace SparkSchemaCreator.Types
 {
     [Serializable]
-    internal class VoidType : SimpleType
+    internal class NullType : SimpleType
     {
         public override string TypeName => "void";
-        public override string TypeNameApi => $"VoidType";
+        public override string TypeNameApi => $"NullType";
 
     }
 }

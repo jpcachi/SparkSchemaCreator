@@ -5,32 +5,14 @@ using System.Text;
 
 namespace SparkSchemaCreator.Utils
 {
-    internal class NameWithDataType
+    internal record NameWithDataType(string Name, DataType DataType) : ITreeElement
     {
-        public string Name { get; }
-        public DataType DataType { get; set; }
-
-        internal NameWithDataType(string name, DataType dataType)
-        {
-            Name = name; DataType = dataType; 
-        }
-
-        public override bool Equals(object? obj)
-        {
-            return obj is NameWithDataType other && Name == other.Name && DataType == other.DataType;
-        }
-
-        public override int GetHashCode()
-        {
-            return HashCode.Combine(Name, DataType);
-        }
-
         public ComplexType? GetParent()
         {
-            if(DataType.ArrayParent != null)
+            if (DataType.ArrayParent != null)
                 return DataType.ArrayParent;
 
-            if(DataType.MapParent != null) 
+            if (DataType.MapParent != null)
                 return DataType.MapParent;
 
             return null;

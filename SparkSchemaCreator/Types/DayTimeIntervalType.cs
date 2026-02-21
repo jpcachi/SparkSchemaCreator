@@ -4,8 +4,6 @@
     internal class DayTimeIntervalType : IntervalType
     {
 
-        public override string TypeNameSimple => $"interval";
-
         public override string TypeName { 
             get
             {

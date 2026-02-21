@@ -13,7 +13,7 @@ namespace SparkSchemaCreator.Types
 {
     [Serializable]
     [TypeConverter(typeof(StructFieldConverter))]
-    internal class StructField : JsonSparkElement
+    internal class StructField : JsonSparkElement, ITreeElement
     {
         [Browsable(false)]
         public StructType? StructParent { get; set; } = null;

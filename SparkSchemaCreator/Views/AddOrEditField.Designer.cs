@@ -149,7 +149,7 @@
             comboBox1.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             comboBox1.DropDownStyle = ComboBoxStyle.DropDownList;
             comboBox1.FormattingEnabled = true;
-            comboBox1.Items.AddRange(new object[] { "string", "integer", "short", "long", "float", "double", "decimal", "boolean", "byte", "char", "varchar", "date", "timestamp", "timestamp_ntz", "interval", "interval year", "interval year to month", "interval month", "interval day", "interval day to hour", "interval day to minute", "interval day to second", "interval hour", "interval hour to minute", "interval hour to second", "interval minute", "interval minute to second", "interval second", "binary", "struct", "array", "map" });
+            comboBox1.Items.AddRange(new object[] { "string", "integer", "short", "long", "float", "double", "decimal", "boolean", "byte", "char", "varchar", "date", "timestamp", "timestamp_ntz", "interval", "interval year", "interval year to month", "interval month", "interval day", "interval day to hour", "interval day to minute", "interval day to second", "interval hour", "interval hour to minute", "interval hour to second", "interval minute", "interval minute to second", "interval second", "binary", "struct", "array", "map", "void" });
             comboBox1.Location = new Point(84, 41);
             comboBox1.Name = "comboBox1";
             comboBox1.Size = new Size(238, 23);
@@ -474,7 +474,7 @@
             button1.UseVisualStyleBackColor = true;
             button1.Click += Button1_Click;
             // 
-            // AddComplexTest
+            // AddOrEditField
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
@@ -495,7 +495,7 @@
             Controls.Add(groupBox4);
             Controls.Add(groupBox2);
             FormBorderStyle = FormBorderStyle.FixedSingle;
-            Name = "AddComplexTest";
+            Name = "AddOrEditField";
             StartPosition = FormStartPosition.CenterParent;
             Text = "AddComplexTest";
             ((System.ComponentModel.ISupportInitialize)numericUpDown2).EndInit();

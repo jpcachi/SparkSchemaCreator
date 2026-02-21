@@ -56,6 +56,7 @@ namespace SparkSchemaCreator.Views
             columnHeader2 = new ColumnHeader();
             splitContainer1 = new SplitContainer();
             splitContainer2 = new SplitContainer();
+            linkLabel1 = new LinkLabel();
             label5 = new Label();
             button2 = new Button();
             label1 = new Label();
@@ -117,6 +118,7 @@ namespace SparkSchemaCreator.Views
             panelWithHeader1.Location = new Point(0, 0);
             panelWithHeader1.MaximizeBox = false;
             panelWithHeader1.Name = "panelWithHeader1";
+            panelWithHeader1.PreferredWindowSize = new Size(500, 500);
             panelWithHeader1.Size = new Size(572, 450);
             panelWithHeader1.TabIndex = 4;
             panelWithHeader1.Title = "First to compare";
@@ -330,6 +332,7 @@ namespace SparkSchemaCreator.Views
             panelWithHeader2.Location = new Point(0, 0);
             panelWithHeader2.MaximizeBox = false;
             panelWithHeader2.Name = "panelWithHeader2";
+            panelWithHeader2.PreferredWindowSize = new Size(500, 500);
             panelWithHeader2.Size = new Size(572, 450);
             panelWithHeader2.TabIndex = 5;
             panelWithHeader2.Title = "Second to compare";
@@ -412,6 +415,7 @@ namespace SparkSchemaCreator.Views
             fastColoredTextBoxLeft.DisabledColor = Color.FromArgb(100, 180, 180, 180);
             fastColoredTextBoxLeft.Dock = DockStyle.Fill;
             fastColoredTextBoxLeft.FoldingIndicatorColor = Color.LightSkyBlue;
+            fastColoredTextBoxLeft.Font = new Font("Courier New", 9.75F);
             fastColoredTextBoxLeft.Language = SparkSchemaCreator.Controls.FastColoredTextBox.Language.JSON;
             fastColoredTextBoxLeft.LeftBracket = '[';
             fastColoredTextBoxLeft.LeftBracket2 = '{';
@@ -450,7 +454,6 @@ namespace SparkSchemaCreator.Views
             fastColoredTextBoxRight.DisabledColor = Color.FromArgb(100, 180, 180, 180);
             fastColoredTextBoxRight.Dock = DockStyle.Fill;
             fastColoredTextBoxRight.FoldingIndicatorColor = Color.LightSkyBlue;
-            fastColoredTextBoxRight.Font = new Font("Courier New", 9.75F);
             fastColoredTextBoxRight.Language = SparkSchemaCreator.Controls.FastColoredTextBox.Language.JSON;
             fastColoredTextBoxRight.LeftBracket = '[';
             fastColoredTextBoxRight.LeftBracket2 = '{';
@@ -519,6 +522,7 @@ namespace SparkSchemaCreator.Views
             // 
             // splitContainer1.Panel2
             // 
+            splitContainer1.Panel2.Controls.Add(linkLabel1);
             splitContainer1.Panel2.Controls.Add(label5);
             splitContainer1.Panel2.Controls.Add(button2);
             splitContainer1.Panel2.Controls.Add(listView1);
@@ -548,6 +552,18 @@ namespace SparkSchemaCreator.Views
             splitContainer2.Size = new Size(1148, 450);
             splitContainer2.SplitterDistance = 572;
             splitContainer2.TabIndex = 0;
+            // 
+            // linkLabel1
+            // 
+            linkLabel1.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            linkLabel1.AutoSize = true;
+            linkLabel1.Location = new Point(394, 239);
+            linkLabel1.Name = "linkLabel1";
+            linkLabel1.Size = new Size(139, 15);
+            linkLabel1.TabIndex = 16;
+            linkLabel1.TabStop = true;
+            linkLabel1.Text = "Copy results to clipboard";
+            linkLabel1.LinkClicked += CopyToClipboard_LinkClicked;
             // 
             // label5
             // 
@@ -620,6 +636,7 @@ namespace SparkSchemaCreator.Views
             panelWithHeader4.Location = new Point(845, 30);
             panelWithHeader4.MaximizeBox = false;
             panelWithHeader4.Name = "panelWithHeader4";
+            panelWithHeader4.PreferredWindowSize = new Size(500, 500);
             panelWithHeader4.Size = new Size(300, 205);
             panelWithHeader4.TabIndex = 0;
             panelWithHeader4.Title = "Right Field";
@@ -652,6 +669,7 @@ namespace SparkSchemaCreator.Views
             panelWithHeader3.Location = new Point(540, 30);
             panelWithHeader3.MaximizeBox = false;
             panelWithHeader3.Name = "panelWithHeader3";
+            panelWithHeader3.PreferredWindowSize = new Size(500, 500);
             panelWithHeader3.Size = new Size(300, 206);
             panelWithHeader3.TabIndex = 0;
             panelWithHeader3.Title = "Left Field";
@@ -753,5 +771,6 @@ namespace SparkSchemaCreator.Views
         private Label label3;
         private Label label4;
         private Label label5;
+        private LinkLabel linkLabel1;
     }
 }

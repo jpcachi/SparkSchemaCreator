@@ -18,7 +18,7 @@ namespace SparkSchemaCreator.Json
         private static DataType ParseSimpleType(JValue jvalue, bool integersAsLongs = false, bool forceString = false)
         {
             if (jvalue.Value == null)
-                return new VoidType();
+                return new NullType();
 
             string value = jvalue.ToString(Formatting.None);
 

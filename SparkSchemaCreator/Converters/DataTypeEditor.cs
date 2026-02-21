@@ -23,7 +23,6 @@ namespace SparkSchemaCreator.Converters
             {
                 ListBoxEditor dropdown = new(dataType.DefaultType ?? dataType, dataType, edSvc);
 
-                //dropdown.Items.AddRange(DataType.DataTypes);
                 dropdown.Items.AddRange(DataTypes.All);
 
                 edSvc.DropDownControl(dropdown);

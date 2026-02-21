@@ -1,4 +1,5 @@
-﻿using SparkSchemaCreator.Controls.FastColoredTextBox;
+﻿using Newtonsoft.Json.Linq;
+using SparkSchemaCreator.Controls.FastColoredTextBox;
 using SparkSchemaCreator.Json;
 using SparkSchemaCreator.Properties;
 using SparkSchemaCreator.Types;
@@ -10,6 +11,7 @@ using System.Data;
 using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
+using System.Xml.Linq;
 
 namespace SparkSchemaCreator.Views
 {
@@ -22,15 +24,15 @@ namespace SparkSchemaCreator.Views
         private DataType _keyType;
         private DataType _valueType;
 
-        internal AddOrEditField(StructField? value = null)
+        internal AddOrEditField(ITreeElement? element)
         {
             InitializeComponent();
             InitializeDataGrids();
             SetRegularEditSize();
 
-            _elementType = new VoidType();
-            _keyType = new VoidType();
-            _valueType = new VoidType();
+            _elementType = new NullType();
+            _keyType = new NullType();
+            _valueType = new NullType();
 
             RefreshElementType();
             RefreshKeyType();
@@ -41,13 +43,7 @@ namespace SparkSchemaCreator.Views
 
             richTextBox1.Text = struct1;
 
-            if (value == null)
-            {
-                Value = new StructField();
-                Text = "Add Field";
-                Icon = Resources.add_field_icon;
-            }
-            else
+            if(element is StructField value)
             {
                 Value = value.Clone();
                 Text = "Edit Field";
@@ -55,32 +51,22 @@ namespace SparkSchemaCreator.Views
 
                 LoadStructField(value);
             }
-        }
 
-        internal AddOrEditField(NameWithDataType pairNode)
-        {
-            InitializeComponent();
-            InitializeDataGrids();
-            SetRegularEditSize();
+            else if (element is NameWithDataType pairNode)
+            {
+                Value = pairNode.DataType;
+                Text = $"Edit {pairNode.Name}";
+                Icon = Resources.edit_field_icon;
 
-            _elementType = new VoidType();
-            _keyType = new VoidType();
-            _valueType = new VoidType();
+                LoadNameWithDataType(pairNode);
+            }
 
-            struct1 = new StructType().ToJsonString(false, true, true);
-            struct2 = string.Empty;
-
-            richTextBox1.Text = struct1;
-
-            RefreshElementType();
-            RefreshKeyType();
-            RefreshValueType();
-
-            Value = pairNode.DataType;
-            Text = $"Edit {pairNode.Name}";
-            Icon = Resources.edit_field_icon;
-
-            LoadNameWithDataType(pairNode);
+            else
+            {
+                Value = new StructField();
+                Text = "Add Field";
+                Icon = Resources.add_field_icon;
+            }
         }
 
         private void ActivateButtonOK()
@@ -119,7 +105,7 @@ namespace SparkSchemaCreator.Views
         {
             SetRegularEditSize();
             groupBox1.Visible = false;
-            groupBox3.Visible = false;
+            groupBox2.Visible = false;
             groupBox4.Visible = false;
 
             label3.Enabled = false;
@@ -193,13 +179,14 @@ namespace SparkSchemaCreator.Views
 
         private void ComboBox1_SelectedIndexChanged(object sender, EventArgs e)
         {
-            switch (comboBox1.SelectedIndex)
+
+            switch(comboBox1.SelectedItem)
             {
-                case 6: SelectDecimal(); break;
-                case 9: case 10: SelectChar(); break;
-                case 29: SelectStruct(); break;
-                case 30: SelectArray(); break;
-                case 31: SelectMap(); break;
+                case "decimal": SelectDecimal(); break;
+                case "char": case "varchar": SelectChar(); break;
+                case "struct": SelectStruct(); break;
+                case "array": SelectArray(); break;
+                case "map": SelectMap(); break;
                 default: SelectSimple(); break;
             }
 
@@ -246,19 +233,19 @@ namespace SparkSchemaCreator.Views
 
         private void ClearElementType()
         {
-            _elementType = new VoidType();
+            _elementType = new NullType();
             RefreshElementType();
         }
 
         private void ClearKeyType()
         {
-            _keyType = new VoidType();
+            _keyType = new NullType();
             RefreshKeyType();
         }
 
         private void ClearValueType()
         {
-            _valueType = new VoidType();
+            _valueType = new NullType();
             RefreshValueType();
         }
 
@@ -348,7 +335,7 @@ namespace SparkSchemaCreator.Views
 
         private static DataType Coalesce(DataType? type)
         {
-            return type ?? new VoidType();
+            return type ?? new NullType();
         }
 
         private DataType GetDataType()

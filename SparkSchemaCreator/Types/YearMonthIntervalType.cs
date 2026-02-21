@@ -4,7 +4,6 @@
     internal class YearMonthIntervalType : IntervalType
     {
 
-        public override string TypeNameSimple => $"interval";
         public override string TypeName
         {
             get

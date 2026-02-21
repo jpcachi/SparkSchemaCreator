@@ -59,8 +59,7 @@ namespace SparkSchemaCreator.Types
 
         private static DataType FromApiOrNotApiString(string? dataType, Func<string, Match> matchFunction, Func<string, string?, string?, DataType> getDataTypeFunction)
         {
-            if (dataType == null)
-                throw new Exception("Invalid Data Type null");
+            ArgumentNullException.ThrowIfNull(dataType);
 
             Match match = matchFunction(dataType);
 
