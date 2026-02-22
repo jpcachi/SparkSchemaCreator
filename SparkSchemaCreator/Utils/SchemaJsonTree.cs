@@ -33,10 +33,6 @@ namespace SparkSchemaCreator.Utils
                 e.Result = "<Root>";
             else if (e.Node is ITreeElement element)
                 e.Result = element.Name;
-            /*else if (e.Node is StructField field)
-                e.Result = field.Name;
-            else if (e.Node is NameWithDataType pairNode)
-                e.Result = pairNode.Name;*/
         }
 
         public static void NodeIconNeeded(ImageNodeEventArgs e, ImageList imageList)

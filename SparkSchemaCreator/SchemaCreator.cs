@@ -244,7 +244,7 @@ namespace SparkSchemaCreator
 
         private void RebuildTreesAfterAction(IAction action)
         {
-            if (action.AffectedNode is StructField || action.AffectedNode is NameWithDataType)
+            if (action.AffectedNode is ITreeElement)
                 RebuildSchemaTreeAfterAction(action.AffectedNode);
 
             else if (action.AffectedNode is (StructField structField2, Metadata))

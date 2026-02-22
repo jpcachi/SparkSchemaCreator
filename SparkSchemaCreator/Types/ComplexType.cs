@@ -27,21 +27,6 @@ namespace SparkSchemaCreator.Types
             return null;
         }
 
-        public (JsonSparkElement, bool)? GetParentWithType()
-        {
-            
-            if (FieldOfWhichItIsType != null)
-                return (FieldOfWhichItIsType, false);
-
-            if(ArrayParent != null)
-                return (ArrayParent, false);
-
-            if (MapParent != null)
-                return (MapParent, IsKeyOfMapParent);
-
-            return null;  
-        }
-
         public override string GetJsonPath()
         {
             if (FieldOfWhichItIsType != null)

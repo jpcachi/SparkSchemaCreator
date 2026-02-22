@@ -12,7 +12,7 @@ namespace SparkSchemaCreator.Actions
         private readonly DataType _oldValue;
         private readonly DataType _newValue;
 
-        private readonly NameWithDataType _currentNode;
+        private NameWithDataType _currentNode;
 
         internal EditElement(NameWithDataType currentNode, DataType newValue)
         {
@@ -39,6 +39,8 @@ namespace SparkSchemaCreator.Actions
                 else
                     map.ValueType = dataValue;
             }
+
+            _currentNode = _currentNode with { DataType = dataValue };
         }
 
         public void Do()

@@ -127,7 +127,7 @@
             fastColoredTextBox1.RightBracket = ']';
             fastColoredTextBox1.RightBracket2 = '}';
             fastColoredTextBox1.SelectionColor = Color.FromArgb(60, 30, 144, 255);
-            //fastColoredTextBox1.ServiceColors = (SparkSchemaCreator.Controls.FastColoredTextBox.ServiceColors)resources.GetObject("fastColoredTextBox1.ServiceColors");
+            fastColoredTextBox1.ServiceColors = (Controls.FastColoredTextBox.ServiceColors)resources.GetObject("fastColoredTextBox1.ServiceColors");
             fastColoredTextBox1.Size = new Size(637, 413);
             fastColoredTextBox1.TabIndex = 3;
             fastColoredTextBox1.Text = "fastColoredTextBox1";
@@ -146,6 +146,7 @@
             Name = "MetadataPropertyEditor";
             ShowIcon = false;
             ShowInTaskbar = false;
+            StartPosition = FormStartPosition.CenterParent;
             Text = "Metadata Editor";
             ((System.ComponentModel.ISupportInitialize)fastColoredTextBox1).EndInit();
             ResumeLayout(false);

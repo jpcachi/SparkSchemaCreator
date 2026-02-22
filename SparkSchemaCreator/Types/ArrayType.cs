@@ -57,7 +57,6 @@ namespace SparkSchemaCreator.Types
             return $"{TypeNameApi}({ElementType.ToPythonString(sortFields, includeEmpty)}, {ContainsNull})";
         }
 
-
         public override bool Equals(object? obj)
         {
 

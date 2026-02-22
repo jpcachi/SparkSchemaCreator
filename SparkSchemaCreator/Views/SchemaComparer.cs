@@ -4,6 +4,7 @@ using SparkSchemaCreator.Controls;
 using SparkSchemaCreator.Types;
 using SparkSchemaCreator.Utils;
 using Newtonsoft.Json.Linq;
+using System.Text;
 
 namespace SparkSchemaCreator.Views
 {
@@ -593,7 +594,18 @@ namespace SparkSchemaCreator.Views
 
         private void CopyToClipboard_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
+            StringBuilder stringBuilder = new();
 
+            foreach (ComparisonNode item in SelectedList)
+            {
+                stringBuilder.Append(item.Name);
+                stringBuilder.Append(": ");
+                stringBuilder.Append(item.GetComparisonResultString());
+                stringBuilder.Append("\r\n");
+            }
+
+            MessageBox.Show(this, "The text has been copied to clipboard.", "Schema Diff Tool", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            Clipboard.SetText(stringBuilder.ToString()[..(stringBuilder.Length - 1)]);
         }
     }
 }

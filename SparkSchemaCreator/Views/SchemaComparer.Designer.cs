@@ -415,7 +415,6 @@ namespace SparkSchemaCreator.Views
             fastColoredTextBoxLeft.DisabledColor = Color.FromArgb(100, 180, 180, 180);
             fastColoredTextBoxLeft.Dock = DockStyle.Fill;
             fastColoredTextBoxLeft.FoldingIndicatorColor = Color.LightSkyBlue;
-            fastColoredTextBoxLeft.Font = new Font("Courier New", 9.75F);
             fastColoredTextBoxLeft.Language = SparkSchemaCreator.Controls.FastColoredTextBox.Language.JSON;
             fastColoredTextBoxLeft.LeftBracket = '[';
             fastColoredTextBoxLeft.LeftBracket2 = '{';
@@ -454,6 +453,7 @@ namespace SparkSchemaCreator.Views
             fastColoredTextBoxRight.DisabledColor = Color.FromArgb(100, 180, 180, 180);
             fastColoredTextBoxRight.Dock = DockStyle.Fill;
             fastColoredTextBoxRight.FoldingIndicatorColor = Color.LightSkyBlue;
+            fastColoredTextBoxRight.Font = new Font("Courier New", 9.75F);
             fastColoredTextBoxRight.Language = SparkSchemaCreator.Controls.FastColoredTextBox.Language.JSON;
             fastColoredTextBoxRight.LeftBracket = '[';
             fastColoredTextBoxRight.LeftBracket2 = '{';
@@ -555,8 +555,10 @@ namespace SparkSchemaCreator.Views
             // 
             // linkLabel1
             // 
+            linkLabel1.ActiveLinkColor = Color.FromArgb(79, 110, 140);
             linkLabel1.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
             linkLabel1.AutoSize = true;
+            linkLabel1.LinkColor = Color.FromArgb(22, 65, 124);
             linkLabel1.Location = new Point(394, 239);
             linkLabel1.Name = "linkLabel1";
             linkLabel1.Size = new Size(139, 15);
