@@ -230,6 +230,10 @@ namespace SparkSchemaCreator
             }
 
             fastTree1.ScrollToNode(structField);
+
+            if (structField is NameWithDataType pairNode && pairNode.DataType is ArrayType array)
+                fastTree1.ExpandNode(new NameWithDataType("<element>", array.ElementType));
+
         }
 
         private void RebuildSchemaTreeAfterAction(object structField)
@@ -861,35 +865,34 @@ namespace SparkSchemaCreator
 
         private void ChangeArrayToStructClick(object sender, EventArgs e)
         {
-            if(SelectedField != null && SelectedField.DataType is ArrayType array && array.ElementType is StructType structType)
+            if(SelectedElement?.DataType is ArrayType array && array.ElementType is StructType structType)
             {
-                StructField newField = SelectedField.Clone();
-                newField.DataType = structType;
+                IAction? editAction = SelectedElement switch {
 
-                EditField editAction = new(SelectedField, newField);
-                DoActionAndAddItToStack(editAction);
-            }
-            else if(fastTree1.SelectedNode is NameWithDataType pairNode && pairNode.DataType is ArrayType array2 && array2.ElementType is StructType structType1)
-            {
-                EditElement editElement = new(pairNode, structType1);
-                DoActionAndAddItToStack(editElement);
+                    StructField selectedField => new EditField(selectedField, new StructField(selectedField.Name, structType, selectedField.IsNullable, selectedField.Metadata) { StructParent = selectedField.StructParent }),
+                    NameWithDataType pairNode => new EditElement(pairNode, structType.Clone()),
+                    _ => null
+                };
+                
+                if (editAction != null)
+                    DoActionAndAddItToStack(editAction);
             }
         }
 
         private void ChangeStructToArrayClick(object sender, EventArgs e)
         {
-            if(SelectedField is StructField field && field.DataType is StructType structType)
-            {
-                StructField newField = SelectedField.Clone();
-                newField.DataType = new ArrayType(structType);
 
-                EditField editAction = new(field, newField);
-                DoActionAndAddItToStack(editAction);
-            }
-            else if (fastTree1.SelectedNode is NameWithDataType pairNode && pairNode.DataType is StructType structType1)
+            if(SelectedElement?.DataType is StructType structType)
             {
-                EditElement editElement = new(pairNode, new ArrayType(structType1.Clone()));
-                DoActionAndAddItToStack(editElement);
+                IAction? editAction = SelectedElement switch
+                {
+                    StructField selectedField => new EditField(selectedField, new StructField(selectedField.Name, new ArrayType(structType), selectedField.IsNullable, selectedField.Metadata) { StructParent = selectedField.StructParent }),
+                    NameWithDataType pairNode => new EditElement(pairNode, new ArrayType(structType.Clone())),
+                    _ => null
+                };
+
+                if (editAction != null)
+                    DoActionAndAddItToStack(editAction);
             }
         }
     }
