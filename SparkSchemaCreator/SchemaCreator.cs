@@ -426,8 +426,14 @@ namespace SparkSchemaCreator
 
             bool structToArrayEnabled = isSelectedNodeStruct;
 
-            ArrayType? array = SelectedElement is ArrayType array1 ? array1 : (SelectedElement as StructField)?.DataType as ArrayType;
-            bool arrayToStructEnabled = array != null && array.ElementType is StructType;
+            ArrayType? array = SelectedElement switch
+            {
+                { DataType: ArrayType possibleArray } => possibleArray,
+                _ => null
+            };
+                
+
+            bool arrayToStructEnabled = array?.ElementType is StructType;
 
             toolStripSeparator20.Visible = structToArrayEnabled || arrayToStructEnabled;
             changeArrayTypeToStructTypeToolStripMenuItem.Visible = structToArrayEnabled || arrayToStructEnabled;
