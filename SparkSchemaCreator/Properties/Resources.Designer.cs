@@ -145,7 +145,7 @@ namespace SparkSchemaCreator.Properties {
         /// </summary>
         internal static System.Drawing.Bitmap collapse {
             get {
-                object obj = ResourceManager.GetObject("collapse", resourceCulture);
+                object obj = ResourceManager.GetObject("collapse3", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -355,7 +355,7 @@ namespace SparkSchemaCreator.Properties {
         /// </summary>
         internal static System.Drawing.Bitmap expand {
             get {
-                object obj = ResourceManager.GetObject("expand", resourceCulture);
+                object obj = ResourceManager.GetObject("expand3", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
