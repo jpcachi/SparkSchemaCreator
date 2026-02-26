@@ -450,9 +450,8 @@ namespace SparkSchemaCreator
 
         }
 
-        private bool ClipboardHasStructFieldCopied(out StructField? resul)
+        private static bool ClipboardHasStructFieldCopied(out StructField? resul)
         {
-
             IDataObject? clipboardContent = Clipboard.GetDataObject();
 
             if(clipboardContent?.GetData(typeof(StructField)) is StructField structCopied)
