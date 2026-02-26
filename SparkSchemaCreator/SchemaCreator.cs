@@ -5,7 +5,6 @@ using SparkSchemaCreator.Json;
 using SparkSchemaCreator.Types;
 using SparkSchemaCreator.Utils;
 using SparkSchemaCreator.Views;
-using System.CodeDom;
 
 namespace SparkSchemaCreator
 {
@@ -158,10 +157,10 @@ namespace SparkSchemaCreator
             if (typeParent.FieldOfWhichItIsType != null)
                 return typeParent.FieldOfWhichItIsType;
 
-            else if (typeParent.ArrayParent is not null)
+            if (typeParent.ArrayParent is not null)
                 return new NameWithDataType("<element>", typeParent);
 
-            else if (typeParent.MapParent is not null)
+            if (typeParent.MapParent is not null)
                 return new NameWithDataType(typeParent.IsKeyOfMapParent ? "<key>" : "<value>", typeParent);
 
             return null;
@@ -392,26 +391,28 @@ namespace SparkSchemaCreator
 
         private void FastTree1_NodeSelectedStateChanged(object sender, NodeSelectedStateChangedEventArgs e)
         {
-            StructField? selectedField = SelectedField;
-
-            if(selectedField == null && e.Node is NameWithDataType pairNode)
-                selectedField = pairNode.DataType.MapParent?.FieldOfWhichItIsType;
-            
             structFieldInfo1.LoadValuesRaw(e.Node);
-            fastTree2.Build(selectedField?.Metadata);
+            fastTree2.Build(SelectedField?.Metadata);
             fastTree2.ExpandAll();
 
             CheckActionButtonsEnabling();
-
         }
 
         private void CheckActionButtonsEnabling()
         {
-            bool isSelectedNodeStruct  = SelectedElement?.DataType is StructType || fastTree1.SelectedNode is StructType;
-            bool isSelectedNodeComplex = SelectedElement?.DataType is ComplexType || fastTree1.SelectedNode is ComplexType;
+            bool isSelectedNodeStructNoRoot = SelectedElement?.DataType is StructType;
+            bool isSelectedNodeStruct  = isSelectedNodeStructNoRoot || fastTree1.SelectedNode is StructType;
+
+            bool selectedNodeHasChildren = fastTree1.SelectedNode switch
+            {
+                StructType root => root.Fields.Count > 0,
+                ITreeElement { DataType: StructType nestedStruct } => nestedStruct.Fields.Count > 0,
+                ITreeElement { DataType: ComplexType } => true,
+                _ => false
+            };
 
             EnableAddNode(isSelectedNodeStruct);
-            VisibleExpandChildren(isSelectedNodeComplex);
+            VisibleExpandChildren(selectedNodeHasChildren);
 
             EnableEditNode(SelectedElement != null);
             EnableDeleteNode(SelectedField != null);
@@ -419,16 +420,17 @@ namespace SparkSchemaCreator
             EnableMoveFieldDown(SelectedField?.Index < SelectedField?.StructParent?.Fields.Count - 1);
             EnableMetadataEdit(SelectedField != null);
 
-            findChildrenToolStripMenuItem.Visible = isSelectedNodeStruct;
+            findChildrenToolStripMenuItem.Visible = selectedNodeHasChildren;
 
-            copyNameFullPathToolStripMenuItem.Enabled = SelectedElement != null;
-            copyNameToolStripMenuItem.Enabled = SelectedElement != null;
+            copyNameFullPathToolStripMenuItem.Visible = SelectedField != null;
+            copyNameToolStripMenuItem.Visible = SelectedField != null;
+            toolStripSeparator13.Visible = SelectedField != null;
 
             copyNodeToolStripMenuItem.Enabled = SelectedField != null;
             cutNodeToolStripMenuItem.Enabled = SelectedField != null;
-            pasteNodeToolStripMenuItem.Enabled = isSelectedNodeStruct;
+            pasteNodeToolStripMenuItem.Enabled = isSelectedNodeStruct && ClipboardHasStructFieldCopied(out _);
 
-            bool structToArrayEnabled = isSelectedNodeStruct;
+            bool structToArrayEnabled = isSelectedNodeStructNoRoot;
 
             ArrayType? array = SelectedElement switch
             {
@@ -446,6 +448,21 @@ namespace SparkSchemaCreator
             changeArrayTypeToStructTypeToolStripMenuItem.Enabled = arrayToStructEnabled;
             changeStructTypeToArrayTypeToolStripMenuItem.Enabled = structToArrayEnabled;
 
+        }
+
+        private bool ClipboardHasStructFieldCopied(out StructField? resul)
+        {
+
+            IDataObject? clipboardContent = Clipboard.GetDataObject();
+
+            if(clipboardContent?.GetData(typeof(StructField)) is StructField structCopied)
+            {
+                resul = structCopied;
+                return true;
+            }
+
+            resul = null;
+            return false;
         }
 
         private void FastTree2_NodeChildrenNeeded(object sender, NodeChildrenNeededEventArgs e)
@@ -738,14 +755,14 @@ namespace SparkSchemaCreator
 
         private void ExpandAllSelectedNodeChildrenButtonClick(object sender, EventArgs args)
         {
-            if (SelectedElement != null)
-                fastTree1.ExpandNode(SelectedElement, true);
+            if (fastTree1.SelectedNode != null)
+                fastTree1.ExpandNode(fastTree1.SelectedNode, true);
         }
 
         private void CollapseAllSelectedNodeChildrenButtonClick(object sender, EventArgs args)
         {
-            if (SelectedElement != null)
-                fastTree1.CollapseNode(SelectedElement);
+            if (fastTree1.SelectedNode != null)
+                fastTree1.CollapseNode(fastTree1.SelectedNode);
         }
 
         private void CopyNameButtonClick(object sender, EventArgs args)
@@ -776,15 +793,13 @@ namespace SparkSchemaCreator
 
         private void PasteNodeButtonClick(object sender, EventArgs e)
         {
-            IDataObject? copiedNode = Clipboard.GetDataObject();
-
-            if (copiedNode?.GetData(typeof(StructField)) is StructField nodeData)
+            if(ClipboardHasStructFieldCopied(out StructField? nodeData))
             {
                 StructType? parent = GetParentOfSelectedField();
 
                 if (parent != null)
                 {
-                    AddField addAction = new(parent, nodeData);
+                    AddField addAction = new(parent, nodeData!);
                     DoActionAndAddItToStack(addAction);
                 }
             }
