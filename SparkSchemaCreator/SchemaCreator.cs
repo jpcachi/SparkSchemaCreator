@@ -15,9 +15,11 @@ namespace SparkSchemaCreator
         private readonly Stack<IAction> undo;
         private readonly Stack<IAction> redo;
 
-        private ITreeElement? SelectedElement => fastTree1.SelectedNode as ITreeElement;
+        private IEnumerable<StructField> SelectedFields => fastTree1.SelectedNodes.Cast<StructField>();
 
+        private ITreeElement? SelectedElement => fastTree1.SelectedNodes.Count() == 1 ? fastTree1.SelectedNode as ITreeElement : null;
         private StructField? SelectedField => SelectedElement as StructField;
+
 
         private readonly SyntaxHighlightning syntaxHighlightning = new();
 
@@ -107,8 +109,13 @@ namespace SparkSchemaCreator
 
         private void DeleteNodeButtonClick(object sender, EventArgs e)
         {
+            if(SelectedFields.Count() > 1 && SelectedFields.All(x => x.StructParent != null))
+            {
+                DeleteMultipleFields deleteMultipleFieldsAction = new(SelectedFields);
+                DoActionAndAddItToStack(deleteMultipleFieldsAction);
+            }
 
-            if (SelectedField != null && SelectedField.StructParent is StructType parent)
+            else if (SelectedField != null && SelectedField.StructParent is StructType parent)
             {
                 DeleteField deleteAction = new(parent, SelectedField);
                 DoActionAndAddItToStack(deleteAction);
@@ -152,90 +159,19 @@ namespace SparkSchemaCreator
                 tree.ExpandItem(item);
         }
 
-        private static object? CollectNode(ComplexType typeParent)
+        private void ExpandNodesUntilStructField(ITreeElement field)
         {
-            if (typeParent.FieldOfWhichItIsType != null)
-                return typeParent.FieldOfWhichItIsType;
-
-            if (typeParent.ArrayParent is not null)
-                return new NameWithDataType("<element>", typeParent);
-
-            if (typeParent.MapParent is not null)
-                return new NameWithDataType(typeParent.IsKeyOfMapParent ? "<key>" : "<value>", typeParent);
-
-            return null;
-        }
-
-        private static void CollectNodesRecursively(List<object> parents, object? node)
-        {
-            if (node == null)
-                return;
-
-            parents.Add(node);
-            object? iter = node;
-
-            if (iter is StructField field)
-            {
-                StructType? parent = field.StructParent;
-
-                if (parent?.FieldOfWhichItIsType != null)
-                    iter = parent.FieldOfWhichItIsType;
-
-                else if (parent != null && parent?.MapParent != null && parent?.IsKeyOfMapParent is bool key)
-                    iter = new NameWithDataType(key ? "<key>" : "<value>", parent);
-
-                else if (parent != null && parent?.ArrayParent != null)
-                    iter = new NameWithDataType("<element>", parent);
-                else
-                    return;
-
-                CollectNodesRecursively(parents, iter);
-            }
-
-            else if (iter is NameWithDataType pairNode)
-            {
-                if ((pairNode.Name == "<key>" || pairNode.Name == "<value>") && pairNode.DataType.MapParent is MapType mapParent)
-                    iter = CollectNode(mapParent);
-
-                else if (pairNode.Name == "<element>" && pairNode.DataType.ArrayParent is ArrayType arrayParent)
-                    iter = CollectNode(arrayParent);
-
-                else
-                    return;
-
-                CollectNodesRecursively(parents, iter);
-            }
-        }
-
-        private void ExpandNodesUntilStructField(object structField)
-        {
-            List<object> parents = [];
-
-            CollectNodesRecursively(parents, structField);
-
-            parents.Reverse();
-
             fastTree1.ExpandNode(model.Root);
-            foreach (object parent in parents)
-            {
-                fastTree1.ExpandNode(parent);
-            }
-
-            parents.Reverse();
-            foreach (object parent in parents)
-            {
-                if (fastTree1.SelectNode(parent))
-                    break;
-            }
-
-            fastTree1.ScrollToNode(structField);
-
-            if (structField is NameWithDataType pairNode && pairNode.DataType is ArrayType array)
-                fastTree1.ExpandNode(new NameWithDataType("<element>", array.ElementType));
-
+            fastTree1.ExpandNodesUntilStructField(field);
         }
 
-        private void RebuildSchemaTreeAfterAction(object structField)
+        private void ExpandNodesUntilStructFields(IEnumerable<ITreeElement> fields)
+        {
+            fastTree1.ExpandNode(model.Root);
+            fastTree1.ExpandNodesUntilStructFields(fields);
+        }
+
+        private void RebuildSchemaTreeAfterAction(ITreeElement structField)
         {
             IEnumerable<object> expandedNodesBefore = fastTree1.ExpandedNodes;
             fastTree1.Rebuild();
@@ -245,10 +181,23 @@ namespace SparkSchemaCreator
             structFieldInfo1.LoadValuesRaw(fastTree1.SelectedNode);
         }
 
+        private void RebuildSchemaTreeAfterAction(IEnumerable<StructField> fields)
+        {
+            IEnumerable<object> expandedNodesBefore = fastTree1.ExpandedNodes;
+            fastTree1.Rebuild();
+            fastTree1.ExpandNodesUnsafe(expandedNodesBefore);
+
+            ExpandNodesUntilStructFields(fields);
+            structFieldInfo1.LoadValuesRaw(fastTree1.SelectedNode);
+        }
+
         private void RebuildTreesAfterAction(IAction action)
         {
-            if (action.AffectedNode is ITreeElement)
-                RebuildSchemaTreeAfterAction(action.AffectedNode);
+            if (action.AffectedNode is ITreeElement treeElement)
+                RebuildSchemaTreeAfterAction(treeElement);
+
+            else if (action.AffectedNode is IEnumerable<StructField> fields)
+                RebuildSchemaTreeAfterAction(fields);
 
             else if (action.AffectedNode is (StructField structField2, Metadata))
             {
@@ -415,7 +364,7 @@ namespace SparkSchemaCreator
             VisibleExpandChildren(selectedNodeHasChildren);
 
             EnableEditNode(SelectedElement != null);
-            EnableDeleteNode(SelectedField != null);
+            EnableDeleteNode(SelectedField != null || fastTree1.SelectedNodes.All(x => x is StructField));
             EnableMoveFieldUp(SelectedField?.Index > 0);
             EnableMoveFieldDown(SelectedField?.Index < SelectedField?.StructParent?.Fields.Count - 1);
             EnableMetadataEdit(SelectedField != null);

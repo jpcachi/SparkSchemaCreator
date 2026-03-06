@@ -2,8 +2,10 @@
 using SparkSchemaCreator.Types;
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Text;
 using System.Windows.Forms;
+using System.Xml.Linq;
 
 namespace SparkSchemaCreator.Utils
 {
@@ -55,6 +57,107 @@ namespace SparkSchemaCreator.Utils
                 e.Result = imageList.Images[0];
             else
                 e.Result = imageList.Images[3];
+        }
+
+        private static ITreeElement? CollectNode(ComplexType typeParent)
+        {
+            if (typeParent.FieldOfWhichItIsType != null)
+                return typeParent.FieldOfWhichItIsType;
+
+            if (typeParent.ArrayParent is not null)
+                return new NameWithDataType("<element>", typeParent);
+
+            if (typeParent.MapParent is not null)
+                return new NameWithDataType(typeParent.IsKeyOfMapParent ? "<key>" : "<value>", typeParent);
+
+            return null;
+        }
+
+        private static ITreeElement? CollectParent(ITreeElement? node)
+        {
+            if (node is StructField field && field.StructParent != null)
+                return CollectNode(field.StructParent);
+
+            else if (node is NameWithDataType pairNode)
+            {
+                if ((pairNode.Name == "<key>" || pairNode.Name == "<value>") && pairNode.DataType.MapParent is MapType mapParent)
+                    return CollectNode(mapParent);
+
+                else if (pairNode.Name == "<element>" && pairNode.DataType.ArrayParent is ArrayType arrayParent)
+                    return CollectNode(arrayParent);
+            }
+
+            return null;
+        }
+
+        private static void CollectNodesRecursively(List<ITreeElement> parents, ITreeElement? node)
+        {
+            if (node == null)
+                return;
+
+            parents.Add(node);
+            ITreeElement? iter = CollectParent(node);
+            CollectNodesRecursively(parents, iter);
+        }
+
+        private static NameWithDataType? GetElementTypeIfNodeIsArray(ITreeElement node)
+        {
+            ArrayType? arrayType = null;
+
+            if (node is StructField field && field.DataType is ArrayType array1)
+                arrayType = array1;
+
+            else if (node is NameWithDataType pairNode && pairNode.DataType is ArrayType array2)
+                arrayType = array2;
+
+            return arrayType == null ? null : new NameWithDataType("<element>", arrayType.ElementType);
+        }
+
+        private static void ExpandAndSelectNode(this FastTree tree, ITreeElement node, bool unselectOtherNodes)
+        {
+            NameWithDataType? expandedArrayType = GetElementTypeIfNodeIsArray(node);
+            if (expandedArrayType != null)
+                tree.ExpandNode(expandedArrayType);
+
+            if (!tree.SelectNode(node, unselectOtherNodes) && CollectParent(node) is ITreeElement validParent)
+                tree.SelectNode(validParent, unselectOtherNodes);
+        }
+
+        public static void ExpandNodesUntilStructField(this FastTree tree, ITreeElement node)
+        {
+            List<ITreeElement> parents = [];
+            CollectNodesRecursively(parents, node);
+
+            parents.Reverse();
+            foreach (ITreeElement parent in parents)
+            {
+                tree.ExpandNode(parent);
+            }
+
+            tree.ScrollToNode(node);
+            ExpandAndSelectNode(tree, node, true);
+        }
+
+        public static void ExpandNodesUntilStructFields(this FastTree tree, IEnumerable<ITreeElement> nodes)
+        {
+            List<ITreeElement> parents = [];
+            foreach (ITreeElement node in nodes)
+                CollectNodesRecursively(parents, node);
+
+            parents.Reverse();
+            foreach (ITreeElement parent in parents)
+            {
+                tree.ExpandNode(parent);
+            }
+
+            tree.ScrollToNode(nodes.First());
+
+            bool first = true;
+            foreach (ITreeElement node in nodes)
+            {
+                ExpandAndSelectNode(tree, node, first);
+                first = false;
+            }
         }
     }
 }

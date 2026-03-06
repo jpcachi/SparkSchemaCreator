@@ -257,6 +257,7 @@ namespace SparkSchemaCreator
             fastTree1.Dock = DockStyle.Fill;
             fastTree1.ForeColor = Color.FromArgb(36, 41, 47);
             fastTree1.Location = new Point(0, 0);
+            fastTree1.MultiSelect = true;
             fastTree1.Name = "fastTree1";
             fastTree1.Padding = new Padding(5, 8, 0, 0);
             fastTree1.Readonly = true;
@@ -347,6 +348,7 @@ namespace SparkSchemaCreator
             // structFieldInfo1
             // 
             structFieldInfo1.Dock = DockStyle.Fill;
+            structFieldInfo1.EditButtonEnabled = false;
             structFieldInfo1.LabelColor = Color.FromArgb(36, 41, 47);
             structFieldInfo1.LabelValueColor = Color.FromArgb(87, 96, 105);
             structFieldInfo1.Location = new Point(0, 0);
