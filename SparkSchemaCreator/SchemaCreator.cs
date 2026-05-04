@@ -24,7 +24,7 @@ namespace SparkSchemaCreator
         private readonly SyntaxHighlightning syntaxHighlightning = new();
 
         private readonly SearchEngine searchEngine;
-        private readonly Find search;
+        private Find search;
 
         public SchemaCreator()
         {
@@ -755,6 +755,9 @@ namespace SparkSchemaCreator
 
         private void FindButtonClick(object sender, EventArgs e)
         {
+            if (search.IsDisposed)
+                search = new Find(searchEngine);
+
             search.Show(this);
         }
 
